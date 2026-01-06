@@ -46,7 +46,22 @@ const registerSchema = z
 type LoginValues = z.infer<typeof loginSchema>;
 type RegisterValues = z.infer<typeof registerSchema>;
 
+
 type Mode = "login" | "register";
+
+export interface AuthFormProps {
+    mode?: Mode;
+    loginEndpoint?: string;
+    registerEndpoint?: string;
+    redirectTo?: string;
+}
+
+type FormValues = {
+    fullName?: string;
+    email: string;
+    password: string;
+    confirmPassword?: string;
+};
 
 export interface AuthFormProps {
     mode?: Mode;
@@ -70,7 +85,7 @@ export function AuthForm({
 
     const isLogin = mode === "login";
 
-    const form = useForm({
+    const form = useForm<FormValues>({
         resolver: zodResolver(isLogin ? loginSchema : registerSchema),
         defaultValues: isLogin
             ? { email: "", password: "" }
