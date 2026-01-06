@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Menu, X, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const navLinks = [
     { label: "Home", href: "#home" },
@@ -14,6 +15,7 @@ const navLinks = [
 
 export function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
+    const router = useRouter()
 
     return (
         <motion.nav
@@ -46,10 +48,10 @@ export function Navbar() {
 
                     {/* CTA Buttons */}
                     <div className="hidden md:flex items-center gap-4">
-                        <Button variant="ghost" className="font-medium">
+                        <Button onClick={() => router.push("/login")} variant="ghost" className="font-medium">
                             Login
                         </Button>
-                        <Button className="bg-primary hover:bg-primary/90 font-semibold px-6">
+                        <Button onClick={() => router.push("/register")} className="bg-primary hover:bg-primary/90 font-semibold px-6">
                             Become an Affiliate
                         </Button>
                     </div>

@@ -1,4 +1,4 @@
-import { Building2, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import { Building2, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, X } from "lucide-react";
 
 const footerLinks = {
     company: [
@@ -32,6 +32,7 @@ const socialLinks = [
     { icon: Twitter, href: "#", label: "Twitter" },
     { icon: Instagram, href: "#", label: "Instagram" },
     { icon: Linkedin, href: "#", label: "LinkedIn" },
+    { icon: X, href: "#", label: "X" },
 ];
 
 export function Footer() {
