@@ -89,10 +89,10 @@ export function Navbar() {
                                 </a>
                             ))}
                             <div className="pt-4 space-y-3">
-                                <Button variant="outline" className="w-full">
+                                <Button onClick={() => router.push("/login")} variant="outline" className="w-full">
                                     Login
                                 </Button>
-                                <Button className="w-full bg-primary hover:bg-primary/90">
+                                <Button onClick={() => router.push("/register")} className="w-full bg-primary hover:bg-primary/90">
                                     Become an Affiliate
                                 </Button>
                             </div>
