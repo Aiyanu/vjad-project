@@ -17,6 +17,7 @@ import {
     X,
     ChevronRight,
 } from "lucide-react";
+import Image from "next/image";
 
 interface DashboardLayoutProps {
     children: React.ReactNode;
@@ -51,8 +52,10 @@ const AffiliateDashboardLayout = ({ children }: DashboardLayoutProps) => {
             {/* Mobile Header */}
             <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-[var(--color-vjad-navy)] px-4 py-3 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2">
-                    <Building2 className="h-6 w-6 text-white" />
+                    {/* <Building2 className="h-6 w-6 text-white" />
                     <span className="text-lg font-display font-bold text-white">VJAD</span>
+                     */}
+                    <Image src={"/vijad-projects.png"} width={120} height={70} alt="vjad" />
                 </Link>
 
                 <button onClick={() => setIsSidebarOpen((s) => !s)} className="text-white p-2" aria-label="Toggle menu">
@@ -68,8 +71,9 @@ const AffiliateDashboardLayout = ({ children }: DashboardLayoutProps) => {
                 <div className="flex flex-col h-full">
                     <div className="p-6 border-b border-white/10">
                         <Link href="/" className="flex items-center gap-3">
-                            <Building2 className="h-8 w-8 text-white" />
-                            <span className="text-xl font-display font-bold text-white">VJAD Projects</span>
+                            {/* <Building2 className="h-8 w-8 text-white" />
+                            <span className="text-xl font-display font-bold text-white">VJAD Projects</span> */}
+                            <Image src={"/vijad-projects.png"} width={120} height={70} alt="vjad" />
                         </Link>
                     </div>
 
