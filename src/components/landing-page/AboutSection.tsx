@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Award, Shield, Target, Lightbulb, Heart } from "lucide-react";
+import { Award, Shield, Target, Lightbulb, Heart, Eye } from "lucide-react";
 
 export function AboutSection() {
     const values = [
@@ -61,39 +61,49 @@ export function AboutSection() {
                 </motion.div>
 
                 {/* Mission + Vision (side-by-side on md/lg) */}
-                <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 border-t">
+                <div className="grid md:grid-cols-2 gap-8 mb-20">
+                    {/* Our Mission */}
                     <motion.div
-                        initial={{ opacity: 0, y: 18 }}
-                        whileInView={{ opacity: 1, y: 0 }}
+                        initial={{ opacity: 0, x: -30 }}
+                        whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.6 }}
-                        className="grid gap-8 lg:grid-cols-2 items-start"
+                        className="card-elegant"
                     >
-                        {/* Mission */}
-                        <div className="py-8 pr-4 border-primary/10">
-                            {/* <div className="inline-flex items-center gap-2 px-4 py-2 bg-vjad-gold/10 border border-vjad-gold/30 rounded-full text-sm font-medium text-vjad-gold mb-6">
-                                Our Purpose
-                            </div> */}
-                            <h3 className="text-3xl font-bold text-foreground mb-4">Our Mission</h3>
-                            <p className="text-lg text-muted-foreground leading-relaxed max-w-3xl">
-                                To revolutionize the real estate industry by connecting exceptional developers with a network of empowered
-                                affiliates, delivering premium properties and creating sustainable wealth opportunities for our partners
-                                while maintaining the highest standards of integrity and excellence.
-                            </p>
+                        <div className="flex items-center gap-4 mb-6">
+                            <div className="p-3 rounded-xl bg-primary/10 text-primary">
+                                <Target className="w-7 h-7" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-foreground">Our Mission</h3>
                         </div>
+                        <p className="text-muted-foreground leading-relaxed">
+                            To revolutionize the real estate industry by connecting exceptional developers
+                            with a network of empowered affiliates, delivering premium properties and
+                            creating sustainable wealth opportunities for our partners while maintaining
+                            the highest standards of integrity and excellence.
+                        </p>
+                    </motion.div>
 
-                        {/* Vision */}
-                        <div className="py-8 pl-4 border-primary/10">
-                            {/* <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/30 rounded-full text-sm font-medium text-primary mb-6">
-                                Our Destination
-                            </div> */}
-                            <h3 className="text-3xl font-bold text-foreground mb-4">Our Vision</h3>
-                            <p className="text-lg text-muted-foreground leading-relaxed max-w-3xl">
-                                To become Africa&apos;s leading real estate affiliate platform, known for its innovation, transparency, and
-                                commitment to building lasting relationships. We envision a future where quality properties are accessible
-                                to more people, and our affiliates thrive as successful entrepreneurs in a supportive ecosystem.
-                            </p>
+                    {/* Our Vision */}
+                    <motion.div
+                        initial={{ opacity: 0, x: 30 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.6 }}
+                        className="card-elegant"
+                    >
+                        <div className="flex items-center gap-4 mb-6">
+                            <div className="p-3 rounded-xl bg-vjad-gold/20 text-vjad-gold">
+                                <Eye className="w-7 h-7" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-foreground">Our Vision</h3>
                         </div>
+                        <p className="text-muted-foreground leading-relaxed">
+                            To become Africa's leading real estate affiliate platform, known for its
+                            innovation, transparency, and commitment to building lasting relationships.
+                            We envision a future where quality properties are accessible to more people,
+                            and our affiliates thrive as successful entrepreneurs in a supportive ecosystem.
+                        </p>
                     </motion.div>
                 </div>
 
@@ -147,6 +157,6 @@ export function AboutSection() {
                     })}
                 </div>
             </div>
-        </section>
+        </section >
     );
 }

@@ -29,7 +29,7 @@ export default function RootLayout({
         <link rel="icon" href="/vijad-favicon.png" />
       </Head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable}`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
       </body>

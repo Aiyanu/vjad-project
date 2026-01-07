@@ -78,7 +78,9 @@ export default function VictoryCourtSection() {
                         {/* Features (theme colors) */}
                         <div className="space-y-4 mb-6">
                             <div className="flex items-start gap-4">
-                                <CheckCircle className="w-5 h-5 text-primary mt-1" />
+                                <div>
+                                    <CheckCircle className="w-5 h-5 text-primary mt-1" />
+                                </div>
                                 <div>
                                     <h4 className="font-medium text-foreground">Available in 300 &amp; 500 SQM</h4>
                                     <p className="text-sm text-muted-foreground">Flexible plot sizes to suit your needs</p>
@@ -86,7 +88,9 @@ export default function VictoryCourtSection() {
                             </div>
 
                             <div className="flex items-start gap-4">
-                                <CheckCircle className="w-5 h-5 text-primary mt-1" />
+                                <div>
+                                    <CheckCircle className="w-5 h-5 text-primary mt-1" />
+                                </div>
                                 <div>
                                     <h4 className="font-medium text-foreground">Prime Accessibility</h4>
                                     <p className="text-sm text-muted-foreground">
@@ -96,7 +100,9 @@ export default function VictoryCourtSection() {
                             </div>
 
                             <div className="flex items-start gap-4">
-                                <CheckCircle className="w-5 h-5 text-primary mt-1" />
+                                <div>
+                                    <CheckCircle className="w-5 h-5 text-primary mt-1" />
+                                </div>
                                 <div>
                                     <h4 className="font-medium text-foreground">Land Title</h4>
                                     <p className="text-sm text-muted-foreground">C of O in view — FILE NO: IJO/SL/C50</p>
@@ -106,8 +112,10 @@ export default function VictoryCourtSection() {
 
                         {/* Location + Landmarks */}
                         <div className="mb-6">
-                            <div className="flex items-center gap-2 text-foreground mb-3">
-                                <MapPin className="w-5 h-5 text-primary" />
+                            <div className="flex items-center gap-4 text-foreground mb-3">
+                                <div>
+                                    <MapPin className="w-5 h-5 text-primary" />
+                                </div>
                                 <span className="font-medium">Iloti Epe — Ijebu Ode Road</span>
                             </div>
 

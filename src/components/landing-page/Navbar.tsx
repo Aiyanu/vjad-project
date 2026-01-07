@@ -22,7 +22,7 @@ export function Navbar() {
             initial={{ y: -100 }}
             animate={{ y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
-            className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50"
+            className="fixed top-0 left-0 right-0 z-50 bg-background/50 backdrop-blur-xl border-b border-border/50"
         >
             <div className="container mx-auto px-4">
                 <div className="flex items-center justify-between h-20">
@@ -48,10 +48,10 @@ export function Navbar() {
 
                     {/* CTA Buttons */}
                     <div className="hidden md:flex items-center gap-4">
-                        <Button onClick={() => router.push("/login")} variant="ghost" className="font-medium">
+                        <Button onClick={() => router.push("/auth?mode=login")} variant="ghost" className="font-medium">
                             Login
                         </Button>
-                        <Button onClick={() => router.push("/register")} className="bg-primary hover:bg-primary/90 font-semibold px-6">
+                        <Button onClick={() => router.push("/auth?mode=register")} className="bg-primary hover:bg-primary/90 font-semibold px-6">
                             Become an Affiliate
                         </Button>
                     </div>
@@ -89,10 +89,10 @@ export function Navbar() {
                                 </a>
                             ))}
                             <div className="pt-4 space-y-3">
-                                <Button onClick={() => router.push("/login")} variant="outline" className="w-full">
+                                <Button onClick={() => router.push("/auth?mode=login")} variant="outline" className="w-full">
                                     Login
                                 </Button>
-                                <Button onClick={() => router.push("/register")} className="w-full bg-primary hover:bg-primary/90">
+                                <Button onClick={() => router.push("/auth?mode=register")} className="w-full bg-primary hover:bg-primary/90">
                                     Become an Affiliate
                                 </Button>
                             </div>
