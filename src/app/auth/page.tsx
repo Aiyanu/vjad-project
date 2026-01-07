@@ -31,7 +31,7 @@ type AuthMode = "login" | "register";
 
 const Auth = () => {
     const searchParams = useSearchParams();
-    const initialMode = searchParams.get("mode") === "register" ? "register" : "login";
+    const initialMode = searchParams?.get("mode") === "register" ? "register" : "login";
 
     const [mode, setMode] = useState<AuthMode>(initialMode);
     const [showPassword, setShowPassword] = useState(false);
@@ -86,14 +86,21 @@ const Auth = () => {
             setErrors({});
             return true;
         } catch (error) {
+            // Zod throws ZodError which has `issues` (not `errors`)
             if (error instanceof z.ZodError) {
                 const newErrors: Record<string, string> = {};
-                error.errors.forEach((err) => {
-                    if (err.path[0]) {
-                        newErrors[err.path[0] as string] = err.message;
+                error.issues.forEach((issue) => {
+                    // issue.path is an array (e.g. ['email']) — take the first path segment
+                    const key = issue.path && issue.path.length > 0 ? String(issue.path[0]) : undefined;
+                    if (key) {
+                        // Only set the first message per field (keeps behaviour simple)
+                        if (!newErrors[key]) newErrors[key] = issue.message;
                     }
                 });
                 setErrors(newErrors);
+            } else {
+                // unexpected error; clear errors to be safe
+                setErrors({});
             }
             return false;
         }
@@ -131,13 +138,13 @@ const Auth = () => {
                 });
             } else {
                 // Get referral code from cookie/localStorage if present
-                const referralCode = localStorage.getItem("vjad_ref") || undefined;
+                const referralCode = typeof window !== "undefined" ? localStorage.getItem("vjad_ref") || undefined : undefined;
 
                 // const { error } = await supabase.auth.signUp({
                 //     email: formData.email,
                 //     password: formData.password,
                 //     options: {
-                //         emailRedirectTo: `${window.location.origin}/`,
+                //         emailRedirectTo: `${typeof window !== "undefined" ? window.location.origin : ""}/`,
                 //         data: {
                 //             full_name: formData.fullName,
                 //             referred_by: referralCode,
@@ -184,7 +191,7 @@ const Auth = () => {
         });
 
         // Update URL to reflect the new mode
-        const params = new URLSearchParams(searchParams.toString());
+        const params = new URLSearchParams(searchParams?.toString() ?? "");
         params.set("mode", newMode);
         router.push(`?${params.toString()}`, { scroll: false });
     };
@@ -196,18 +203,15 @@ const Auth = () => {
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0aDR2NGgtNHpNNDAgMzBoNHY0aC00ek00NCAyNmg0djRoLTR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
 
                 <div className="relative z-10 flex flex-col justify-center px-12 xl:px-20">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
-                    >
+                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
                         <Link href="/" className="flex items-center gap-3 mb-12">
                             <Building2 className="h-10 w-10 text-white" />
                             <span className="text-2xl font-display font-bold text-white">VJAD Projects</span>
                         </Link>
 
                         <h1 className="text-4xl xl:text-5xl font-display font-bold text-white mb-6 leading-tight">
-                            Join Our Elite<br />
+                            Join Our Elite
+                            <br />
                             <span className="text-vjad-gold">Affiliate Network</span>
                         </h1>
 
@@ -222,13 +226,7 @@ const Auth = () => {
                                 "Real-time tracking and analytics",
                                 "Dedicated affiliate support team",
                             ].map((benefit, index) => (
-                                <motion.div
-                                    key={index}
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ duration: 0.4, delay: 0.2 + index * 0.1 }}
-                                    className="flex items-center gap-3"
-                                >
+                                <motion.div key={index} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4, delay: 0.2 + index * 0.1 }} className="flex items-center gap-3">
                                     <div className="w-2 h-2 rounded-full bg-vjad-gold" />
                                     <span className="text-white/90">{benefit}</span>
                                 </motion.div>
@@ -244,12 +242,7 @@ const Auth = () => {
 
             {/* Right Panel - Auth Form */}
             <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-background">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="w-full max-w-md"
-                >
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-md">
                     {/* Mobile logo */}
                     <Link href="/" className="flex lg:hidden items-center gap-2 mb-8">
                         <Building2 className="h-8 w-8 text-primary" />
@@ -257,44 +250,22 @@ const Auth = () => {
                     </Link>
 
                     <div className="mb-8">
-                        <h2 className="text-3xl font-display font-bold text-foreground mb-2">
-                            {mode === "login" ? "Welcome back" : "Create your account"}
-                        </h2>
+                        <h2 className="text-3xl font-display font-bold text-foreground mb-2">{mode === "login" ? "Welcome back" : "Create your account"}</h2>
                         <p className="text-muted-foreground">
-                            {mode === "login"
-                                ? "Enter your credentials to access your dashboard"
-                                : "Start your journey as a VJAD affiliate partner"}
+                            {mode === "login" ? "Enter your credentials to access your dashboard" : "Start your journey as a VJAD affiliate partner"}
                         </p>
                     </div>
 
                     <AnimatePresence mode="wait">
-                        <motion.form
-                            key={mode}
-                            initial={{ opacity: 0, x: mode === "login" ? -20 : 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: mode === "login" ? 20 : -20 }}
-                            transition={{ duration: 0.3 }}
-                            onSubmit={handleSubmit}
-                            className="space-y-5"
-                        >
+                        <motion.form key={mode} initial={{ opacity: 0, x: mode === "login" ? -20 : 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: mode === "login" ? 20 : -20 }} transition={{ duration: 0.3 }} onSubmit={handleSubmit} className="space-y-5">
                             {mode === "register" && (
                                 <div className="space-y-2">
                                     <Label htmlFor="fullName">Full Name</Label>
                                     <div className="relative">
                                         <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                                        <Input
-                                            id="fullName"
-                                            name="fullName"
-                                            type="text"
-                                            placeholder="John Doe"
-                                            value={formData.fullName}
-                                            onChange={handleInputChange}
-                                            className={`pl-10 h-12 ${errors.fullName ? "border-destructive" : ""}`}
-                                        />
+                                        <Input id="fullName" name="fullName" type="text" placeholder="John Doe" value={formData.fullName} onChange={handleInputChange} className={`pl-10 h-12 ${errors.fullName ? "border-destructive" : ""}`} />
                                     </div>
-                                    {errors.fullName && (
-                                        <p className="text-sm text-destructive">{errors.fullName}</p>
-                                    )}
+                                    {errors.fullName && <p className="text-sm text-destructive">{errors.fullName}</p>}
                                 </div>
                             )}
 
@@ -302,45 +273,21 @@ const Auth = () => {
                                 <Label htmlFor="email">Email Address</Label>
                                 <div className="relative">
                                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                                    <Input
-                                        id="email"
-                                        name="email"
-                                        type="email"
-                                        placeholder="you@example.com"
-                                        value={formData.email}
-                                        onChange={handleInputChange}
-                                        className={`pl-10 h-12 ${errors.email ? "border-destructive" : ""}`}
-                                    />
+                                    <Input id="email" name="email" type="email" placeholder="you@example.com" value={formData.email} onChange={handleInputChange} className={`pl-10 h-12 ${errors.email ? "border-destructive" : ""}`} />
                                 </div>
-                                {errors.email && (
-                                    <p className="text-sm text-destructive">{errors.email}</p>
-                                )}
+                                {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
                             </div>
 
                             <div className="space-y-2">
                                 <Label htmlFor="password">Password</Label>
                                 <div className="relative">
                                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                                    <Input
-                                        id="password"
-                                        name="password"
-                                        type={showPassword ? "text" : "password"}
-                                        placeholder={mode === "login" ? "Enter your password" : "Create a strong password"}
-                                        value={formData.password}
-                                        onChange={handleInputChange}
-                                        className={`pl-10 pr-10 h-12 ${errors.password ? "border-destructive" : ""}`}
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                                    >
+                                    <Input id="password" name="password" type={showPassword ? "text" : "password"} placeholder={mode === "login" ? "Enter your password" : "Create a strong password"} value={formData.password} onChange={handleInputChange} className={`pl-10 pr-10 h-12 ${errors.password ? "border-destructive" : ""}`} />
+                                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                                         {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                                     </button>
                                 </div>
-                                {errors.password && (
-                                    <p className="text-sm text-destructive">{errors.password}</p>
-                                )}
+                                {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                             </div>
 
                             {mode === "register" && (
@@ -348,53 +295,25 @@ const Auth = () => {
                                     <Label htmlFor="confirmPassword">Confirm Password</Label>
                                     <div className="relative">
                                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                                        <Input
-                                            id="confirmPassword"
-                                            name="confirmPassword"
-                                            type={showConfirmPassword ? "text" : "password"}
-                                            placeholder="Confirm your password"
-                                            value={formData.confirmPassword}
-                                            onChange={handleInputChange}
-                                            className={`pl-10 pr-10 h-12 ${errors.confirmPassword ? "border-destructive" : ""}`}
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                                        >
+                                        <Input id="confirmPassword" name="confirmPassword" type={showConfirmPassword ? "text" : "password"} placeholder="Confirm your password" value={formData.confirmPassword} onChange={handleInputChange} className={`pl-10 pr-10 h-12 ${errors.confirmPassword ? "border-destructive" : ""}`} />
+                                        <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                                             {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                                         </button>
                                     </div>
-                                    {errors.confirmPassword && (
-                                        <p className="text-sm text-destructive">{errors.confirmPassword}</p>
-                                    )}
+                                    {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword}</p>}
                                 </div>
                             )}
 
                             {mode === "login" && (
                                 <div className="flex justify-end">
-                                    <Link
-                                        href="/forgot-password"
-                                        className="text-sm text-primary hover:underline"
-                                    >
+                                    <Link href="/auth/forgot-password" className="text-sm text-primary hover:underline">
                                         Forgot password?
                                     </Link>
                                 </div>
                             )}
 
-                            <Button
-                                type="submit"
-                                disabled={isLoading}
-                                className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-semibold text-base"
-                            >
-                                {isLoading ? (
-                                    <Loader2 className="h-5 w-5 animate-spin" />
-                                ) : (
-                                    <>
-                                        {mode === "login" ? "Sign In" : "Create Account"}
-                                        <ArrowRight className="ml-2 h-5 w-5" />
-                                    </>
-                                )}
+                            <Button type="submit" disabled={isLoading} className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-semibold text-base">
+                                {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : (<><span>{mode === "login" ? "Sign In" : "Create Account"}</span><ArrowRight className="ml-2 h-5 w-5" /></>)}
                             </Button>
                         </motion.form>
                     </AnimatePresence>
@@ -402,10 +321,7 @@ const Auth = () => {
                     <div className="mt-8 text-center">
                         <p className="text-muted-foreground">
                             {mode === "login" ? "Don't have an account?" : "Already have an account?"}{" "}
-                            <button
-                                onClick={toggleMode}
-                                className="text-primary font-semibold hover:underline"
-                            >
+                            <button onClick={toggleMode} className="text-primary font-semibold hover:underline cursor-pointer">
                                 {mode === "login" ? "Sign up" : "Sign in"}
                             </button>
                         </p>
@@ -414,13 +330,8 @@ const Auth = () => {
                     {mode === "register" && (
                         <p className="mt-6 text-center text-sm text-muted-foreground">
                             By creating an account, you agree to our{" "}
-                            <Link href="/terms" className="text-primary hover:underline">
-                                Terms of Service
-                            </Link>{" "}
-                            and{" "}
-                            <Link href="/privacy" className="text-primary hover:underline">
-                                Privacy Policy
-                            </Link>
+                            <Link href="/terms" className="text-primary hover:underline">Terms of Service</Link> and{" "}
+                            <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link>
                         </p>
                     )}
                 </motion.div>
