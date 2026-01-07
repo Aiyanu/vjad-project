@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Building2, Loader2 } from "lucide-react";
 import { z } from "zod";
 import Link from "next/link";
+import Image from "next/image";
 
 const loginSchema = z.object({
     email: z.string().email("Please enter a valid email address"),
@@ -205,8 +206,9 @@ const Auth = () => {
                 <div className="relative z-10 flex flex-col justify-center px-12 xl:px-20">
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
                         <Link href="/" className="flex items-center gap-3 mb-12">
-                            <Building2 className="h-10 w-10 text-white" />
-                            <span className="text-2xl font-display font-bold text-white">VJAD Projects</span>
+                            {/* <Building2 className="h-10 w-10 text-white" />
+                            <span className="text-2xl font-display font-bold text-white">VJAD Projects</span> */}
+                            <Image src={"/vijad-projects.png"} width={150} height={100} alt="vjad" />
                         </Link>
 
                         <h1 className="text-4xl xl:text-5xl font-display font-bold text-white mb-6 leading-tight">
@@ -245,8 +247,10 @@ const Auth = () => {
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-md">
                     {/* Mobile logo */}
                     <Link href="/" className="flex lg:hidden items-center gap-2 mb-8">
-                        <Building2 className="h-8 w-8 text-primary" />
-                        <span className="text-xl font-display font-bold">VJAD Projects</span>
+                        {/* <Building2 className="h-8 w-8 text-primary" />
+                        <span className="text-xl font-display font-bold">VJAD Projects</span> */}
+                        <Image src={"/vijad-projects-dark.png"} width={130} height={100} alt="vjad" />
+
                     </Link>
 
                     <div className="mb-8">

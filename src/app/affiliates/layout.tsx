@@ -47,9 +47,9 @@ const AffiliateDashboardLayout = ({ children }: DashboardLayoutProps) => {
     const userName = "Affiliate";
 
     return (
-        <div className="min-h-screen bg-[hsl(var(--background))]">
+        <div className="min-h-screen bg-[var(--color-background)]">
             {/* Mobile Header */}
-            <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-[hsl(var(--vjad-navy))] px-4 py-3 flex items-center justify-between">
+            <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-[var(--color-vjad-navy)] px-4 py-3 flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2">
                     <Building2 className="h-6 w-6 text-white" />
                     <span className="text-lg font-display font-bold text-white">VJAD</span>
@@ -62,7 +62,7 @@ const AffiliateDashboardLayout = ({ children }: DashboardLayoutProps) => {
 
             {/* Sidebar */}
             <aside
-                className={`fixed top-0 left-0 h-full w-64 bg-[hsl(var(--vjad-navy))] z-40 transform transition-transform duration-300 ease-in-out
+                className={`fixed top-0 left-0 h-full w-64 bg-[var(--color-vjad-navy)] z-40 transform transition-transform duration-300 ease-in-out
           ${isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
             >
                 <div className="flex flex-col h-full">
@@ -75,7 +75,7 @@ const AffiliateDashboardLayout = ({ children }: DashboardLayoutProps) => {
 
                     <div className="p-4 border-b border-white/10">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-[hsl(var(--primary))] flex items-center justify-center text-white font-semibold">
+                            <div className="w-10 h-10 rounded-full bg-[var(--color-primary)] flex items-center justify-center text-white font-semibold">
                                 {userName.charAt(0)}
                             </div>
                             <div className="flex-1 min-w-0">
@@ -95,7 +95,7 @@ const AffiliateDashboardLayout = ({ children }: DashboardLayoutProps) => {
                                     href={item.href}
                                     onClick={() => setIsSidebarOpen(false)}
                                     className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
-                    ${isActive ? "bg-[hsl(var(--primary))] text-white" : "text-white/70 hover:bg-white/10 hover:text-white"}`}
+                    ${isActive ? "bg-[var(--color-primary)] text-white" : "text-white/70 hover:bg-white/10 hover:text-white"}`}
                                 >
                                     <Icon className="h-5 w-5" />
                                     <span className="font-medium">{item.label}</span>

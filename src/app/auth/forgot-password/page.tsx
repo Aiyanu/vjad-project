@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useState } from "react";
 import { motion } from "framer-motion";
 // import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +9,7 @@ import { Mail, ArrowLeft, Building2, Loader2, CheckCircle } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
 import Link from "next/link";
+import Image from "next/image";
 
 const emailSchema = z.object({
     email: z.string().email("Please enter a valid email address"),
@@ -24,45 +25,35 @@ const ForgotPassword = () => {
         e.preventDefault();
         setError("");
 
-        //     try {
-        //         emailSchema.parse({ email });
-        //     } catch (err) {
-        //         if (err instanceof z.ZodError) {
-        //             setError(err.errors[0].message);
-        //             return;
-        //         }
-        //     }
+        // Validation example (uncomment if needed)
+        // try {
+        //   emailSchema.parse({ email });
+        // } catch (err) {
+        //   if (err instanceof z.ZodError) {
+        //     setError(err.issues[0]?.message ?? "Invalid email");
+        //     return;
+        //   }
+        // }
 
-        //     setIsLoading(true);
+        // Simulated flow (Supabase calls commented)
+        // setIsLoading(true);
+        // try {
+        //   const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        //     redirectTo: `${window.location.origin}/reset-password`,
+        //   });
+        //   if (error) { /* handle */ }
+        //   setIsSubmitted(true);
+        // } finally {
+        //   setIsLoading(false);
+        // }
 
-        //     try {
-        //         // const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        //         //     redirectTo: `${window.location.origin}/reset-password`,
-        //         // });
-
-        //         if (error) {
-        //             toast({
-        //                 title: "Error",
-        //                 description: error.message,
-        //                 variant: "destructive",
-        //             });
-        //             return;
-        //         }
-
-        //         setIsSubmitted(true);
-        //     } catch (error) {
-        //         toast({
-        //             title: "An error occurred",
-        //             description: "Please try again later.",
-        //             variant: "destructive",
-        //         });
-        //     } finally {
-        //         setIsLoading(false);
-        //     }
+        // Demo behaviour:
+        setIsSubmitted(true);
+        toast.success("Reset link sent (demo)");
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[hsl(var(--background))] p-4">
+        <div className="min-h-screen flex items-center justify-center bg-[var(--color-background)] p-4">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -71,35 +62,28 @@ const ForgotPassword = () => {
             >
                 <div className="text-center mb-8">
                     <Link href="/" className="inline-flex items-center gap-2 mb-8">
-                        <Building2 className="h-8 w-8 text-[hsl(var(--primary))]" />
-                        <span className="text-xl font-display font-bold">VJAD Projects</span>
+                        {/* <Building2 className="h-8 w-8 text-[var(--color-primary)]" />
+                        <span className="text-xl font-display font-bold text-[var(--color-foreground)]">
+                            VJAD Projects
+                        </span> */}
+                        <Image src={"/vijad-projects-dark.png"} width={150} height={70} alt="vjad" />
                     </Link>
 
                     {isSubmitted ? (
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="space-y-4"
-                        >
-                            <div className="w-16 h-16 mx-auto bg-green-100 rounded-full flex items-center justify-center">
-                                <CheckCircle className="h-8 w-8 text-green-600" />
+                        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-4">
+                            <div className="w-16 h-16 mx-auto bg-[var(--color-vjad-gold)]/10 rounded-full flex items-center justify-center">
+                                <CheckCircle className="h-8 w-8 text-[var(--color-vjad-gold)]" />
                             </div>
-                            <h2 className="text-2xl font-display font-bold text-[hsl(var(--foreground))]">
-                                Check your email
-                            </h2>
-                            <p className="text-[hsl(var(--muted-foreground))]">
-                                We've sent a password reset link to<br />
-                                <span className="font-medium text-[hsl(var(--foreground))]">{email}</span>
+                            <h2 className="text-2xl font-display font-bold text-[var(--color-foreground)]">Check your email</h2>
+                            <p className="text-[var(--color-muted-foreground)]">
+                                We've sent a password reset link to <br />
+                                <span className="font-medium text-[var(--color-foreground)]">{email}</span>
                             </p>
                         </motion.div>
                     ) : (
                         <>
-                            <h2 className="text-2xl font-display font-bold text-[hsl(var(--foreground))] mb-2">
-                                Forgot your password?
-                            </h2>
-                            <p className="text-[hsl(var(--muted-foreground))]">
-                                No worries, we'll send you reset instructions.
-                            </p>
+                            <h2 className="text-2xl font-display font-bold text-[var(--color-foreground)] mb-2">Forgot your password?</h2>
+                            <p className="text-[var(--color-muted-foreground)]">No worries, we'll send you reset instructions.</p>
                         </>
                     )}
                 </div>
@@ -109,7 +93,7 @@ const ForgotPassword = () => {
                         <div className="space-y-2">
                             <Label htmlFor="email">Email Address</Label>
                             <div className="relative">
-                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[hsl(var(--muted-foreground))]" />
+                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[var(--color-muted-foreground)]" />
                                 <Input
                                     id="email"
                                     type="email"
@@ -119,33 +103,20 @@ const ForgotPassword = () => {
                                         setEmail(e.target.value);
                                         setError("");
                                     }}
-                                    className={`pl-10 h-12 ${error ? "border-[hsl(var(--destructive))]" : ""}`}
+                                    className={`pl-10 h-12 ${error ? "border-[var(--color-destructive)]" : ""}`}
                                 />
                             </div>
-                            {error && (
-                                <p className="text-sm text-[hsl(var(--destructive))]">{error}</p>
-                            )}
+                            {error && <p className="text-sm text-[var(--color-destructive)]">{error}</p>}
                         </div>
 
-                        <Button
-                            type="submit"
-                            disabled={isLoading}
-                            className="w-full h-12 bg-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))]/90 text-white font-semibold"
-                        >
-                            {isLoading ? (
-                                <Loader2 className="h-5 w-5 animate-spin" />
-                            ) : (
-                                "Send Reset Link"
-                            )}
+                        <Button type="submit" disabled={isLoading} className="w-full h-12 bg-[var(--color-primary)] hover:bg-[var(--color-primary)]/90 text-[var(--color-primary-foreground)] font-semibold">
+                            {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Send Reset Link"}
                         </Button>
                     </form>
                 )}
 
                 <div className="mt-8 text-center">
-                    <Link
-                        href="/auth"
-                        className="inline-flex items-center gap-2 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
-                    >
+                    <Link href="/auth" className="inline-flex items-center gap-2 text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]">
                         <ArrowLeft className="h-4 w-4" />
                         Back to login
                     </Link>

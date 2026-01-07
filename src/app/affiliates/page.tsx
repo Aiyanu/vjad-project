@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion"; // consistent import
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { toast, Toaster } from "sonner";
 
@@ -64,10 +64,10 @@ const AffiliateDashboard = () => {
 
             <div className="space-y-8">
                 <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-                    <h1 className="text-3xl font-display font-bold text-[hsl(var(--foreground))]">
+                    <h1 className="text-3xl font-display font-bold text-[var(--color-foreground)]">
                         Welcome back, {userName}
                     </h1>
-                    <p className="text-[hsl(var(--muted-foreground))] mt-1">Here's an overview of your affiliate performance</p>
+                    <p className="text-[var(--color-muted-foreground)] mt-1">Here's an overview of your affiliate performance</p>
                 </motion.div>
 
                 <motion.div
@@ -85,11 +85,10 @@ const AffiliateDashboard = () => {
                         <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-lg p-2 pl-4">
                             <span className="text-sm truncate max-w-[220px]">{referralLink || "No link yet"}</span>
 
-                            {/* Use Button normally; icon inherits currentColor */}
                             <Button
                                 size="sm"
                                 onClick={copyToClipboard}
-                                className="bg-white text-[hsl(var(--vjad-navy))] hover:bg-white/90"
+                                className="bg-white text-[var(--color-vjad-navy)] hover:bg-white/90"
                                 aria-label="Copy referral link"
                             >
                                 {copied ? <CheckCircle className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
@@ -109,9 +108,8 @@ const AffiliateDashboard = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <motion.div className="card-elegant" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.5 }}>
                         <h3 className="font-display font-bold text-lg">Report a Sale</h3>
-                        <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1">Submit a new sale for verification</p>
+                        <p className="text-sm text-[var(--color-muted-foreground)] mt-1">Submit a new sale for verification</p>
 
-                        {/* Wrap Button with next/link — safer and compatible with your UI */}
                         <Link href="/affiliate/sales" className="block mt-4 w-full sm:w-auto">
                             <Button className="w-full sm:w-auto flex items-center justify-center">
                                 Report Sale <ArrowRight className="ml-2 h-4 w-4" />
@@ -121,7 +119,7 @@ const AffiliateDashboard = () => {
 
                     <motion.div className="card-elegant" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.6 }}>
                         <h3 className="font-display font-bold text-lg">View Referrals</h3>
-                        <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1">Track your referral conversions</p>
+                        <p className="text-sm text-[var(--color-muted-foreground)] mt-1">Track your referral conversions</p>
 
                         <Link href="/affiliate/referrals" className="block mt-4 w-full sm:w-auto">
                             <Button variant="outline" className="w-full sm:w-auto flex items-center justify-center">
@@ -133,7 +131,7 @@ const AffiliateDashboard = () => {
 
                 <motion.div className="card-elegant" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.7 }}>
                     <h3 className="font-display font-bold text-lg mb-4">Recent Activity</h3>
-                    <div className="text-center py-8 text-[hsl(var(--muted-foreground))]">
+                    <div className="text-center py-8 text-[var(--color-muted-foreground)]">
                         <Share2 className="h-12 w-12 mx-auto mb-3 opacity-30" />
                         <p>No recent activity yet</p>
                     </div>
