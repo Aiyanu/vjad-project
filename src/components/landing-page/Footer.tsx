@@ -1,4 +1,5 @@
 import { Building2, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, X } from "lucide-react";
+import Image from "next/image";
 
 const footerLinks = {
     company: [
@@ -28,11 +29,10 @@ const footerLinks = {
 };
 
 const socialLinks = [
-    { icon: Facebook, href: "#", label: "Facebook" },
-    { icon: Twitter, href: "#", label: "Twitter" },
-    { icon: Instagram, href: "#", label: "Instagram" },
-    { icon: Linkedin, href: "#", label: "LinkedIn" },
-    { icon: X, href: "#", label: "X" },
+    { icon: Facebook, href: "https://www.facebook.com/share/1C1opzzfhk/?mibextid=wwXIfr", label: "Facebook" },
+    // { icon: Twitter, href: "#", label: "Twitter" },
+    { icon: Instagram, href: "https://www.instagram.com/vijadprojects?igsh=NnY0cTlqeGE2eG9h", label: "Instagram" },
+    // { icon: Linkedin, href: "#", label: "LinkedIn" },
 ];
 
 export function Footer() {
@@ -43,13 +43,9 @@ export function Footer() {
                     {/* Brand Column */}
                     <div className="lg:col-span-2">
                         <a href="#home" className="flex items-center gap-3 mb-6">
-                            <div className="p-2 bg-primary rounded-xl">
-                                <Building2 className="w-6 h-6 text-primary-foreground" />
-                            </div>
-                            <span className="font-display font-bold text-xl">
-                                VJAD<span className="text-primary">Projects</span>
-                            </span>
+                            <Image src={"/vijad-projects.png"} width={100} height={100} alt="vjad" />
                         </a>
+
                         <p className="text-secondary-foreground/70 mb-6 max-w-sm">
                             Building wealth through strategic real estate partnerships.
                             Join Nigeria's fastest-growing property affiliate network.
@@ -63,11 +59,11 @@ export function Footer() {
                             </a>
                             <a href="tel:+2341234567890" className="flex items-center gap-3 text-secondary-foreground/70 hover:text-secondary-foreground transition-colors">
                                 <Phone className="w-4 h-4" />
-                                +234 123 456 7890
+                                +2347048482006
                             </a>
                             <div className="flex items-start gap-3 text-secondary-foreground/70">
                                 <MapPin className="w-4 h-4 mt-1 flex-shrink-0" />
-                                <span>123 Victoria Island, Lagos, Nigeria</span>
+                                <span className="capitalize">Block C1 HFP SHOPPING COMPLEX ABRAHAM ADESANYA AJAH LAGOS</span>
                             </div>
                         </div>
                     </div>
