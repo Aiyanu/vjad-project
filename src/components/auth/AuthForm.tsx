@@ -116,6 +116,12 @@ export function AuthForm({
             const data = await res.json();
 
             if (!res.ok) {
+                // Check for EMAIL_NOT_VERIFIED error code
+                if (data?.code === "EMAIL_NOT_VERIFIED" && data?.email) {
+                    // Redirect to verify email page
+                    router.push(`/auth/verify-email?email=${encodeURIComponent(data.email)}`);
+                    return;
+                }
                 setServerError(data?.error ?? "An error occurred. Please try again.");
                 return;
             }

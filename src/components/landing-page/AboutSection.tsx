@@ -6,38 +6,25 @@ import { Award, Shield, Target, Lightbulb, Heart, Eye } from "lucide-react";
 export function AboutSection() {
     const values = [
         {
-            icon: Award,
-            title: "Excellence",
-            description: "Pursuing the highest standards in everything we deliver",
-            circleClasses: "bg-gradient-to-br from-[#0046ff] to-[#002583]"
+            icon: Target,
+            title: "Professionalism",
+            description:
+                "We are committed to continuous improvement and professional growth. Our team operates in a respectful and collaborative environment, where every effort is directed toward achieving superior results.",
+            circleClasses: "bg-gradient-to-br from-sky-500 to-sky-700",
         },
         {
             icon: Shield,
             title: "Integrity",
-            description: "Transparency and honesty in all our dealings",
+            description:
+                "Transparency and honesty are the bedrock of our business. We stand by our commitments and conduct all transactions with integrity, ensuring that each project is forward-thinking and future-proof.",
             circleClasses: "bg-gradient-to-br from-emerald-500 to-emerald-600",
-
         },
         {
-            icon: Target,
-            title: "Competence",
-            description: "Expertise and skill in our industry and craft",
-            circleClasses: "bg-gradient-to-br from-amber-500 to-amber-600",
-
-        },
-        {
-            icon: Lightbulb,
-            title: "Creativity & Innovation",
-            description: "Fresh ideas and forward-thinking solutions",
-            circleClasses: "bg-gradient-to-br from-purple-500 to-purple-600",
-
-        },
-        {
-            icon: Heart,
-            title: "Customer Service",
-            description: "Putting your success at the heart of what we do",
-            circleClasses: "bg-gradient-to-br from-rose-500 to-rose-600",
-
+            icon: Award,
+            title: "Excellence",
+            description:
+                "Exceeding expectations is at the heart of Dexta Africa's mission. We relentlessly pursue excellence, always seeking better ways to achieve our goals and setting new industry benchmarks with every project.",
+            circleClasses: "bg-gradient-to-br from-[#0046ff] to-[#002583]",
         },
     ];
 
@@ -55,8 +42,8 @@ export function AboutSection() {
                     <span className="gold-badge mb-4">About Us</span>
                     <h2 className="section-heading mt-4">Who We Are</h2>
                     <p className="section-subheading mx-auto">
-                        VJAD Projects is a premier real estate marketing company dedicated to bridging the gap between
-                        quality properties and aspiring homeowners.
+                        VJAD Projects is a premier real estate marketing company dedicated to
+                        bridging the gap between quality properties and aspiring homeowners.
                     </p>
                 </motion.div>
 
@@ -99,10 +86,7 @@ export function AboutSection() {
                             <h3 className="text-2xl font-bold text-foreground">Our Vision</h3>
                         </div>
                         <p className="text-muted-foreground leading-relaxed">
-                            To become Africa's leading real estate affiliate platform, known for its
-                            innovation, transparency, and commitment to building lasting relationships.
-                            We envision a future where quality properties are accessible to more people,
-                            and our affiliates thrive as successful entrepreneurs in a supportive ecosystem.
+                            To be the leading real estate brand in the industry, known for our commitment to excellence and quality projects that exceed customer expectations.
                         </p>
                     </motion.div>
                 </div>
@@ -125,7 +109,7 @@ export function AboutSection() {
                 </motion.div>
 
                 {/* Core Values Grid */}
-                <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-5">
+                <div className="grid gap-8 md:grid-cols-3 lg:grid-cols-3">
                     {values.map((v) => {
                         const Icon = v.icon;
                         return (

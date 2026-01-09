@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Head from "next/head";
+import { Toaster } from "@/components/ui/sonner";
+import { AuthInitializer } from "@/components/AuthInitializer";
+import ReduxProvider from "@/store/ReduxProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,6 +19,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Vijad Projects",
   description: "Building Excellence and Creating Communities",
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export default function RootLayout({
@@ -31,7 +37,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable}`}
       >
-        {children}
+        <ReduxProvider>
+          <AuthInitializer>
+            {children}
+          </AuthInitializer>
+        </ReduxProvider>
+        <Toaster />
       </body>
     </html>
   );

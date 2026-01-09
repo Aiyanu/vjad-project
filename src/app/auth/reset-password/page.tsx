@@ -1,15 +1,16 @@
+// src/app/auth/reset-password/page.tsx (or wherever ResetPassword lives)
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-// import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Lock, Eye, EyeOff, Building2, Loader2, CheckCircle } from "lucide-react";
+import { Lock, Eye, EyeOff, Loader2, CheckCircle } from "lucide-react";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { toast } from "sonner";
 
 const passwordSchema = z
     .object({
@@ -22,6 +23,11 @@ const passwordSchema = z
     });
 
 const ResetPassword = () => {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const token = searchParams?.get("token") ?? "";
+    const emailParam = searchParams?.get("email") ?? "";
+
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -29,34 +35,58 @@ const ResetPassword = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
-    const router = useRouter();
+
+    useEffect(() => {
+        // If token or email missing, we could redirect back or show a message
+        if (!token || !emailParam) {
+            // leave the UI — attempt will fail with server error if missing
+        }
+    }, [token, emailParam]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setErrors({});
 
-        // Uncomment and adapt validation when ready
-        // try {
-        //   passwordSchema.parse({ password, confirmPassword });
-        // } catch (err) {
-        //   if (err instanceof z.ZodError) {
-        //     const newErrors: Record<string,string> = {};
-        //     err.issues.forEach((issue) => {
-        //       const key = issue.path?.[0] ? String(issue.path[0]) : undefined;
-        //       if (key) newErrors[key] = issue.message;
-        //     });
-        //     setErrors(newErrors);
-        //     return;
-        //   }
-        // }
+        try {
+            passwordSchema.parse({ password, confirmPassword });
+        } catch (err) {
+            if (err instanceof z.ZodError) {
+                const newErrors: Record<string, string> = {};
+                err.issues.forEach((issue) => {
+                    const key = issue.path?.[0] ? String(issue.path[0]) : undefined;
+                    if (key && !newErrors[key]) newErrors[key] = issue.message;
+                });
+                setErrors(newErrors);
+                return;
+            }
+        }
 
-        // Simulate success (replace with Supabase update)
         setIsLoading(true);
-        setTimeout(() => {
-            setIsLoading(false);
+        try {
+            const res = await fetch("/api/auth/reset", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email: emailParam, token, password }),
+            });
+
+            const json = await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+                toast.error(json?.error || "Could not reset password");
+                setErrors({ form: json?.error || "Could not reset password" });
+                return;
+            }
+
             setIsSuccess(true);
-            // router.push('/affiliate/dashboard') // optionally redirect
-        }, 900);
+            toast.success("Password reset successful");
+            // optional: redirect to login after short delay
+            setTimeout(() => router.push("/auth"), 1200);
+        } catch (err) {
+            console.error(err);
+            toast.error("An error occurred. Please try again later.");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -64,8 +94,6 @@ const ResetPassword = () => {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-md">
                 <div className="text-center mb-8">
                     <Link href="/" className="inline-flex items-center gap-2 mb-8">
-                        {/* <Building2 className="h-8 w-8 text-[var(--color-primary)]" />
-                        <span className="text-xl font-display font-bold text-[var(--color-foreground)]">VJAD Projects</span> */}
                         <Image src={"/vijad-projects-dark.png"} width={150} height={70} alt="vjad" />
                     </Link>
 
@@ -75,7 +103,7 @@ const ResetPassword = () => {
                                 <CheckCircle className="h-8 w-8 text-[var(--color-vjad-gold)]" />
                             </div>
                             <h2 className="text-2xl font-display font-bold text-[var(--color-foreground)]">Password updated!</h2>
-                            <p className="text-[var(--color-muted-foreground)]">Your password has been successfully reset.</p>
+                            <p className="text-[var(--color-muted-foreground)]">Your password has been successfully reset. Redirecting to sign in…</p>
                         </motion.div>
                     ) : (
                         <>
@@ -91,14 +119,7 @@ const ResetPassword = () => {
                             <Label htmlFor="password">New Password</Label>
                             <div className="relative">
                                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[var(--color-muted-foreground)]" />
-                                <Input
-                                    id="password"
-                                    type={showPassword ? "text" : "password"}
-                                    placeholder="Enter new password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className={`pl-10 pr-10 h-12 ${errors.password ? "border-[var(--color-destructive)]" : ""}`}
-                                />
+                                <Input id="password" type={showPassword ? "text" : "password"} placeholder="Enter new password" value={password} onChange={(e) => setPassword(e.target.value)} className={`pl-10 pr-10 h-12 ${errors.password ? "border-[var(--color-destructive)]" : ""}`} />
                                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]">
                                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                                 </button>
@@ -110,20 +131,15 @@ const ResetPassword = () => {
                             <Label htmlFor="confirmPassword">Confirm Password</Label>
                             <div className="relative">
                                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-[var(--color-muted-foreground)]" />
-                                <Input
-                                    id="confirmPassword"
-                                    type={showConfirmPassword ? "text" : "password"}
-                                    placeholder="Confirm new password"
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    className={`pl-10 pr-10 h-12 ${errors.confirmPassword ? "border-[var(--color-destructive)]" : ""}`}
-                                />
+                                <Input id="confirmPassword" type={showConfirmPassword ? "text" : "password"} placeholder="Confirm new password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className={`pl-10 pr-10 h-12 ${errors.confirmPassword ? "border-[var(--color-destructive)]" : ""}`} />
                                 <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]">
                                     {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                                 </button>
                             </div>
                             {errors.confirmPassword && <p className="text-sm text-[var(--color-destructive)]">{errors.confirmPassword}</p>}
                         </div>
+
+                        {errors.form && <p className="text-sm text-[var(--color-destructive)]">{errors.form}</p>}
 
                         <Button type="submit" disabled={isLoading} className="w-full h-12 bg-[var(--color-primary)] hover:bg-[var(--color-primary)]/90 text-[var(--color-primary-foreground)] font-semibold">
                             {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Reset Password"}

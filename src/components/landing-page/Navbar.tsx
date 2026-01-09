@@ -7,9 +7,9 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 const navLinks = [
-    { label: "Home", href: "#home" },
+    { label: "Home", href: "/" },
     { label: "About", href: "#about" },
-    { label: "Projects", href: "#projects" },
+    { label: "Projects", href: "/projects" },
     { label: "Testimonials", href: "#testimonials" },
 ];
 

@@ -1,19 +1,14 @@
+// src/app/auth/forgot-password/page.tsx (or your route)
 "use client";
 import { useState } from "react";
 import { motion } from "framer-motion";
-// import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, ArrowLeft, Building2, Loader2, CheckCircle } from "lucide-react";
-import { z } from "zod";
+import { Mail, ArrowLeft, Loader2, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import Image from "next/image";
-
-const emailSchema = z.object({
-    email: z.string().email("Please enter a valid email address"),
-});
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState("");
@@ -24,48 +19,39 @@ const ForgotPassword = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
+        setIsLoading(true);
 
-        // Validation example (uncomment if needed)
-        // try {
-        //   emailSchema.parse({ email });
-        // } catch (err) {
-        //   if (err instanceof z.ZodError) {
-        //     setError(err.issues[0]?.message ?? "Invalid email");
-        //     return;
-        //   }
-        // }
+        try {
+            const res = await fetch("/api/auth/forgot-password", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email }),
+            });
 
-        // Simulated flow (Supabase calls commented)
-        // setIsLoading(true);
-        // try {
-        //   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        //     redirectTo: `${window.location.origin}/reset-password`,
-        //   });
-        //   if (error) { /* handle */ }
-        //   setIsSubmitted(true);
-        // } finally {
-        //   setIsLoading(false);
-        // }
+            const json = await res.json().catch(() => ({}));
 
-        // Demo behaviour:
-        setIsSubmitted(true);
-        toast.success("Reset link sent (demo)");
+            if (!res.ok) {
+                toast.error(json?.error || "Could not request reset");
+                setError(json?.error || "Could not request reset");
+                return;
+            }
+
+            setIsSubmitted(true);
+            toast.success("If an account exists, a reset email was sent");
+        } catch (err) {
+            console.error(err);
+            toast.error("An error occurred. Please try again later.");
+            setError("An error occurred. Please try again later.");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-[var(--color-background)] p-4">
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="w-full max-w-md"
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-md">
                 <div className="text-center mb-8">
                     <Link href="/" className="inline-flex items-center gap-2 mb-8">
-                        {/* <Building2 className="h-8 w-8 text-[var(--color-primary)]" />
-                        <span className="text-xl font-display font-bold text-[var(--color-foreground)]">
-                            VJAD Projects
-                        </span> */}
                         <Image src={"/vijad-projects-dark.png"} width={150} height={70} alt="vjad" />
                     </Link>
 

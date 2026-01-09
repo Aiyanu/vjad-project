@@ -1,7 +1,8 @@
 "use client"
-import { motion } from "motion/react";
-import { ArrowRight, Play, Shield, TrendingUp, Users } from "lucide-react";
+import { motion } from "framer-motion";
+import { ArrowRight, Building2, Shield, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export function HeroSection() {
     return (
@@ -32,7 +33,7 @@ export function HeroSection() {
                             className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-full text-sm font-medium text-white mb-8"
                         >
                             <Shield className="w-4 h-4 text-vjad-gold" />
-                            Trusted Real Estate Partner
+                            Licensed Real Estate Company • RC 7755787
                         </motion.div>
 
                         <motion.h1
@@ -41,9 +42,9 @@ export function HeroSection() {
                             transition={{ duration: 0.6, delay: 0.1 }}
                             className="text-5xl md:text-6xl lg:text-7xl font-display font-bold leading-tight mb-6 text-white"
                         >
-                            {/* <span className="text-vjad-gold"> */}
-                            Don’t expect the usual!{" "}
-                            {/* </span> */}
+                            Redefining{" "}
+                            <span className="text-vjad-gold">Modern Living</span>{" "}
+                            & Investment
                         </motion.h1>
 
                         <motion.p
@@ -52,28 +53,32 @@ export function HeroSection() {
                             transition={{ duration: 0.6, delay: 0.2 }}
                             className="text-xl text-white/80 mb-10 max-w-xl"
                         >
-                            Join our exclusive affiliate program and earn generous commissions
-                            by connecting buyers with premium real estate opportunities.
+                            VJAD Projects delivers exceptional property solutions in Nigeria's dynamic real estate industry —
+                            from residential to commercial and industrial projects. We bridge the gap between housing needs and investment opportunities.
                         </motion.p>
 
-                        {/* <motion.div
+                        <motion.div
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, delay: 0.3 }}
                             className="flex flex-wrap gap-4 mb-12"
                         >
-                            <Button className="bg-white text-secondary hover:bg-white/90 px-8 py-6 text-lg font-semibold rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 group">
-                                Our Projects
-                                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                            <Button asChild className="bg-white text-secondary hover:bg-white/90 px-8 py-6 text-lg font-semibold rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 group">
+                                <Link href="/projects">
+                                    Explore Projects
+                                    <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                                </Link>
                             </Button>
-                            <Button variant="outline" className="border-2 border-white/30 text-white hover:bg-white/10 px-8 py-6 text-lg font-semibold rounded-xl transition-all duration-300 backdrop-blur-sm group">
-                                <Play className="w-5 h-5 mr-2" />
-                                Become an Affiliate
+                            <Button asChild variant="outline" className="border-2 border-white/30 text-white hover:bg-white/10 px-8 py-6 text-lg font-semibold rounded-xl transition-all duration-300 backdrop-blur-sm group">
+                                <Link href="/auth?mode=register">
+                                    <Users className="w-5 h-5 mr-2" />
+                                    Join Affiliate Program
+                                </Link>
                             </Button>
-                        </motion.div> */}
+                        </motion.div>
 
                         {/* Quick Stats */}
-                        {/* <motion.div
+                        <motion.div
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, delay: 0.4 }}
@@ -81,23 +86,23 @@ export function HeroSection() {
                         >
                             <div className="flex items-center gap-3">
                                 <div className="p-2 rounded-lg bg-white/10">
-                                    <Users className="w-5 h-5 text-vjad-gold" />
+                                    <Building2 className="w-5 h-5 text-vjad-gold" />
                                 </div>
                                 <div>
-                                    <div className="text-2xl font-bold text-white">500+</div>
-                                    <div className="text-sm text-white/60">Active Affiliates</div>
+                                    <div className="text-2xl font-bold text-white">20+ Acres</div>
+                                    <div className="text-sm text-white/60">Under Development</div>
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
                                 <div className="p-2 rounded-lg bg-white/10">
-                                    <TrendingUp className="w-5 h-5 text-vjad-gold" />
+                                    <Users className="w-5 h-5 text-vjad-gold" />
                                 </div>
                                 <div>
-                                    <div className="text-2xl font-bold text-white">₦2B+</div>
-                                    <div className="text-sm text-white/60">In Sales</div>
+                                    <div className="text-2xl font-bold text-white">500+</div>
+                                    <div className="text-sm text-white/60">Happy Clients</div>
                                 </div>
                             </div>
-                        </motion.div> */}
+                        </motion.div>
                     </div>
 
                     {/* Right Content - Feature Cards */}
@@ -111,17 +116,18 @@ export function HeroSection() {
                             {/* Main Card */}
                             <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20">
                                 <div className="text-white mb-6">
-                                    <h3 className="text-2xl font-bold mb-2">Why Partner With Us?</h3>
+                                    <h3 className="text-2xl font-bold mb-2">Why Partner With VJAD?</h3>
                                     <p className="text-white/70">
-                                        Join Nigeria's fastest-growing real estate affiliate network
+                                        Creating enduring legacies through quality real estate
                                     </p>
                                 </div>
 
                                 <div className="space-y-4">
                                     {[
-                                        { label: "Up to 5% Commission", desc: "Industry-leading rates" },
-                                        { label: "Instant Tracking", desc: "Real-time dashboard access" },
-                                        { label: "Premium Properties", desc: "Exclusive project listings" },
+                                        { label: "Real Estate Development", desc: "Premium properties with high demand" },
+                                        { label: "Investment Advisory", desc: "Market analysis & return forecasting" },
+                                        { label: "Legal & Regulatory Support", desc: "Full compliance & documentation" },
+                                        { label: "Real Estate Consultancy", desc: "Portfolio & market entry strategies" },
                                     ].map((item, i) => (
                                         <div key={i} className="flex items-start gap-4 p-4 rounded-xl bg-white/5">
                                             <div className="w-2 h-2 mt-2 rounded-full bg-vjad-gold" />
@@ -140,7 +146,7 @@ export function HeroSection() {
                                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                                 className="absolute -top-4 -right-4 bg-vjad-gold text-vjad-dark px-6 py-3 rounded-full font-bold shadow-gold-glow"
                             >
-                                Join Now – Free!
+                                C of O Verified
                             </motion.div>
                         </div>
                     </motion.div>
@@ -161,7 +167,6 @@ export function HeroSection() {
                     />
                 </svg>
             </div>
-
         </section>
     );
 }

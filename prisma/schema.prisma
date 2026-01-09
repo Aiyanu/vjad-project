@@ -10,5 +10,47 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
+}
+
+model User {
+  id           String  @id @default(uuid())
+  email        String  @unique
+  passwordHash String
+  fullName     String?
+
+  role Role @default(affiliate)
+
+  // ─── Affiliate payout details ───
+  bankName      String?
+  bankCode      String?
+  accountNumber String?
+  accountName   String?
+  phone         String?
+
+  // ─── Referral system ───
+  referralCode String @unique
+
+  referrerId String?
+  referrer   User?   @relation("UserReferrals", fields: [referrerId], references: [id])
+  referrals  User[]  @relation("UserReferrals")
+
+  // ─── Auth / Security ───
+  emailVerified Boolean   @default(false)
+  verificationToken String?
+  verificationTokenExp DateTime?
+  isDisabled Boolean @default(false)
+
+  // ─── Metadata ───
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([referrerId])
+  @@index([verificationToken])
+}
+
+enum Role {
+  affiliate
+  admin
+  super_admin
 }

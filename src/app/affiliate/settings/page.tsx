@@ -1,137 +1,36 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { motion } from "motion/react";
-// import { supabase } from "@/lib/supabase/client";
-// import { User } from "@supabase/supabase-js";
+import { useAffiliateSettings } from "@/hooks/useAffiliateSettings";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { User as UserIcon, Mail, Phone, Lock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
-interface Profile {
-    full_name: string | null;
-    email: string | null;
-    phone: string | null;
-}
-
-// Mock user type to replace Supabase User
-interface User {
-    id: string;
-    email?: string;
-    user_metadata?: Record<string, any>;
-    created_at?: string;
-}
+const PhoneInput = dynamic(() => import("react-phone-input-2"), { ssr: false });
 
 export default function AffiliateSettings() {
-    const [user, setUser] = useState<User | null>(null);
-    const [profile, setProfile] = useState<Profile>({ full_name: "", email: "", phone: "" });
-    const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
-    const [changingPassword, setChangingPassword] = useState(false);
-
-    const [passwordData, setPasswordData] = useState({
-        newPassword: "",
-        confirmPassword: "",
-    });
-
-    useEffect(() => {
-        fetchUserAndProfile();
-    }, []);
-
-    const fetchUserAndProfile = async () => {
-        try {
-            // SUPABASE IMPLEMENTATION (COMMENTED OUT)
-            // const { data: { user } } = await supabase.auth.getUser();
-            // if (!user) return;
-            // setUser(user);
-
-            // const { data: profileData } = await supabase
-            //     .from("profiles")
-            //     .select("full_name, email, phone")
-            //     .eq("id", user.id)
-            //     .maybeSingle();
-
-            // if (profileData) {
-            //     setProfile(profileData);
-            // } else {
-            //     setProfile({
-            //         full_name: user.user_metadata?.full_name || "",
-            //         email: user.email || "",
-            //         phone: "",
-            //     });
-            // }
-
-            // MOCK DATA FOR DEVELOPMENT
-            setUser(null);
-            setProfile({ full_name: "", email: "", phone: "" });
-        } catch (error) {
-            console.error("Error fetching profile:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleProfileUpdate = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!user) return;
-
-        setSaving(true);
-        try {
-            // SUPABASE IMPLEMENTATION (COMMENTED OUT)
-            // const { error } = await supabase
-            //     .from("profiles")
-            //     .update({
-            //         full_name: profile.full_name,
-            //         phone: profile.phone,
-            //     })
-            //     .eq("id", user.id);
-
-            // if (error) throw error;
-
-            toast.success("Profile updated successfully");
-        } catch (error) {
-            console.error("Error updating profile:", error);
-            toast.error("Failed to update profile");
-        } finally {
-            setSaving(false);
-        }
-    };
-
-    const handlePasswordChange = async (e: React.FormEvent) => {
-        e.preventDefault();
-
-        if (passwordData.newPassword !== passwordData.confirmPassword) {
-            toast.error("Passwords do not match");
-            return;
-        }
-
-        if (passwordData.newPassword.length < 6) {
-            toast.error("Password must be at least 6 characters");
-            return;
-        }
-
-        setChangingPassword(true);
-        try {
-            // SUPABASE IMPLEMENTATION (COMMENTED OUT)
-            // const { error } = await supabase.auth.updateUser({
-            //     password: passwordData.newPassword,
-            // });
-
-            // if (error) throw error;
-
-            toast.success("Password updated successfully");
-            setPasswordData({ newPassword: "", confirmPassword: "" });
-        } catch (error) {
-            console.error("Error updating password:", error);
-            toast.error("Failed to update password");
-        } finally {
-            setChangingPassword(false);
-        }
-    };
+    const {
+        user,
+        loading,
+        profile,
+        updateProfileField,
+        bankState,
+        updateBankField,
+        banks,
+        saving,
+        changingPassword,
+        passwordData,
+        setPasswordData,
+        handleProfileUpdate,
+        handlePasswordChange,
+    } = useAffiliateSettings();
 
     if (loading) {
         return (
@@ -181,8 +80,8 @@ export default function AffiliateSettings() {
                         <Label htmlFor="full_name">Full Name</Label>
                         <Input
                             id="full_name"
-                            value={profile.full_name || ""}
-                            onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
+                            value={profile.fullName || ""}
+                            onChange={(e) => updateProfileField("fullName", e.target.value)}
                             placeholder="Your full name"
                         />
                     </div>
@@ -203,16 +102,97 @@ export default function AffiliateSettings() {
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="phone">Phone Number</Label>
-                        <div className="relative">
-                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(var(--muted-foreground))]" />
-                            <Input
-                                id="phone"
-                                value={profile.phone || ""}
-                                onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                                placeholder="+234 800 000 0000"
-                                className="pl-10"
-                            />
+                        <div>
+                            {/* Phone input uses react-phone-input-2 (dynamic import). Install via: npm i react-phone-input-2 */}
+                            {/* If the package isn't available, we fall back to a normal Input */}
+                            {typeof window !== "undefined" && (PhoneInput as any) ? (
+                                <PhoneInput
+                                    country={"ng"}
+                                    value={profile.phone || ""}
+                                    onChange={(value: any) => updateProfileField("phone", value ? `+${value}` : "")}
+                                    inputProps={{ name: "phone", required: false }}
+                                    inputStyle={{ width: "100%" }}
+                                />
+                            ) : (
+                                <div className="relative">
+                                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(var(--muted-foreground))]" />
+                                    <Input
+                                        id="phone"
+                                        value={profile.phone || ""}
+                                        onChange={(e) => updateProfileField("phone", e.target.value)}
+                                        placeholder="+234 800 000 0000"
+                                        className="pl-10"
+                                    />
+                                </div>
+                            )}
                         </div>
+                    </div>
+
+                    {/* Bank Details */}
+                    <div className="space-y-2">
+                        <Label htmlFor="bankName">Bank</Label>
+                        <Select
+                            value={bankState.bankCode || ""}
+                            onValueChange={(code) => {
+                                const bank = banks.find((b) => b.code === code);
+                                if (bank) {
+                                    updateBankField("bankCode", code);
+                                    updateBankField("bankName", bank.name);
+                                    updateBankField("accountNumber", "");
+                                    updateBankField("accountName", "");
+                                }
+                            }}
+                        >
+                            <SelectTrigger id="bankName" className="w-full">
+                                <SelectValue placeholder="Select your bank" />
+                            </SelectTrigger>
+                            <SelectContent className="border-0">
+                                {banks.map((b, idx) => (
+                                    <SelectItem key={idx} value={b.code} className="hover:bg-gray-100 focus:bg-gray-100">{b.name}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <Label htmlFor="accountNumber">Account Number</Label>
+                            {bankState.accountVerified && bankState.accountName ? (
+                                <Badge variant="default">Verified</Badge>
+                            ) : null}
+                        </div>
+                        <Input
+                            id="accountNumber"
+                            value={bankState.accountNumber}
+                            onChange={async (e) => {
+                                const v = e.target.value.replace(/\D/g, "");
+                                updateBankField("accountNumber", v);
+                                updateBankField("accountName", "");
+                                // auto-verify when it reaches 10 digits and bank is selected
+                                if (v.length === 10 && bankState.bankCode && !bankState.accountVerifying) {
+                                    try {
+                                        const res = await fetch("/api/verify-account", {
+                                            method: "POST",
+                                            headers: { "Content-Type": "application/json" },
+                                            body: JSON.stringify({ accountNumber: v, bankCode: bankState.bankCode }),
+                                        });
+                                        const json = await res.json();
+                                        if (!res.ok || json.error) {
+                                            toast.error(json.error || "Could not verify account", { id: "account-verify" });
+                                            return;
+                                        }
+                                        updateBankField("accountName", json.accountName);
+                                        toast.success(`Verified: ${json.accountName}`, { id: "account-verify" });
+                                    } catch (err) {
+                                        console.error(err);
+                                        toast.error("Failed to verify account number", { id: "account-verify" });
+                                    }
+                                }
+                            }}
+                            placeholder="Enter account number (10 digits)"
+                            disabled={!bankState.bankCode}
+                        />
+                        {bankState.accountName && <p className="text-sm text-muted-foreground">{bankState.accountName}</p>}
                     </div>
                     <Button type="submit" disabled={saving}>
                         {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
@@ -283,7 +263,7 @@ export default function AffiliateSettings() {
                 <div className="space-y-3 text-sm">
                     <div className="flex justify-between">
                         <span className="text-[hsl(var(--muted-foreground))]">Account ID</span>
-                        <span className="font-mono text-[hsl(var(--foreground))]">{user?.id.slice(0, 8)}...</span>
+                        <span className="font-mono text-[hsl(var(--foreground))]">{user?.id?.slice(0, 8) || "-"}...</span>
                     </div>
                     <Separator />
                     <div className="flex justify-between">
@@ -294,7 +274,7 @@ export default function AffiliateSettings() {
                     <div className="flex justify-between">
                         <span className="text-[hsl(var(--muted-foreground))]">Member Since</span>
                         <span className="text-[hsl(var(--foreground))]">
-                            {user?.created_at ? new Date(user.created_at).toLocaleDateString() : "-"}
+                            {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : "-"}
                         </span>
                     </div>
                 </div>

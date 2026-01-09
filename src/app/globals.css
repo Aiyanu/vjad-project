@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "react-phone-input-2/lib/style.css";
 
 @theme {
   /* VJAD Brand Colors */
@@ -355,4 +356,94 @@ h6 {
     var(--color-secondary),
     var(--color-primary)
   );
+}
+
+/* Toast Customization */
+[data-sonner-toaster] {
+  font-family: var(--font-family-sans);
+}
+
+[data-sonner-toast] {
+  background: white !important;
+  border: 1px solid var(--color-border) !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -4px rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-sonner-toast][data-type="success"] {
+  background: #f0fdf4 !important;
+  border-color: #86efac !important;
+  color: #166534 !important;
+}
+
+[data-sonner-toast][data-type="success"] [data-description] {
+  color: #15803d !important;
+}
+
+[data-sonner-toast][data-type="error"] {
+  background: #fef2f2 !important;
+  border-color: #fca5a5 !important;
+  color: #991b1b !important;
+}
+
+[data-sonner-toast][data-type="error"] [data-description] {
+  color: #b91c1c !important;
+}
+
+[data-sonner-toast][data-type="warning"] {
+  background: #fffbeb !important;
+  border-color: #fde047 !important;
+  color: #854d0e !important;
+}
+
+[data-sonner-toast][data-type="warning"] [data-description] {
+  color: #a16207 !important;
+}
+
+[data-sonner-toast][data-type="info"] {
+  background: #eff6ff !important;
+  border-color: #93c5fd !important;
+  color: #1e40af !important;
+}
+
+[data-sonner-toast][data-type="info"] [data-description] {
+  color: #2563eb !important;
+}
+
+[data-sonner-toast] [data-title] {
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+[data-sonner-toast] [data-description] {
+  font-size: 13px;
+  line-height: 1.4;
+  opacity: 1;
+  color: inherit;
+  margin-top: 4px;
+}
+
+[data-sonner-toast] [data-button] {
+  background: var(--color-vjad-navy) !important;
+  color: white !important;
+  border-radius: 6px;
+  font-weight: 500;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+[data-sonner-toast] [data-button]:hover {
+  background: var(--color-vjad-primary) !important;
+}
+
+[data-sonner-toast] [data-close-button] {
+  border: none !important;
+  background: transparent !important;
+  color: currentColor !important;
+  opacity: 0.5;
+}
+
+[data-sonner-toast] [data-close-button]:hover {
+  opacity: 1;
 }

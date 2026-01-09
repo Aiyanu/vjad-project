@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { motion } from "motion/react";
 // import { supabase } from "@/lib/supabase/client";
 // import { User } from "@supabase/supabase-js";
@@ -10,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { User as UserIcon, Mail, Phone, Lock, Loader2 } from "lucide-react";
+const PhoneInput = dynamic(() => import("react-phone-input-2"), { ssr: false });
 // import { useToast } from "@/hooks/use-toast";
 
 interface Profile {
@@ -226,16 +228,25 @@ export default function AdminSettings() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="phone">Phone Number</Label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(var(--muted-foreground))]" />
-              <Input
-                id="phone"
+            {typeof window !== "undefined" ? (
+              <PhoneInput
+                country={"ng"}
                 value={profile.phone || ""}
-                onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                placeholder="+234 800 000 0000"
-                className="pl-10"
+                onChange={(value: any) => setProfile({ ...profile, phone: value ? `+${value}` : "" })}
+                inputStyle={{ width: "100%" }}
               />
-            </div>
+            ) : (
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(var(--muted-foreground))]" />
+                <Input
+                  id="phone"
+                  value={profile.phone || ""}
+                  onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                  placeholder="+234 800 000 0000"
+                  className="pl-10"
+                />
+              </div>
+            )}
           </div>
           <Button type="submit" disabled={saving}>
             {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}

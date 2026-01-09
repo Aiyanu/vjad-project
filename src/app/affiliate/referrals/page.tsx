@@ -2,19 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
-// import { supabase } from "@/lib/supabase/client";
-
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
 import {
     Table,
     TableBody,
@@ -23,69 +11,49 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Plus, Users, Search, Loader2 } from "lucide-react";
+import { Users, Search, Loader2, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface Referral {
     id: string;
-    referred_name: string;
-    referred_email: string | null;
-    referred_phone: string | null;
-    status: string;
-    notes: string | null;
-    created_at: string;
+    email: string;
+    fullName: string | null;
+    referralCode: string;
+    emailVerified: boolean;
+    createdAt: string;
 }
+
+type SortField = "name" | "email" | "date" | "status";
+type SortOrder = "asc" | "desc";
 
 export default function AffiliateReferrals() {
     const [referrals, setReferrals] = useState<Referral[]>([]);
     const [loading, setLoading] = useState(true);
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
-    const [submitting, setSubmitting] = useState(false);
-    const [affiliateId, setAffiliateId] = useState<string | null>(null);
-
-    const [formData, setFormData] = useState({
-        referred_name: "",
-        referred_email: "",
-        referred_phone: "",
-        notes: "",
-    });
+    const [currentPage, setCurrentPage] = useState(1);
+    const [sortField, setSortField] = useState<SortField>("date");
+    const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
+    const itemsPerPage = 10;
 
     useEffect(() => {
-        fetchAffiliateAndReferrals();
+        fetchReferrals();
     }, []);
 
-    const fetchAffiliateAndReferrals = async () => {
+    const fetchReferrals = async () => {
         try {
-            // SUPABASE IMPLEMENTATION (COMMENTED OUT)
-            // const { data: { user } } = await supabase.auth.getUser();
-            // if (!user) return;
+            const res = await fetch("/api/affiliate/referrals", {
+                credentials: "include",
+            });
 
-            // // Get affiliate record
-            // const { data: affiliate } = await supabase
-            //     .from("affiliates")
-            //     .select("id")
-            //     .eq("user_id", user.id)
-            //     .maybeSingle();
+            if (!res.ok) {
+                throw new Error("Failed to fetch referrals");
+            }
 
-            // if (affiliate) {
-            //     setAffiliateId(affiliate.id);
-
-            //     // Fetch referrals
-            //     const { data, error } = await supabase
-            //         .from("referrals")
-            //         .select("*")
-            //         .eq("affiliate_id", affiliate.id)
-            //         .order("created_at", { ascending: false });
-
-            //     if (error) throw error;
-            //     setReferrals(data || []);
-            // }
-
-            // MOCK DATA FOR DEVELOPMENT
-            setReferrals([]);
+            const data = await res.json();
+            setReferrals(data.referrals || []);
         } catch (error) {
             console.error("Error fetching referrals:", error);
             toast.error("Failed to load referrals");
@@ -94,130 +62,58 @@ export default function AffiliateReferrals() {
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!affiliateId) return;
-
-        setSubmitting(true);
-        try {
-            // SUPABASE IMPLEMENTATION (COMMENTED OUT)
-            // const { error } = await supabase.from("referrals").insert({
-            //     affiliate_id: affiliateId,
-            //     referred_name: formData.referred_name,
-            //     referred_email: formData.referred_email || null,
-            //     referred_phone: formData.referred_phone || null,
-            //     notes: formData.notes || null,
-            // });
-
-            // if (error) throw error;
-
-            toast.success("Referral added successfully");
-
-            setFormData({ referred_name: "", referred_email: "", referred_phone: "", notes: "" });
-            setIsDialogOpen(false);
-            fetchAffiliateAndReferrals();
-        } catch (error) {
-            console.error("Error adding referral:", error);
-            toast.error("Failed to add referral");
-        } finally {
-            setSubmitting(false);
+    const handleSort = (field: SortField) => {
+        if (sortField === field) {
+            setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+        } else {
+            setSortField(field);
+            setSortOrder("asc");
         }
+        setCurrentPage(1);
     };
 
     const filteredReferrals = referrals.filter(
         (r) =>
-            r.referred_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            r.referred_email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            r.referred_phone?.includes(searchQuery)
+            r.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            r.email?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const getStatusBadge = (status: string) => {
-        const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-            pending: "secondary",
-            contacted: "outline",
-            converted: "default",
-            lost: "destructive",
-        };
-        return <Badge variant={variants[status] || "secondary"}>{status}</Badge>;
-    };
+    const sortedReferrals = [...filteredReferrals].sort((a, b) => {
+        let comparison = 0;
+        switch (sortField) {
+            case "name":
+                comparison = (a.fullName || "").localeCompare(b.fullName || "");
+                break;
+            case "email":
+                comparison = a.email.localeCompare(b.email);
+                break;
+            case "date":
+                comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+                break;
+            case "status":
+                comparison = (a.emailVerified ? 1 : 0) - (b.emailVerified ? 1 : 0);
+                break;
+        }
+        return sortOrder === "asc" ? comparison : -comparison;
+    });
+
+    const totalPages = Math.ceil(sortedReferrals.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedReferrals = sortedReferrals.slice(startIndex, endIndex);
 
     return (
         <div className="space-y-6">
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
             >
-                <div>
-                    <h1 className="text-3xl font-display font-bold text-[hsl(var(--foreground))]">
-                        Referrals
-                    </h1>
-                    <p className="text-[hsl(var(--muted-foreground))] mt-1">
-                        Manage and track your referrals
-                    </p>
-                </div>
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogTrigger asChild>
-                        <Button>
-                            <Plus className="h-4 w-4 mr-2" />
-                            Add Referral
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Add New Referral</DialogTitle>
-                            <DialogDescription>
-                                Add a potential buyer you've referred to VJAD Projects
-                            </DialogDescription>
-                        </DialogHeader>
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="name">Full Name *</Label>
-                                <Input
-                                    id="name"
-                                    value={formData.referred_name}
-                                    onChange={(e) => setFormData({ ...formData, referred_name: e.target.value })}
-                                    required
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="email">Email</Label>
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    value={formData.referred_email}
-                                    onChange={(e) => setFormData({ ...formData, referred_email: e.target.value })}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="phone">Phone</Label>
-                                <Input
-                                    id="phone"
-                                    value={formData.referred_phone}
-                                    onChange={(e) => setFormData({ ...formData, referred_phone: e.target.value })}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="notes">Notes</Label>
-                                <Input
-                                    id="notes"
-                                    value={formData.notes}
-                                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                                    placeholder="Any additional information..."
-                                />
-                            </div>
-                            <div className="flex justify-end gap-2">
-                                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                                    Cancel
-                                </Button>
-                                <Button type="submit" disabled={submitting}>
-                                    {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                                    Add Referral
-                                </Button>
-                            </div>
-                        </form>
-                    </DialogContent>
-                </Dialog>
+                <h1 className="text-3xl font-display font-bold text-[hsl(var(--foreground))]">
+                    Referrals
+                </h1>
+                <p className="text-[hsl(var(--muted-foreground))] mt-1">
+                    View all users who signed up using your referral code
+                </p>
             </motion.div>
 
             {/* Search */}
@@ -252,41 +148,116 @@ export default function AffiliateReferrals() {
                         <Users className="h-12 w-12 mx-auto mb-3 opacity-30" />
                         <p className="text-[hsl(var(--muted-foreground))]">No referrals yet</p>
                         <p className="text-sm text-[hsl(var(--muted-foreground))]">
-                            Add your first referral to get started
+                            Share your referral code to start earning
                         </p>
                     </div>
                 ) : (
                     <Table>
                         <TableHeader>
-                            <TableRow>
-                                <TableHead>Name</TableHead>
-                                <TableHead>Contact</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Date Added</TableHead>
-                                <TableHead>Notes</TableHead>
+                            <TableRow className="border-b border-[var(--color-border)] bg-[var(--color-muted)]/30">
+                                <TableHead className="font-semibold text-slate-700 w-12">S/N</TableHead>
+                                <TableHead className="font-semibold text-slate-700">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="-ml-3 h-8 font-semibold hover:!bg-slate-100"
+                                        onClick={() => handleSort("name")}
+                                    >
+                                        Name
+                                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                                    </Button>
+                                </TableHead>
+                                <TableHead className="font-semibold text-slate-700">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="-ml-3 h-8 font-semibold hover:!bg-slate-100"
+                                        onClick={() => handleSort("email")}
+                                    >
+                                        Email
+                                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                                    </Button>
+                                </TableHead>
+                                <TableHead className="font-semibold text-slate-700">Referral Code</TableHead>
+                                <TableHead className="font-semibold text-slate-700">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="-ml-3 h-8 font-semibold hover:!bg-slate-100"
+                                        onClick={() => handleSort("status")}
+                                    >
+                                        Status
+                                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                                    </Button>
+                                </TableHead>
+                                <TableHead className="font-semibold text-slate-700">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="-ml-3 h-8 font-semibold hover:!bg-slate-100"
+                                        onClick={() => handleSort("date")}
+                                    >
+                                        Date Joined
+                                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                                    </Button>
+                                </TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filteredReferrals.map((referral) => (
-                                <TableRow key={referral.id}>
-                                    <TableCell className="font-medium">{referral.referred_name}</TableCell>
-                                    <TableCell>
-                                        <div className="text-sm">
-                                            {referral.referred_email && <div>{referral.referred_email}</div>}
-                                            {referral.referred_phone && (
-                                                <div className="text-[hsl(var(--muted-foreground))]">
-                                                    {referral.referred_phone}
-                                                </div>
-                                            )}
-                                        </div>
+                            {paginatedReferrals.map((referral, index) => (
+                                <TableRow key={referral.id} className="border-b border-[var(--color-border)] hover:bg-[var(--color-muted)]/20 transition-colors">
+                                    <TableCell className="font-semibold text-slate-700 w-12">
+                                        {((currentPage - 1) * itemsPerPage) + index + 1}
                                     </TableCell>
-                                    <TableCell>{getStatusBadge(referral.status)}</TableCell>
-                                    <TableCell>{format(new Date(referral.created_at), "MMM d, yyyy")}</TableCell>
-                                    <TableCell className="max-w-[200px] truncate">{referral.notes || "-"}</TableCell>
+                                    <TableCell className="font-medium text-[var(--color-foreground)]">
+                                        {referral.fullName || "N/A"}
+                                    </TableCell>
+                                    <TableCell className="text-[var(--color-muted-foreground)]">{referral.email}</TableCell>
+                                    <TableCell>
+                                        <code className="px-2 py-1 rounded bg-[var(--color-vjad-navy)]/10 text-[var(--color-vjad-navy)] text-sm font-mono">
+                                            {referral.referralCode}
+                                        </code>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Badge variant={referral.emailVerified ? "default" : "secondary"}>
+                                            {referral.emailVerified ? "Verified" : "Unverified"}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell className="text-[var(--color-muted-foreground)]">{format(new Date(referral.createdAt), "MMM d, yyyy")}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
                     </Table>
+                )}
+                {sortedReferrals.length > itemsPerPage && (
+                    <div className="flex items-center justify-between px-4 py-4 border-t border-[var(--color-border)]">
+                        <div className="text-sm text-[var(--color-muted-foreground)]">
+                            Showing {startIndex + 1} to {Math.min(endIndex, sortedReferrals.length)} of {sortedReferrals.length} referrals
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                                disabled={currentPage === 1}
+                            >
+                                <ChevronLeft className="h-4 w-4" />
+                                Previous
+                            </Button>
+                            <div className="text-sm font-medium">
+                                Page {currentPage} of {totalPages}
+                            </div>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                                disabled={currentPage === totalPages}
+                            >
+                                Next
+                                <ChevronRight className="h-4 w-4 ml-1" />
+                            </Button>
+                        </div>
+                    </div>
                 )}
             </motion.div>
         </div>

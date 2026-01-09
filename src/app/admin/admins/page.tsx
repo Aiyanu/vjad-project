@@ -31,7 +31,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { UserCog, Plus, Search, Loader2, Shield } from "lucide-react";
+import { UserCog, Plus, Search, Loader2, Shield, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 
 interface AdminUser {
@@ -53,9 +53,11 @@ export default function AdminAdmins() {
   const [affiliates, setAffiliates] = useState<AffiliateUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState("");
+  const itemsPerPage = 10;
   // const { toast } = useToast();
 
   useEffect(() => {
@@ -159,6 +161,11 @@ export default function AdminAdmins() {
       a.profiles?.email?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const totalPages = Math.ceil(filteredAdmins.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedAdmins = filteredAdmins.slice(startIndex, endIndex);
+
   return (
     <div className="space-y-6">
       <motion.div
@@ -258,7 +265,8 @@ export default function AdminAdmins() {
         ) : (
           <Table>
             <TableHeader>
-              <TableRow>
+              <TableRow className="bg-slate-50 hover:bg-slate-50">
+                <TableHead className="font-semibold text-slate-700 w-12">S/N</TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
@@ -266,8 +274,11 @@ export default function AdminAdmins() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredAdmins.map((admin) => (
+              {paginatedAdmins.map((admin, idx) => (
                 <TableRow key={admin.id}>
+                  <TableCell className="font-semibold text-slate-700 w-12">
+                    {((currentPage - 1) * itemsPerPage) + idx + 1}
+                  </TableCell>
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
                       {admin.role === "SUPERADMIN" && (
@@ -287,6 +298,36 @@ export default function AdminAdmins() {
               ))}
             </TableBody>
           </Table>
+        )}
+        {filteredAdmins.length > itemsPerPage && (
+          <div className="flex items-center justify-between px-4 py-4 border-t border-[var(--color-border)]">
+            <div className="text-sm text-[var(--color-muted-foreground)]">
+              Showing {startIndex + 1} to {Math.min(endIndex, filteredAdmins.length)} of {filteredAdmins.length} admins
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Previous
+              </Button>
+              <div className="text-sm font-medium">
+                Page {currentPage} of {totalPages}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+          </div>
         )}
       </motion.div>
     </div>

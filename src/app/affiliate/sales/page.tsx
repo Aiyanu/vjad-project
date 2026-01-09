@@ -236,132 +236,13 @@ export default function AffiliateSales() {
                         Report and track your sales
                     </p>
                 </div>
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogTrigger asChild>
-                        <Button>
-                            <Plus className="h-4 w-4 mr-2" />
-                            Report Sale
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-lg">
-                        <DialogHeader>
-                            <DialogTitle>Report a Sale</DialogTitle>
-                            <DialogDescription>
-                                Submit a new sale for verification. Commission: {commissionRate}%
-                            </DialogDescription>
-                        </DialogHeader>
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="buyer_name">Buyer Name *</Label>
-                                    <Input
-                                        id="buyer_name"
-                                        value={formData.buyer_name}
-                                        onChange={(e) => setFormData({ ...formData, buyer_name: e.target.value })}
-                                        required
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="sale_amount">Sale Amount (₦) *</Label>
-                                    <Input
-                                        id="sale_amount"
-                                        type="number"
-                                        value={formData.sale_amount}
-                                        onChange={(e) => setFormData({ ...formData, sale_amount: e.target.value })}
-                                        required
-                                    />
-                                </div>
-                            </div>
-
-                            {formData.sale_amount && (
-                                <div className="p-3 rounded-lg bg-[hsl(var(--primary))]/10 text-[hsl(var(--primary))]">
-                                    <span className="text-sm font-medium">
-                                        Estimated Commission: {formatCurrency(calculatedCommission)}
-                                    </span>
-                                </div>
-                            )}
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="buyer_email">Buyer Email</Label>
-                                    <Input
-                                        id="buyer_email"
-                                        type="email"
-                                        value={formData.buyer_email}
-                                        onChange={(e) => setFormData({ ...formData, buyer_email: e.target.value })}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="buyer_phone">Buyer Phone</Label>
-                                    <Input
-                                        id="buyer_phone"
-                                        value={formData.buyer_phone}
-                                        onChange={(e) => setFormData({ ...formData, buyer_phone: e.target.value })}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label>Project</Label>
-                                    <Select
-                                        value={formData.project_id}
-                                        onValueChange={(value) => setFormData({ ...formData, project_id: value })}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select project" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {projects.map((project) => (
-                                                <SelectItem key={project.id} value={project.id}>
-                                                    {project.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Linked Referral</Label>
-                                    <Select
-                                        value={formData.referral_id}
-                                        onValueChange={(value) => setFormData({ ...formData, referral_id: value })}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select referral" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {referrals.map((referral) => (
-                                                <SelectItem key={referral.id} value={referral.id}>
-                                                    {referral.referred_name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="notes">Notes</Label>
-                                <Textarea
-                                    id="notes"
-                                    value={formData.notes}
-                                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                                    placeholder="Any additional details about the sale..."
-                                />
-                            </div>
-
-                            <div className="flex justify-end gap-2">
-                                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                                    Cancel
-                                </Button>
-                                <Button type="submit" disabled={submitting}>
-                                    {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                                    Report Sale
-                                </Button>
-                            </div>
-                        </form>
-                    </DialogContent>
-                </Dialog>
+                <div className="flex items-center gap-4">
+                    <Button disabled variant="outline">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Reporting disabled
+                    </Button>
+                    <p className="text-sm text-[hsl(var(--muted-foreground))]">Sales/reporting is handled outside the app. Contact support to submit transactions.</p>
+                </div>
             </motion.div>
 
             {/* Search */}
@@ -402,7 +283,8 @@ export default function AffiliateSales() {
                 ) : (
                     <Table>
                         <TableHeader>
-                            <TableRow>
+                            <TableRow className="bg-slate-50 hover:bg-slate-50">
+                                <TableHead className="font-semibold text-slate-700 w-12">S/N</TableHead>
                                 <TableHead>Buyer</TableHead>
                                 <TableHead>Project</TableHead>
                                 <TableHead>Sale Amount</TableHead>
@@ -412,8 +294,11 @@ export default function AffiliateSales() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {filteredSales.map((sale) => (
+                            {filteredSales.map((sale, idx) => (
                                 <TableRow key={sale.id}>
+                                    <TableCell className="font-semibold text-slate-700 w-12">
+                                        {idx + 1}
+                                    </TableCell>
                                     <TableCell>
                                         <div>
                                             <div className="font-medium">{sale.buyer_name}</div>

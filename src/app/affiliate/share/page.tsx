@@ -20,7 +20,7 @@ import { toast } from "sonner";
 
 export default function AffiliateShare() {
     const [referralCode, setReferralCode] = useState("");
-    const [commissionRate, setCommissionRate] = useState(3);
+    const [commissionRate, setCommissionRate] = useState(15);
     const [copied, setCopied] = useState(false);
 
     const referralLink = typeof window !== 'undefined' ? `${window.location.origin}/ref/${referralCode}` : "";
@@ -31,24 +31,19 @@ export default function AffiliateShare() {
 
     const fetchAffiliateData = async () => {
         try {
-            // SUPABASE IMPLEMENTATION (COMMENTED OUT)
-            // const { data: { user } } = await supabase.auth.getUser();
-            // if (!user) return;
-
-            // const { data: affiliate } = await supabase
-            //     .from("affiliates")
-            //     .select("referral_code, commission_rate")
-            //     .eq("user_id", user.id)
-            //     .maybeSingle();
-
-            // if (affiliate) {
-            //     setReferralCode(affiliate.referral_code);
-            //     setCommissionRate(Number(affiliate.commission_rate));
-            // }
-
-            // MOCK DATA FOR DEVELOPMENT
-            setReferralCode("");
-            setCommissionRate(3);
+            // Use centralized API helper to load current user and referral code
+            const api = (await import("@/hooks/useApi")).default();
+            const res = await api.get("/api/user");
+            if (res?.user) {
+                setReferralCode(res.user.referralCode || "");
+                // commission rate not yet stored on user; default 15
+                setCommissionRate(res.user.commissionRate ?? 15);
+                // show a welcome message with name if available
+                // if (res.user.fullName) {
+                //     // eslint-disable-next-line @typescript-eslint/no-floating-promises
+                //     import("sonner").then((m) => m.toast.success(`Welcome back, ${res.user.fullName}`));
+                // }
+            }
         } catch (error) {
             console.error("Error fetching affiliate data:", error);
         }

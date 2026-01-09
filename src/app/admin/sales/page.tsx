@@ -22,7 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { DollarSign, Search, Loader2, CheckCircle, XCircle } from "lucide-react";
+import { DollarSign, Search, Loader2, CheckCircle, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
 // import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
@@ -48,7 +48,9 @@ export default function AdminSales() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [currentPage, setCurrentPage] = useState(1);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const itemsPerPage = 10;
   // const { toast } = useToast();
 
   useEffect(() => {
@@ -138,6 +140,11 @@ export default function AdminSales() {
 
     return matchesSearch && matchesStatus;
   });
+
+  const totalPages = Math.ceil(filteredSales.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedSales = filteredSales.slice(startIndex, endIndex);
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
@@ -229,7 +236,8 @@ export default function AdminSales() {
         ) : (
           <Table>
             <TableHeader>
-              <TableRow>
+              <TableRow className="bg-slate-50 hover:bg-slate-50">
+                <TableHead className="font-semibold text-slate-700 w-12">S/N</TableHead>
                 <TableHead>Affiliate</TableHead>
                 <TableHead>Buyer</TableHead>
                 <TableHead>Project</TableHead>
@@ -241,8 +249,11 @@ export default function AdminSales() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredSales.map((sale) => (
+              {paginatedSales.map((sale, idx) => (
                 <TableRow key={sale.id}>
+                  <TableCell className="font-semibold text-slate-700 w-12">
+                    {((currentPage - 1) * itemsPerPage) + idx + 1}
+                  </TableCell>
                   <TableCell>
                     <div>
                       <div className="font-medium">
@@ -306,6 +317,36 @@ export default function AdminSales() {
               ))}
             </TableBody>
           </Table>
+        )}
+        {filteredSales.length > itemsPerPage && (
+          <div className="flex items-center justify-between px-4 py-4 border-t border-[var(--color-border)]">
+            <div className="text-sm text-[var(--color-muted-foreground)]">
+              Showing {startIndex + 1} to {Math.min(endIndex, filteredSales.length)} of {filteredSales.length} sales
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Previous
+              </Button>
+              <div className="text-sm font-medium">
+                Page {currentPage} of {totalPages}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+          </div>
         )}
       </motion.div>
     </div>

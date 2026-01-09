@@ -1,15 +1,18 @@
+// src/app/auth/page.tsx (or wherever your Auth component lives)
 "use client";
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-// import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Building2, Loader2 } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Loader2 } from "lucide-react";
 import { z } from "zod";
+import { useAppDispatch } from "@/store/hooks";
+import { setToken, setUser } from "@/store/authSlice";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -18,64 +21,128 @@ const loginSchema = z.object({
     password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-const registerSchema = z.object({
-    fullName: z.string().min(2, "Full name must be at least 2 characters").max(100, "Full name is too long"),
-    email: z.string().email("Please enter a valid email address"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
-    confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-});
+const registerSchema = z
+    .object({
+        fullName: z.string().min(2, "Full name must be at least 2 characters").max(100, "Full name is too long"),
+        email: z.string().email("Please enter a valid email address"),
+        password: z.string().min(8, "Password must be at least 8 characters"),
+        confirmPassword: z.string(),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+        message: "Passwords don't match",
+        path: ["confirmPassword"],
+    });
 
 type AuthMode = "login" | "register";
+type RegistrationStep = 1 | 2 | 3;
 
 const Auth = () => {
     const searchParams = useSearchParams();
+    const router = useRouter();
+    const dispatch = useAppDispatch();
     const initialMode = searchParams?.get("mode") === "register" ? "register" : "login";
 
     const [mode, setMode] = useState<AuthMode>(initialMode);
+    const [registrationStep, setRegistrationStep] = useState<RegistrationStep>(1);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [referrerName, setReferrerName] = useState<string | null>(null);
+
+    // Bank details for registration
+    const [banks, setBanks] = useState<{ name: string; code: string }[]>([]);
+    const [bankCode, setBankCode] = useState<string>("");
+    const [bankName, setBankName] = useState<string>("");
+    const [accountNumber, setAccountNumber] = useState<string>("");
+    // const [accountName, setAccountName] = useState<string>("");
+    // const [accountVerified, setAccountVerified] = useState(false);
+    // const [verifyingAccount, setVerifyingAccount] = useState(false);
 
     const [formData, setFormData] = useState({
         fullName: "",
         email: "",
         password: "",
         confirmPassword: "",
+        referralCode: "",
     });
 
-    const router = useRouter();
-
-    // Check if user is already logged in
+    // Save referral if present in URL and fetch referrer info
     useEffect(() => {
-        const checkUser = async () => {
-            // const { data: { session } } = await supabase.auth.getSession();
-            // if (session) {
-            //     router.push("/affiliate/dashboard");
-            // }
+        const ref = searchParams?.get("ref");
+        if (ref) {
+            try {
+                localStorage.setItem("vjad_ref", ref);
+                // Populate the referral code input field
+                setFormData((prev) => ({ ...prev, referralCode: ref }));
+                // Fetch referrer name for display
+                fetchReferrerInfo(ref);
+            } catch {
+                // ignore storage failures (private mode)
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // Load banks when in register mode
+    useEffect(() => {
+        if (mode !== "register") return;
+        const loadBanks = async () => {
+            try {
+                const res = await fetch("/api/banks");
+                const json = await res.json();
+                setBanks(json?.banks || []);
+            } catch (e) {
+                console.warn("Could not load banks", e);
+            }
         };
-        checkUser();
+        loadBanks();
+    }, [mode]);
 
-        // const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-        //     if (session) {
-        //         router.push("/affiliate/dashboard");
-        //     }
-        // });
-
-        // return () => subscription.unsubscribe();
-    }, [router]);
+    const fetchReferrerInfo = async (referralCode: string) => {
+        try {
+            const res = await fetch(`/api/user?referralCode=${encodeURIComponent(referralCode)}`);
+            const data = await res.json();
+            if (data?.user?.fullName) {
+                setReferrerName(data.user.fullName);
+            }
+        } catch (error) {
+            console.error("Failed to fetch referrer info:", error);
+        }
+    };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
-        // Clear error when user starts typing
-        if (errors[name]) {
-            setErrors((prev) => ({ ...prev, [name]: "" }));
-        }
+        if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
     };
+
+    // const verifyAccount = async (acctNumber: string, code: string) => {
+    //     if (!code || acctNumber.length !== 10) return;
+    //     setVerifyingAccount(true);
+    //     setAccountVerified(false);
+    //     setAccountName("");
+    //     try {
+    //         const res = await fetch("/api/verify-account", {
+    //             method: "POST",
+    //             headers: { "Content-Type": "application/json" },
+    //             body: JSON.stringify({ accountNumber: acctNumber, bankCode: code }),
+    //         });
+    //         const json = await res.json();
+    //         if (!res.ok || json.error) {
+    //             toast.error(json.error || "Could not verify account");
+    //             return;
+    //         }
+    //         setAccountName(json.accountName);
+    //         setAccountVerified(true);
+    //         toast.success(`Verified: ${json.accountName}`);
+    //     } catch (err) {
+    //         console.error(err);
+    //         toast.error("Verification failed. Please try again.");
+    //     } finally {
+    //         setVerifyingAccount(false);
+    //     }
+    // };
 
     const validateForm = () => {
         try {
@@ -87,20 +154,14 @@ const Auth = () => {
             setErrors({});
             return true;
         } catch (error) {
-            // Zod throws ZodError which has `issues` (not `errors`)
             if (error instanceof z.ZodError) {
                 const newErrors: Record<string, string> = {};
                 error.issues.forEach((issue) => {
-                    // issue.path is an array (e.g. ['email']) — take the first path segment
                     const key = issue.path && issue.path.length > 0 ? String(issue.path[0]) : undefined;
-                    if (key) {
-                        // Only set the first message per field (keeps behaviour simple)
-                        if (!newErrors[key]) newErrors[key] = issue.message;
-                    }
+                    if (key && !newErrors[key]) newErrors[key] = issue.message;
                 });
                 setErrors(newErrors);
             } else {
-                // unexpected error; clear errors to be safe
                 setErrors({});
             }
             return false;
@@ -109,72 +170,133 @@ const Auth = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
         if (!validateForm()) return;
 
         setIsLoading(true);
 
         try {
             if (mode === "login") {
-                // const { error } = await supabase.auth.signInWithPassword({
-                //     email: formData.email,
-                //     password: formData.password,
-                // });
-
-                // if (error) {
-                //     if (error.message.includes("Invalid login credentials")) {
-                //         toast.error("Login failed", {
-                //             description: "Invalid email or password. Please try again.",
-                //         });
-                //     } else {
-                //         toast.error("Login failed", {
-                //             description: error.message,
-                //         });
-                //     }
-                //     return;
-                // }
-
-                toast.success("Welcome back!", {
-                    description: "You have successfully logged in.",
+                const res = await fetch("/api/auth/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email: formData.email, password: formData.password }),
                 });
+
+                const json = await res.json().catch(() => ({}));
+
+                if (!res.ok) {
+                    // If email not verified, redirect to verification page
+                    if (json?.code === "EMAIL_NOT_VERIFIED") {
+                        toast.info("Email verification required", {
+                            description: "Check your inbox for the verification link",
+                        });
+                        router.push(`/auth/verify-email?email=${encodeURIComponent(json.email)}`);
+                        return;
+                    }
+                    toast.error(json?.error || "Login failed");
+                    return;
+                }
+
+                // Save authToken in session store (only token); then fetch user
+                try {
+                    dispatch(setToken(json?.authToken ?? null));
+                } catch (e) {
+                    console.error("Failed to save token:", e);
+                }
+
+                // Fetch user using session cookie to avoid storing user in response
+                let fetchedUser: any = null;
+                try {
+                    const userRes = await fetch("/api/user", { credentials: "same-origin" });
+                    const userJson = await userRes.json().catch(() => ({}));
+                    if (userRes.ok && userJson?.user) {
+                        fetchedUser = userJson.user;
+                        dispatch(setUser(fetchedUser));
+                    }
+                } catch (e) {
+                    console.error("Failed to fetch user after login:", e);
+                }
+
+                // Personalized welcome
+                const displayName = fetchedUser?.fullName || fetchedUser?.email || "";
+                toast.success(displayName ? `Welcome back, ${displayName}` : "Welcome back!", { description: "Redirecting to your dashboard…" });
+
+                // navigate based on role
+                const role = fetchedUser?.role ?? "affiliate";
+                if (role === "admin" || role === "super_admin") {
+                    router.push("/admin");
+                } else {
+                    router.push("/affiliate");
+                }
             } else {
-                // Get referral code from cookie/localStorage if present
-                const referralCode = typeof window !== "undefined" ? localStorage.getItem("vjad_ref") || undefined : undefined;
+                // registration
+                // Use form input first, fallback to localStorage if input is empty
+                const referralCode = formData.referralCode ||
+                    (typeof window !== "undefined" ? localStorage.getItem("vjad_ref") || undefined : undefined);
 
-                // const { error } = await supabase.auth.signUp({
-                //     email: formData.email,
-                //     password: formData.password,
-                //     options: {
-                //         emailRedirectTo: `${typeof window !== "undefined" ? window.location.origin : ""}/`,
-                //         data: {
-                //             full_name: formData.fullName,
-                //             referred_by: referralCode,
-                //         },
-                //     },
-                // });
-
-                // if (error) {
-                //     if (error.message.includes("already registered")) {
-                //         toast.error("Account exists", {
-                //             description: "An account with this email already exists. Please login instead.",
-                //         });
-                //         setMode("login");
-                //     } else {
-                //         toast.error("Registration failed", {
-                //             description: error.message,
-                //         });
-                //     }
-                //     return;
-                // }
-
-                toast.success("Registration successful!", {
-                    description: "Welcome to VJAD Projects! You can now access your affiliate dashboard.",
+                const res = await fetch("/api/auth/register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        fullName: formData.fullName,
+                        email: formData.email,
+                        password: formData.password,
+                        referralCode,
+                        bankName,
+                        bankCode,
+                        accountNumber,
+                        // accountName,
+                    }),
                 });
+
+                const json = await res.json().catch(() => ({}));
+
+                if (!res.ok) {
+                    // handle duplicate
+                    if (res.status === 409) {
+                        toast.error(json?.error || "Account already exists. Try logging in.");
+                        setMode("login");
+                        return;
+                    }
+                    toast.error(json?.error || "Registration failed");
+                    return;
+                }
+
+                // Successfully registered - redirect to verify email page
+                toast.success("Registration successful", {
+                    description: "Please check your email to verify your account.",
+                });
+
+                // Get verification URL from response (in dev) or construct it
+                const verificationToken = json?.verificationUrl
+                    ? new URL(json.verificationUrl).searchParams.get("token")
+                    : null;
+
+                // If the backend returned a referral code for the new user, store and show it
+                const myReferral = json?.user?.referralCode ?? null;
+                if (myReferral) {
+                    try {
+                        localStorage.setItem("vjad_my_ref", myReferral);
+                    } catch {
+                        // ignore storage errors
+                    }
+                    toast.success(`Your referral code: ${myReferral}`);
+                }
+
+                if (verificationToken) {
+                    // Redirect to verify email page with token
+                    router.push(`/auth/verify-email?token=${encodeURIComponent(verificationToken)}&email=${encodeURIComponent(formData.email)}`);
+                } else {
+                    // Fallback: show message and let user request resend
+                    toast.info("Check your email for the verification link", {
+                        description: "You can request a new link if needed.",
+                    });
+                    setFormData({ fullName: "", email: "", password: "", confirmPassword: "", referralCode: "" });
+                }
             }
-        } catch (error) {
-            toast.error("An error occurred", {
-                description: "Please try again later.",
-            });
+        } catch (err) {
+            console.error(err);
+            toast.error("An error occurred. Please try again later.");
         } finally {
             setIsLoading(false);
         }
@@ -184,17 +306,52 @@ const Auth = () => {
         const newMode = mode === "login" ? "register" : "login";
         setMode(newMode);
         setErrors({});
-        setFormData({
-            fullName: "",
-            email: "",
-            password: "",
-            confirmPassword: "",
-        });
+        setReferrerName(null);
+        setRegistrationStep(1);
+        setFormData({ fullName: "", email: "", password: "", confirmPassword: "", referralCode: "" });
+        setBankCode("");
+        setBankName("");
+        setAccountNumber("");
+        // setAccountName("");
+        // setAccountVerified(false);
 
-        // Update URL to reflect the new mode
         const params = new URLSearchParams(searchParams?.toString() ?? "");
         params.set("mode", newMode);
         router.push(`?${params.toString()}`, { scroll: false });
+    };
+
+    const handleNextStep = () => {
+        // Validate current step before proceeding
+        if (registrationStep === 1) {
+            // Validate personal info
+            try {
+                registerSchema.parse(formData);
+                setErrors({});
+                setRegistrationStep(2);
+            } catch (error) {
+                if (error instanceof z.ZodError) {
+                    const newErrors: Record<string, string> = {};
+                    error.issues.forEach((issue) => {
+                        const key = issue.path && issue.path.length > 0 ? String(issue.path[0]) : undefined;
+                        if (key && !newErrors[key]) newErrors[key] = issue.message;
+                    });
+                    setErrors(newErrors);
+                }
+            }
+        } else if (registrationStep === 2) {
+            // Validate bank details (no verification required)
+            if (!bankCode || accountNumber.length !== 10) {
+                toast.error("Please select a bank and enter a 10-digit account number.");
+                return;
+            }
+            setRegistrationStep(3);
+        }
+    };
+
+    const handlePrevStep = () => {
+        if (registrationStep > 1) {
+            setRegistrationStep((prev) => (prev - 1) as RegistrationStep);
+        }
     };
 
     return (
@@ -206,8 +363,6 @@ const Auth = () => {
                 <div className="relative z-10 flex flex-col justify-center px-12 xl:px-20">
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
                         <Link href="/" className="flex items-center gap-3 mb-12">
-                            {/* <Building2 className="h-10 w-10 text-white" />
-                            <span className="text-2xl font-display font-bold text-white">VJAD Projects</span> */}
                             <Image src={"/vijad-projects.png"} width={150} height={100} alt="vjad" />
                         </Link>
 
@@ -223,7 +378,7 @@ const Auth = () => {
 
                         <div className="space-y-4">
                             {[
-                                "Earn up to 3% commission on every sale",
+                                "Earn up to 15% commission on every sale",
                                 "Access exclusive property listings",
                                 "Real-time tracking and analytics",
                                 "Dedicated affiliate support team",
@@ -237,7 +392,6 @@ const Auth = () => {
                     </motion.div>
                 </div>
 
-                {/* Decorative elements */}
                 <div className="absolute -bottom-20 -right-20 w-80 h-80 rounded-full bg-white/5 blur-3xl" />
                 <div className="absolute top-20 -left-10 w-40 h-40 rounded-full bg-vjad-gold/10 blur-2xl" />
             </div>
@@ -245,80 +399,215 @@ const Auth = () => {
             {/* Right Panel - Auth Form */}
             <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-background">
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-md">
-                    {/* Mobile logo */}
                     <Link href="/" className="flex lg:hidden items-center gap-2 mb-8">
-                        {/* <Building2 className="h-8 w-8 text-primary" />
-                        <span className="text-xl font-display font-bold">VJAD Projects</span> */}
                         <Image src={"/vijad-projects-dark.png"} width={130} height={100} alt="vjad" />
-
                     </Link>
 
                     <div className="mb-8">
                         <h2 className="text-3xl font-display font-bold text-foreground mb-2">{mode === "login" ? "Welcome back" : "Create your account"}</h2>
-                        <p className="text-muted-foreground">
-                            {mode === "login" ? "Enter your credentials to access your dashboard" : "Start your journey as a VJAD affiliate partner"}
-                        </p>
+                        <p className="text-muted-foreground">{mode === "login" ? "Enter your credentials to access your dashboard" : "Start your journey as a VJAD affiliate partner"}</p>
+                        {mode === "register" && referrerName && (
+                            <div className="mt-4 p-3 rounded-lg bg-vjad-gold/10 border border-vjad-gold/20">
+                                <p className="text-sm text-vjad-gold font-medium">
+                                    ✨ Referred by <span className="font-bold">{referrerName}</span>
+                                </p>
+                            </div>
+                        )}
+                        {/* Registration Progress Indicator */}
+                        {mode === "register" && (
+                            <div className="mt-6 flex items-center justify-center gap-2">
+                                <div className={`h-2 rounded-full transition-all ${registrationStep >= 1 ? "bg-primary w-16" : "bg-gray-200 w-12"}`} />
+                                <div className={`h-2 rounded-full transition-all ${registrationStep >= 2 ? "bg-primary w-16" : "bg-gray-200 w-12"}`} />
+                                <div className={`h-2 rounded-full transition-all ${registrationStep >= 3 ? "bg-primary w-16" : "bg-gray-200 w-12"}`} />
+                            </div>
+                        )}
                     </div>
 
                     <AnimatePresence mode="wait">
                         <motion.form key={mode} initial={{ opacity: 0, x: mode === "login" ? -20 : 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: mode === "login" ? 20 : -20 }} transition={{ duration: 0.3 }} onSubmit={handleSubmit} className="space-y-5">
-                            {mode === "register" && (
-                                <div className="space-y-2">
-                                    <Label htmlFor="fullName">Full Name</Label>
-                                    <div className="relative">
-                                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                                        <Input id="fullName" name="fullName" type="text" placeholder="John Doe" value={formData.fullName} onChange={handleInputChange} className={`pl-10 h-12 ${errors.fullName ? "border-destructive" : ""}`} />
+
+                            {/* Step 1: Personal Information (Registration) */}
+                            {mode === "register" && registrationStep === 1 && (
+                                <>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="fullName">Full Name</Label>
+                                        <div className="relative">
+                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                            <Input id="fullName" name="fullName" type="text" placeholder="John Doe" value={formData.fullName} onChange={handleInputChange} className={`pl-10 h-12 ${errors.fullName ? "border-destructive" : ""}`} />
+                                        </div>
+                                        {errors.fullName && <p className="text-sm text-destructive">{errors.fullName}</p>}
                                     </div>
-                                    {errors.fullName && <p className="text-sm text-destructive">{errors.fullName}</p>}
-                                </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="email">Email Address</Label>
+                                        <div className="relative">
+                                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                            <Input id="email" name="email" type="email" placeholder="you@example.com" value={formData.email} onChange={handleInputChange} className={`pl-10 h-12 ${errors.email ? "border-destructive" : ""}`} />
+                                        </div>
+                                        {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="password">Password</Label>
+                                        <div className="relative">
+                                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                            <Input id="password" name="password" type={showPassword ? "text" : "password"} placeholder="Create a strong password" value={formData.password} onChange={handleInputChange} className={`pl-10 pr-10 h-12 ${errors.password ? "border-destructive" : ""}`} />
+                                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                                                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                            </button>
+                                        </div>
+                                        {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="confirmPassword">Confirm Password</Label>
+                                        <div className="relative">
+                                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                            <Input id="confirmPassword" name="confirmPassword" type={showConfirmPassword ? "text" : "password"} placeholder="Confirm your password" value={formData.confirmPassword} onChange={handleInputChange} className={`pl-10 pr-10 h-12 ${errors.confirmPassword ? "border-destructive" : ""}`} />
+                                            <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                                                {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                            </button>
+                                        </div>
+                                        {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword}</p>}
+                                    </div>
+
+                                    <Button type="button" onClick={handleNextStep} className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-semibold text-base">
+                                        Next Step <ArrowRight className="ml-2 h-5 w-5" />
+                                    </Button>
+                                </>
                             )}
 
-                            <div className="space-y-2">
-                                <Label htmlFor="email">Email Address</Label>
-                                <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                                    <Input id="email" name="email" type="email" placeholder="you@example.com" value={formData.email} onChange={handleInputChange} className={`pl-10 h-12 ${errors.email ? "border-destructive" : ""}`} />
-                                </div>
-                                {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="password">Password</Label>
-                                <div className="relative">
-                                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                                    <Input id="password" name="password" type={showPassword ? "text" : "password"} placeholder={mode === "login" ? "Enter your password" : "Create a strong password"} value={formData.password} onChange={handleInputChange} className={`pl-10 pr-10 h-12 ${errors.password ? "border-destructive" : ""}`} />
-                                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                                        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                                    </button>
-                                </div>
-                                {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
-                            </div>
-
-                            {mode === "register" && (
-                                <div className="space-y-2">
-                                    <Label htmlFor="confirmPassword">Confirm Password</Label>
-                                    <div className="relative">
-                                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                                        <Input id="confirmPassword" name="confirmPassword" type={showConfirmPassword ? "text" : "password"} placeholder="Confirm your password" value={formData.confirmPassword} onChange={handleInputChange} className={`pl-10 pr-10 h-12 ${errors.confirmPassword ? "border-destructive" : ""}`} />
-                                        <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                                            {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                                        </button>
+                            {/* Step 2: Bank Details (Registration) */}
+                            {mode === "register" && registrationStep === 2 && (
+                                <>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="bankName">Bank</Label>
+                                        <Select
+                                            value={bankCode}
+                                            onValueChange={(code) => {
+                                                const bank = banks.find((b) => b.code === code);
+                                                setBankCode(code);
+                                                setBankName(bank?.name || "");
+                                            }}
+                                        >
+                                            <SelectTrigger className="w-full h-12">
+                                                <SelectValue placeholder="Select your bank" />
+                                            </SelectTrigger>
+                                            <SelectContent className="border-0">
+                                                {banks.map((b, idx) => (
+                                                    <SelectItem key={idx} value={b.code} className="hover:bg-gray-100 focus:bg-gray-100">{b.name}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </div>
-                                    {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword}</p>}
-                                </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="accountNumber">Account Number</Label>
+                                        <Input
+                                            id="accountNumber"
+                                            name="accountNumber"
+                                            inputMode="numeric"
+                                            maxLength={10}
+                                            value={accountNumber}
+                                            onChange={(e) => {
+                                                const v = e.target.value.replace(/\D/g, "");
+                                                setAccountNumber(v);
+                                            }}
+                                            placeholder="Enter 10-digit account number"
+                                            className="h-12"
+                                        />
+                                    </div>
+
+                                    <div className="flex gap-2">
+                                        <Button type="button" onClick={handlePrevStep} variant="outline" className="flex-1 h-12 font-semibold">
+                                            Back
+                                        </Button>
+                                        <Button type="button" onClick={handleNextStep} className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white font-semibold">
+                                            Next <ArrowRight className="ml-2 h-5 w-5" />
+                                        </Button>
+                                    </div>
+                                </>
                             )}
 
+                            {/* Step 3: Referral Code (Registration) */}
+                            {mode === "register" && registrationStep === 3 && (
+                                <>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <Label htmlFor="referralCode">Referral Code</Label>
+                                            <span className="text-xs text-muted-foreground">Optional</span>
+                                        </div>
+                                        <Input
+                                            id="referralCode"
+                                            name="referralCode"
+                                            type="text"
+                                            placeholder="e.g., REF12345678"
+                                            value={formData.referralCode}
+                                            onChange={(e) => {
+                                                handleInputChange(e);
+                                                if (e.target.value) {
+                                                    fetchReferrerInfo(e.target.value);
+                                                } else {
+                                                    setReferrerName(null);
+                                                }
+                                            }}
+                                            className={`h-12 ${errors.referralCode ? "border-destructive" : ""}`}
+                                        />
+                                        {referrerName && (
+                                            <p className="text-sm text-vjad-gold font-medium">✨ Referred by {referrerName}</p>
+                                        )}
+                                        {errors.referralCode && <p className="text-sm text-destructive">{errors.referralCode}</p>}
+                                        <p className="text-xs text-muted-foreground">
+                                            If someone referred you, enter their code here. You can skip this step if you don't have one.
+                                        </p>
+                                    </div>
+
+                                    <div className="flex gap-2">
+                                        <Button type="button" onClick={handlePrevStep} variant="outline" className="flex-1 h-12 font-semibold">
+                                            Back
+                                        </Button>
+                                        <Button type="submit" disabled={isLoading} className="flex-1 h-12 bg-primary hover:bg-primary/90 text-white font-semibold">
+                                            {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : (<><span>Complete</span><ArrowRight className="ml-2 h-5 w-5" /></>)}
+                                        </Button>
+                                    </div>
+                                </>
+                            )}
+
+                            {/* Login Form */}
                             {mode === "login" && (
-                                <div className="flex justify-end">
-                                    <Link href="/auth/forgot-password" className="text-sm text-primary hover:underline">
-                                        Forgot password?
-                                    </Link>
-                                </div>
-                            )}
+                                <>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="email">Email Address</Label>
+                                        <div className="relative">
+                                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                            <Input id="email" name="email" type="email" placeholder="you@example.com" value={formData.email} onChange={handleInputChange} className={`pl-10 h-12 ${errors.email ? "border-destructive" : ""}`} />
+                                        </div>
+                                        {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+                                    </div>
 
-                            <Button type="submit" disabled={isLoading} className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-semibold text-base">
-                                {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : (<><span>{mode === "login" ? "Sign In" : "Create Account"}</span><ArrowRight className="ml-2 h-5 w-5" /></>)}
-                            </Button>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="password">Password</Label>
+                                        <div className="relative">
+                                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                            <Input id="password" name="password" type={showPassword ? "text" : "password"} placeholder="Enter your password" value={formData.password} onChange={handleInputChange} className={`pl-10 pr-10 h-12 ${errors.password ? "border-destructive" : ""}`} />
+                                            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                                                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                                            </button>
+                                        </div>
+                                        {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+                                    </div>
+
+                                    <div className="flex justify-end">
+                                        <Link href="/auth/forgot-password" className="text-sm text-primary hover:underline">
+                                            Forgot password?
+                                        </Link>
+                                    </div>
+
+                                    <Button type="submit" disabled={isLoading} className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-semibold text-base">
+                                        {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : (<><span>Sign In</span><ArrowRight className="ml-2 h-5 w-5" /></>)}
+                                    </Button>
+                                </>
+                            )}
                         </motion.form>
                     </AnimatePresence>
 

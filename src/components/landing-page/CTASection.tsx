@@ -2,9 +2,11 @@
 import { motion } from "motion/react";
 import { ArrowRight, CheckCircle, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+
 
 const benefits = [
-    "Up to 5% commission on every sale",
+    "Up to 15% commission on every sale",
     "Real-time tracking dashboard",
     "Dedicated support team",
     "Training and marketing materials",
@@ -13,6 +15,7 @@ const benefits = [
 ];
 
 export function CTASection() {
+    const router = useRouter()
     return (
         <section className="py-24 bg-background relative overflow-hidden">
             {/* Background Elements */}
@@ -71,6 +74,7 @@ export function CTASection() {
                         viewport={{ once: true }}
                         transition={{ duration: 0.6, delay: 0.3 }}
                         className="flex flex-col sm:flex-row gap-4 justify-center"
+                        onClick={() => router.push("/auth?mode=register")}
                     >
                         <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-10 py-6 group">
                             Register as Affiliate
