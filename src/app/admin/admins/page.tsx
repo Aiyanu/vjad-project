@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
-// import { supabase } from "@/lib/supabase/client";
-
+import { useAppSelector } from "@/store/hooks";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,29 +36,32 @@ import { format } from "date-fns";
 
 interface AdminUser {
   id: string;
-  user_id: string;
+  email: string;
+  fullName: string | null;
   role: string;
-  created_at: string;
-  profiles?: { full_name: string | null; email: string | null } | null;
+  createdAt: string;
 }
 
-interface AffiliateUser {
-  id: string;
-  user_id: string;
-  profiles?: { full_name: string | null; email: string | null } | null;
+interface NewAdminForm {
+  fullName: string;
+  email: string;
+  password: string;
 }
 
 export default function AdminAdmins() {
+  const currentUser = useAppSelector((state) => state.auth.user);
   const [admins, setAdmins] = useState<AdminUser[]>([]);
-  const [affiliates, setAffiliates] = useState<AffiliateUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState("");
+  const [formData, setFormData] = useState<NewAdminForm>({
+    fullName: "",
+    email: "",
+    password: "",
+  });
   const itemsPerPage = 10;
-  // const { toast } = useToast();
 
   useEffect(() => {
     fetchData();
@@ -66,56 +69,17 @@ export default function AdminAdmins() {
 
   const fetchData = async () => {
     try {
-      // SUPABASE IMPLEMENTATION (COMMENTED OUT)
-      // // Fetch admins and superadmins
-      // const { data: adminRoles, error: adminError } = await supabase
-      //   .from("user_roles")
-      //   .select("id, user_id, role, created_at")
-      //   .in("role", ["ADMIN", "SUPERADMIN"])
-      //   .order("created_at", { ascending: false });
+      const res = await fetch("/api/admin/admins");
+      const data = await res.json();
 
-      // if (adminError) throw adminError;
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to fetch admins");
+      }
 
-      // // Fetch profiles for admin users
-      // const adminUserIds = (adminRoles || []).map(a => a.user_id);
-      // const { data: profilesData } = await supabase
-      //   .from("profiles")
-      //   .select("id, full_name, email")
-      //   .in("id", adminUserIds);
-
-      // const adminsWithProfiles = (adminRoles || []).map(role => ({
-      //   ...role,
-      //   profiles: profilesData?.find(p => p.id === role.user_id) || null,
-      // }));
-      // setAdmins(adminsWithProfiles);
-
-      // // Fetch affiliates who are not admins
-      // const { data: affiliatesData } = await supabase
-      //   .from("affiliates")
-      //   .select("id, user_id");
-
-      // const nonAdminAffiliates = (affiliatesData || []).filter(
-      //   a => !adminUserIds.includes(a.user_id)
-      // );
-
-      // // Get profiles for non-admin affiliates
-      // const nonAdminUserIds = nonAdminAffiliates.map(a => a.user_id);
-      // const { data: affProfilesData } = await supabase
-      //   .from("profiles")
-      //   .select("id, full_name, email")
-      //   .in("id", nonAdminUserIds);
-
-      // const affiliatesWithProfiles = nonAdminAffiliates.map(aff => ({
-      //   ...aff,
-      //   profiles: affProfilesData?.find(p => p.id === aff.user_id) || null,
-      // }));
-      // setAffiliates(affiliatesWithProfiles);
-
-      // MOCK DATA FOR DEVELOPMENT
-      setAdmins([]);
-      setAffiliates([]);
+      setAdmins(data.admins || []);
     } catch (error) {
       console.error("Error fetching data:", error);
+      toast.error("Failed to load admins");
     } finally {
       setLoading(false);
     }
@@ -123,33 +87,33 @@ export default function AdminAdmins() {
 
   const handleAddAdmin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedUserId) return;
+
+    if (!formData.fullName || !formData.email || !formData.password) {
+      toast.error("Please fill in all fields");
+      return;
+    }
 
     setSubmitting(true);
     try {
-      // SUPABASE IMPLEMENTATION (COMMENTED OUT)
-      // const { error } = await supabase.from("user_roles").insert({
-      //   user_id: selectedUserId,
-      //   role: "ADMIN",
-      // });
+      const res = await fetch("/api/admin/admins", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
-      // if (error) throw error;
+      const data = await res.json();
 
-      // toast({
-      //   title: "Success",
-      //   description: "Admin added successfully",
-      // });
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to add admin");
+      }
 
-      setSelectedUserId("");
+      toast.success("Admin added successfully");
+      setFormData({ fullName: "", email: "", password: "" });
       setIsDialogOpen(false);
       fetchData();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error adding admin:", error);
-      // toast({
-      //   title: "Error",
-      //   description: "Failed to add admin. User may already be an admin.",
-      //   variant: "destructive",
-      // });
+      toast.error(error.message || "Failed to add admin");
     } finally {
       setSubmitting(false);
     }
@@ -157,9 +121,11 @@ export default function AdminAdmins() {
 
   const filteredAdmins = admins.filter(
     (a) =>
-      a.profiles?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      a.profiles?.email?.toLowerCase().includes(searchQuery.toLowerCase())
+      a.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.email?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const isSuperAdmin = currentUser?.role === "super_admin";
 
   const totalPages = Math.ceil(filteredAdmins.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -181,53 +147,75 @@ export default function AdminAdmins() {
             Manage admin users (Superadmin only)
           </p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Admin
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add New Admin</DialogTitle>
-              <DialogDescription>
-                Promote an affiliate to admin role
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleAddAdmin} className="space-y-4">
-              <div className="space-y-2">
-                <Label>Select User</Label>
-                <Select value={selectedUserId} onValueChange={setSelectedUserId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select an affiliate" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {affiliates.map((affiliate) => (
-                      <SelectItem key={affiliate.user_id} value={affiliate.user_id}>
-                        {affiliate.profiles?.full_name || affiliate.profiles?.email || "Unknown"}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {affiliates.length === 0 && (
-                  <p className="text-sm text-[hsl(var(--muted-foreground))]">
-                    No eligible affiliates to promote
-                  </p>
-                )}
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={submitting || !selectedUserId}>
-                  {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  Add Admin
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
+        {isSuperAdmin && (
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Admin
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add New Admin</DialogTitle>
+                <DialogDescription>
+                  Create a new admin user account
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleAddAdmin} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Full Name</Label>
+                  <Input
+                    id="fullName"
+                    value={formData.fullName}
+                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                    placeholder="John Doe"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email Address</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="admin@example.com"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    placeholder="Minimum 8 characters"
+                    minLength={8}
+                    required
+                  />
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setIsDialogOpen(false);
+                      setFormData({ fullName: "", email: "", password: "" });
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={submitting}>
+                    {submitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                    Add Admin
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        )}
       </motion.div>
 
       {/* Search */}
@@ -281,19 +269,19 @@ export default function AdminAdmins() {
                   </TableCell>
                   <TableCell className="font-medium">
                     <div className="flex items-center gap-2">
-                      {admin.role === "SUPERADMIN" && (
+                      {admin.role === "super_admin" && (
                         <Shield className="h-4 w-4 text-[hsl(var(--vjad-gold))]" />
                       )}
-                      {admin.profiles?.full_name || "N/A"}
+                      {admin.fullName || "N/A"}
                     </div>
                   </TableCell>
-                  <TableCell>{admin.profiles?.email || "N/A"}</TableCell>
+                  <TableCell>{admin.email || "N/A"}</TableCell>
                   <TableCell>
-                    <Badge variant={admin.role === "SUPERADMIN" ? "destructive" : "default"}>
-                      {admin.role === "SUPERADMIN" ? "Super Admin" : "Admin"}
+                    <Badge variant={admin.role === "super_admin" ? "destructive" : "default"}>
+                      {admin.role === "super_admin" ? "Super Admin" : "Admin"}
                     </Badge>
                   </TableCell>
-                  <TableCell>{format(new Date(admin.created_at), "MMM d, yyyy")}</TableCell>
+                  <TableCell>{format(new Date(admin.createdAt), "MMM d, yyyy")}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
