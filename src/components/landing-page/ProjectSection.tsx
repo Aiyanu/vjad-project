@@ -6,36 +6,40 @@ import { Button } from "@/components/ui/button";
 const projects = [
     {
         id: 1,
-        title: "Victory Court Estate",
-        location: "Near Yaba Tech Epe Campus, Isimi Lagos & Epe Toll Gate",
-        description: "Victory Court Estate is a burgeoning residential and commercial development poised for growth and excellence, sitting on 20 acres.",
-        image: "/flyer.jpg",
-        status: "Ongoing",
-        cofo: "IJO/SL/C 133",
+        title: "Victory Court",
+        location: "Iloti Epe-Ijebu Ode Express",
+        description: "Now Introducing Victory Court - ESTD 2024",
+        image: "/assets/projects/victory-court.jpg",
+        status: "Now Introducing",
+        cofo: "IJO/SL/C50",
         features: [
-            "C of O Verified",
-            "Fenced & Gated",
-            "Upcoming infrastructure development",
-            "Potential for capital appreciation",
-            "Secure and serene environment",
+            "Title",
+            "24/7 Security",
+            "Road Network",
+            "Swimming Pool",
+            "Perimeter Fence",
+            "Streetlight",
         ],
-        size: "300sqm - 600sqm",
+        size: "300 & 500 SQM",
     },
     {
         id: 2,
         title: "Beryls Prime",
-        location: "Lekki Peninsula II",
-        description: "This is a premium development of 12 units of luxury 2-Bedroom apartments with BQ. A perfect blend of modern living and investment opportunity.",
-        image: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80",
-        status: "Ongoing",
+        location: "Lekki Peninsula 2 GRA",
+        description: "2 Bedroom with BQ - Now Selling!",
+        image: "/assets/projects/beryls.jpg",
+        status: "Now Selling",
+        cofo: "ET2025(IKT)/DO/222/70",
         features: [
-            "Luxury 2-Bedroom Apartments",
-            "Boys Quarter (BQ)",
-            "Premium Finishes",
-            "Strategic Location",
-            "High ROI Potential",
+            "Ample Parking",
+            "Security",
+            "Title",
+            "Gym",
+            "Concierge",
+            "Smart Features",
         ],
-        size: "960sqm Land",
+        price: "N95M",
+        initialDeposit: "N30M",
     },
 ];
 
@@ -139,10 +143,10 @@ export function ProjectsSection() {
                                     </div>
                                 </div>
 
-                                <Button size="lg" className="group">
+                                {/* <Button size="lg" className="group">
                                     Learn More
                                     <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-                                </Button>
+                                </Button> */}
                             </div>
                         </motion.div>
                     ))}

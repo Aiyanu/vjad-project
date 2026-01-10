@@ -11,8 +11,8 @@ export async function PATCH(
     const { id } = await params;
 
     const { user, error, status } = requireAdmin(request);
-    if (error) {
-      const [response, respStatus] = apiError(error, status);
+    if (error || !user) {
+      const [response, respStatus] = apiError(error || "Unauthorized", status);
       return NextResponse.json(response, { status: respStatus });
     }
 

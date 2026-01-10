@@ -6,8 +6,8 @@ import { apiSuccess, apiError } from "@/lib/api-response-server";
 export async function POST(request: NextRequest) {
   try {
     const { user, error, status } = requireAuth(request);
-    if (error) {
-      const [response, httpStatus] = apiError(error, status);
+    if (error || !user) {
+      const [response, httpStatus] = apiError(error || "Unauthorized", status);
       return NextResponse.json(response, { status: httpStatus });
     }
 
@@ -23,8 +23,11 @@ export async function POST(request: NextRequest) {
       !accountName &&
       !bankName
     ) {
-      const [response, status] = apiError("Please provide data to update", 400);
-      return NextResponse.json(response, { status });
+      const [response, httpStatus] = apiError(
+        "Please provide data to update",
+        400
+      );
+      return NextResponse.json(response, { status: httpStatus });
     }
 
     const userUpdate: any = {
@@ -72,14 +75,18 @@ export async function POST(request: NextRequest) {
       accountName: updated?.affiliate?.accountName ?? null,
     };
 
-    const [response, status] = apiSuccess(
+    const [response, httpStatus] = apiSuccess(
       responsePayload,
       "Profile updated successfully",
       200
     );
-    return NextResponse.json(response, { status });
+    return NextResponse.json(response, { status: httpStatus });
   } catch (error) {
-    const [response, status] = apiError("Failed to update profile", 500, error);
-    return NextResponse.json(response, { status });
+    const [response, httpStatus] = apiError(
+      "Failed to update profile",
+      500,
+      error
+    );
+    return NextResponse.json(response, { status: httpStatus });
   }
 }

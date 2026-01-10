@@ -7,17 +7,6 @@ import { ApiService } from "./api";
 // URL constants for admin endpoints
 const ADMIN_URLS = {
   ADMINS_LIST: "/api/admin/admins",
-
-  /**
-   * Update admin role (super_admin only)
-   */
-  updateAdminRole: async (
-    api: ApiService,
-    id: string,
-    role: "admin" | "super_admin"
-  ) => {
-    return api.patch(ADMIN_URLS.ADMIN_ITEM(id), { role });
-  },
   ADMINS_CREATE: "/api/admin/admins",
   ADMIN_ITEM: (id: string) => `/api/admin/admins/${id}`,
   AFFILIATES_LIST: "/api/admin/affiliates",
@@ -59,10 +48,21 @@ export const adminService = {
   },
 
   /**
+   * Update admin role (super_admin only)
+   */
+  updateAdminRole: async (
+    api: ApiService,
+    id: string,
+    role: "admin" | "super_admin"
+  ) => {
+    return api.put(ADMIN_URLS.ADMIN_ITEM(id), { role });
+  },
+
+  /**
    * Delete an admin (super_admin only)
    */
   deleteAdmin: async (api: ApiService, id: string) => {
-    return api.delete(ADMIN_URLS.ADMIN_ITEM(id));
+    return api.del(ADMIN_URLS.ADMIN_ITEM(id));
   },
 
   /**

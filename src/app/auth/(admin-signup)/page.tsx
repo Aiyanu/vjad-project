@@ -207,3 +207,7 @@
 //         </div>
 //     );
 // }
+
+export default function AdminSignupPage() {
+  return null;
+}

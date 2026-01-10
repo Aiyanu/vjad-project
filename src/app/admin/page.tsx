@@ -129,9 +129,8 @@ export default function AdminDashboard() {
           >
             <StatCard
               title={stat.title}
-              value={stat.format ? Math.round(stat.value) : stat.value}
+              value={typeof stat.value === 'number' ? stat.value : 0}
               icon={stat.icon}
-              prefix={stat.prefix}
             />
           </motion.div>
         ))}

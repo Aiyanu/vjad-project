@@ -19,6 +19,7 @@ interface AffiliateDetails {
     fullName: string;
     email: string;
     phone: string | null;
+    emailVerified: boolean;
     createdAt: string;
   }>;
   referralsCount: number;

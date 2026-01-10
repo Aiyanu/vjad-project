@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { requireAdmin } from "@/lib/authMiddleware";
 import { apiSuccess, apiError } from "@/lib/api-response-server";
 
 // Admin transactions placeholder
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
     const { user, error, status } = requireAdmin(request);
     if (error) {

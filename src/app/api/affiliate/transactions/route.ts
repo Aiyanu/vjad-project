@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { requireAuth } from "@/lib/authMiddleware";
 import { apiSuccess, apiError } from "@/lib/api-response-server";
 
 // Transactions are not modelled in Prisma yet. Return placeholder data.
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
     const { user, error, status } = requireAuth(request);
     if (error) {

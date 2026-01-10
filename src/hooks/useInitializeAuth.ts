@@ -9,7 +9,7 @@ import { useAppSelector } from "@/store/hooks";
  */
 export function useInitializeAuth() {
   const user = useAppSelector((state) => state.user.user);
-  const token = useAppSelector((state) => state.token.token);
+  const token = useAppSelector((state) => state.global.token);
 
   useEffect(() => {
     // Optional: Log current auth state for debugging

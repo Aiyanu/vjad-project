@@ -117,7 +117,11 @@ export default function AffiliateReferrals() {
         pagination={pagination}
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
-        onSort={handleSort}
+        onSort={(field: string) => {
+          if (["fullName", "email", "emailVerified", "createdAt"].includes(field)) {
+            handleSort(field as "fullName" | "email" | "emailVerified" | "createdAt");
+          }
+        }}
         sortField="createdAt"
         emptyIcon={<Users className="h-12 w-12 mx-auto mb-3 opacity-30" />}
         emptyMessage="No referrals yet"

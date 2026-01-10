@@ -187,7 +187,11 @@ export default function AdminAffiliates() {
         pagination={pagination}
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
-        onSort={handleSort}
+        onSort={(field: string) => {
+          if (["email", "fullName", "referralsCount", "createdAt", "isDisabled", "phone"].includes(field)) {
+            handleSort(field as "email" | "fullName" | "referralsCount" | "createdAt" | "isDisabled" | "phone");
+          }
+        }}
         sortField="createdAt"
         onRowClick={(affiliate) => router.push(`/admin/affiliates/${affiliate.id}`)}
         emptyIcon={<Users className="h-12 w-12 mx-auto mb-3 opacity-30" />}

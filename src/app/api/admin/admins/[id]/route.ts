@@ -5,8 +5,9 @@ import { apiError, apiSuccess } from "@/lib/api-response-server";
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const { error, status } = requireAdmin(request as any, true);
   if (error) {
     const [response, httpStatus] = apiError(error, status);
@@ -15,7 +16,7 @@ export async function DELETE(
 
   try {
     const admin = await prisma.user.findUnique({
-      where: { id: params.id },
+      where: { id },
       select: { id: true, role: true },
     });
 
@@ -32,13 +33,9 @@ export async function DELETE(
       return NextResponse.json(response, { status: httpStatus });
     }
 
-    await prisma.user.delete({ where: { id: params.id } });
+    await prisma.user.delete({ where: { id } });
 
-    const [response, httpStatus] = apiSuccess(
-      { id: params.id },
-      "Admin removed",
-      200
-    );
+    const [response, httpStatus] = apiSuccess({ id }, "Admin removed", 200);
     return NextResponse.json(response, { status: httpStatus });
   } catch (err) {
     const [response, httpStatus] = apiError("Failed to remove admin", 500, err);
@@ -48,8 +45,9 @@ export async function DELETE(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
   const { error, status } = requireAdmin(request as any, true);
   if (error) {
     const [response, httpStatus] = apiError(error, status);
@@ -64,7 +62,7 @@ export async function PATCH(
     }
 
     const existing = await prisma.user.findUnique({
-      where: { id: params.id },
+      where: { id },
       select: { id: true, role: true },
     });
 
@@ -74,7 +72,7 @@ export async function PATCH(
     }
 
     const updated = await prisma.user.update({
-      where: { id: params.id },
+      where: { id },
       data: { role },
       select: { id: true, role: true },
     });

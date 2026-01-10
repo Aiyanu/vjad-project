@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
@@ -8,7 +8,7 @@ import { requireAdmin } from "@/lib/authMiddleware";
 import { apiSuccess, apiError } from "@/lib/api-response-server";
 
 // GET - Fetch admins with pagination/sort
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const { error, status } = requireAdmin(request);
   if (error) {
     const [response, httpStatus] = apiError(error, status);
@@ -88,7 +88,7 @@ export async function GET(request: Request) {
 }
 
 // POST - Create new admin (super_admin only)
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   const { user, error, status } = requireAdmin(request, true);
   if (error) {
     const [response, httpStatus] = apiError(error, status);

@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/authMiddleware";
 import { apiSuccess, apiError } from "@/lib/api-response-server";
@@ -23,7 +23,7 @@ const flattenUser = (user: any) => {
   };
 };
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
     const url = new URL(request.url);
     // Accept email, id, or referralCode query for dev convenience
@@ -65,8 +65,8 @@ export async function GET(request: Request) {
 
     // Verify authentication
     const { user: authUser, error, status } = requireAuth(request);
-    if (error) {
-      const [response, httpStatus] = apiError(error, status);
+    if (error || !authUser) {
+      const [response, httpStatus] = apiError(error || "Unauthorized", status);
       return NextResponse.json(response, { status: httpStatus });
     }
 
