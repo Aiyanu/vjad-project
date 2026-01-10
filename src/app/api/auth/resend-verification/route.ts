@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { resendCodeRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 import { sendMail } from "@/lib/mailer";
 import { emailTemplates } from "@/lib/emailTemplates";
+import { apiSuccess, apiError } from "@/lib/api-response-server";
 
 function randomTokenHex(len = 32) {
   return crypto.randomBytes(len).toString("hex");
@@ -15,7 +16,8 @@ export async function POST(req: Request) {
     const { email } = await req.json().catch(() => ({}));
 
     if (!email) {
-      return NextResponse.json({ error: "Email is required" }, { status: 400 });
+      const [response, status] = apiError("Email is required", 400);
+      return NextResponse.json(response, { status });
     }
 
     // Apply rate limiting based on email
@@ -32,19 +34,22 @@ export async function POST(req: Request) {
 
     if (!user) {
       // Don't leak user existence
-      return NextResponse.json({
-        ok: true,
-        message:
-          "If an account exists with this email, a verification link has been sent.",
-      });
+      const [response, status] = apiSuccess(
+        null,
+        "If an account exists with this email, a verification link has been sent.",
+        200
+      );
+      return NextResponse.json(response, { status });
     }
 
     // If already verified, no need to resend
     if (user.emailVerified) {
-      return NextResponse.json({
-        ok: true,
-        message: "This email is already verified.",
-      });
+      const [response, status] = apiSuccess(
+        null,
+        "This email is already verified.",
+        200
+      );
+      return NextResponse.json(response, { status });
     }
 
     // Generate new 6-digit OTP verification token
@@ -88,13 +93,14 @@ export async function POST(req: Request) {
       console.error("Failed to send verification email:", emailError);
     }
 
-    return NextResponse.json({
-      ok: true,
-      message:
-        "If an account exists with this email, a verification link has been sent.",
-    });
+    const [response, status] = apiSuccess(
+      null,
+      "If an account exists with this email, a verification link has been sent.",
+      200
+    );
+    return NextResponse.json(response, { status });
   } catch (err) {
-    console.error("Resend verification error:", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    const [response, status] = apiError("Server error", 500, err);
+    return NextResponse.json(response, { status });
   }
 }

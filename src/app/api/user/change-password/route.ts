@@ -1,47 +1,47 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/lib/db";
 import bcrypt from "bcrypt";
-import { verifyJwt } from "@/lib/auth";
+import { requireAuth } from "@/lib/authMiddleware";
+import { apiSuccess, apiError } from "@/lib/api-response-server";
 
 export async function POST(request: NextRequest) {
   try {
-    const token = request.cookies.get("vj_session")?.value;
-
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const payload = verifyJwt(token);
-    if (!payload || !payload.sub) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    const { user, error, status } = requireAuth(request);
+    if (error) {
+      const [response, httpStatus] = apiError(error, status);
+      return NextResponse.json(response, { status: httpStatus });
     }
 
     const body = await request.json();
     const { newPassword } = body;
 
     if (!newPassword || newPassword.length < 6) {
-      return NextResponse.json(
-        { error: "Password must be at least 6 characters" },
-        { status: 400 }
+      const [response, status] = apiError(
+        "Password must be at least 6 characters",
+        400
       );
+      return NextResponse.json(response, { status });
     }
 
     const passwordHash = await bcrypt.hash(newPassword, 10);
 
     await db.user.update({
-      where: { id: (payload as any).sub as string },
+      where: { id: user.userId },
       data: { passwordHash },
     });
 
-    return NextResponse.json(
-      { message: "Password updated successfully" },
-      { status: 200 }
+    const [response, status] = apiSuccess(
+      null,
+      "Password updated successfully",
+      200
     );
+    return NextResponse.json(response, { status });
   } catch (error) {
-    console.error("Error changing password:", error);
-    return NextResponse.json(
-      { error: "Failed to change password" },
-      { status: 500 }
+    const [response, status] = apiError(
+      "Failed to change password",
+      500,
+      error
     );
+    return NextResponse.json(response, { status });
   }
 }

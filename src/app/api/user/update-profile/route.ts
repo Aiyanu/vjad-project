@@ -1,49 +1,85 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/lib/db";
-import { verifyJwt } from "@/lib/auth";
+import { requireAuth } from "@/lib/authMiddleware";
+import { apiSuccess, apiError } from "@/lib/api-response-server";
 
 export async function POST(request: NextRequest) {
   try {
-    const token = request.cookies.get("vj_session")?.value;
-
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const payload = verifyJwt(token);
-    if (!payload || !payload.sub) {
-      return NextResponse.json({ error: "Invalid token" }, { status: 401 });
+    const { user, error, status } = requireAuth(request);
+    if (error) {
+      const [response, httpStatus] = apiError(error, status);
+      return NextResponse.json(response, { status: httpStatus });
     }
 
     const body = await request.json();
-    const { fullName, phone, bankCode, accountNumber, accountName } = body;
+    const { fullName, phone, bankCode, accountNumber, accountName, bankName } =
+      body;
 
-    if (!fullName && !phone && !bankCode && !accountNumber && !accountName) {
-      return NextResponse.json(
-        { error: "Please provide data to update" },
-        { status: 400 }
-      );
+    if (
+      !fullName &&
+      !phone &&
+      !bankCode &&
+      !accountNumber &&
+      !accountName &&
+      !bankName
+    ) {
+      const [response, status] = apiError("Please provide data to update", 400);
+      return NextResponse.json(response, { status });
     }
 
-    const updateData: any = {
+    const userUpdate: any = {
       ...(fullName && { fullName }),
       ...(phone && { phone }),
+    };
+
+    const affiliateUpdate: any = {
       ...(bankCode && { bankCode }),
       ...(accountNumber && { accountNumber }),
       ...(accountName && { accountName }),
+      ...(bankName && { bankName }),
     };
 
-    const user = await db.user.update({
-      where: { id: (payload as any).sub as string },
-      data: updateData,
+    if (Object.keys(userUpdate).length > 0) {
+      await db.user.update({ where: { id: user.userId }, data: userUpdate });
+    }
+
+    if (Object.keys(affiliateUpdate).length > 0) {
+      await db.affiliate.upsert({
+        where: { userId: user.userId },
+        create: { userId: user.userId, ...affiliateUpdate },
+        update: affiliateUpdate,
+      });
+    }
+
+    const updated = await db.user.findUnique({
+      where: { id: user.userId },
+      include: { affiliate: true },
     });
 
-    return NextResponse.json({ user }, { status: 200 });
-  } catch (error) {
-    console.error("Error updating profile:", error);
-    return NextResponse.json(
-      { error: "Failed to update profile" },
-      { status: 500 }
+    const responsePayload = {
+      id: updated?.id,
+      email: updated?.email,
+      fullName: updated?.fullName,
+      role: updated?.role,
+      phone: updated?.phone,
+      emailVerified: updated?.emailVerified,
+      isDisabled: updated?.isDisabled,
+      createdAt: updated?.createdAt,
+      referralCode: updated?.affiliate?.referralCode ?? null,
+      bankName: updated?.affiliate?.bankName ?? null,
+      bankCode: updated?.affiliate?.bankCode ?? null,
+      accountNumber: updated?.affiliate?.accountNumber ?? null,
+      accountName: updated?.affiliate?.accountName ?? null,
+    };
+
+    const [response, status] = apiSuccess(
+      responsePayload,
+      "Profile updated successfully",
+      200
     );
+    return NextResponse.json(response, { status });
+  } catch (error) {
+    const [response, status] = apiError("Failed to update profile", 500, error);
+    return NextResponse.json(response, { status });
   }
 }

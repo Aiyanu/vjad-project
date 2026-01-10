@@ -34,14 +34,14 @@ export default function AffiliateShare() {
             // Use centralized API helper to load current user and referral code
             const api = (await import("@/hooks/useApi")).default();
             const res = await api.get("/api/user");
-            if (res?.user) {
-                setReferralCode(res.user.referralCode || "");
+            if (res?.success && res?.data) {
+                setReferralCode(res.data.referralCode || "");
                 // commission rate not yet stored on user; default 15
-                setCommissionRate(res.user.commissionRate ?? 15);
+                setCommissionRate(res.data.commissionRate ?? 15);
                 // show a welcome message with name if available
-                // if (res.user.fullName) {
+                // if (res.data.fullName) {
                 //     // eslint-disable-next-line @typescript-eslint/no-floating-promises
-                //     import("sonner").then((m) => m.toast.success(`Welcome back, ${res.user.fullName}`));
+                //     import("sonner").then((m) => m.toast.success(`Welcome back, ${res.data.fullName}`));
                 // }
             }
         } catch (error) {

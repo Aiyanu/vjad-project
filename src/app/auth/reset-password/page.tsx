@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Lock, Eye, EyeOff, Loader2, CheckCircle } from "lucide-react";
 import { z } from "zod";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useApi } from "@/hooks/useApi";
 import Link from "next/link";
 import Image from "next/image";
 import { toast } from "sonner";
@@ -25,6 +26,7 @@ const passwordSchema = z
 const ResetPassword = () => {
     const searchParams = useSearchParams();
     const router = useRouter();
+    const api = useApi();
     const token = searchParams?.get("token") ?? "";
     const emailParam = searchParams?.get("email") ?? "";
 
@@ -63,19 +65,7 @@ const ResetPassword = () => {
 
         setIsLoading(true);
         try {
-            const res = await fetch("/api/auth/reset", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: emailParam, token, password }),
-            });
-
-            const json = await res.json().catch(() => ({}));
-
-            if (!res.ok) {
-                toast.error(json?.error || "Could not reset password");
-                setErrors({ form: json?.error || "Could not reset password" });
-                return;
-            }
+            const json = await api.post("/api/auth/reset", { email: emailParam, token, password });
 
             setIsSuccess(true);
             toast.success("Password reset successful");

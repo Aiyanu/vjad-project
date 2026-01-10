@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { clearAuth } from "@/store/authSlice";
+import { clearUser } from "@/store/userSlice";
+import { clearToken } from "@/store/globalSlice";
 
 interface ProtectedRouteProps {
     children: React.ReactNode;
@@ -17,8 +18,8 @@ export function ProtectedRoute({
     allowedRoles,
 }: ProtectedRouteProps) {
     const router = useRouter();
-    const user = useAppSelector((state) => state.auth.user);
-    const token = useAppSelector((state) => state.auth.token);
+    const user = useAppSelector((state) => state.user.user);
+    const token = useAppSelector((state) => state.global.token);
     const dispatch = useAppDispatch();
     const [isChecking, setIsChecking] = useState(true);
 
@@ -43,7 +44,8 @@ export function ProtectedRoute({
         // Check if user is disabled
         if (user.isDisabled) {
             // Clear auth and show alert
-            dispatch(clearAuth());
+            dispatch(clearUser());
+            dispatch(clearToken());
             alert("Your account has been disabled. Please contact support for assistance.");
             router.replace("/auth");
             return;

@@ -80,16 +80,16 @@ export function rateLimitResponse(resetTime: number) {
 
 // Predefined rate limiters
 export const authRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  maxRequests: 5, // 5 requests per 15 minutes for auth endpoints
+  windowMs: 5 * 60 * 1000, // 5 minutes (reduced from 15)
+  maxRequests: 10, // 10 requests per 5 minutes (increased from 5)
 });
 
 export const apiRateLimit = rateLimit({
   windowMs: 60 * 1000, // 1 minute
-  maxRequests: 60, // 60 requests per minute for general API
+  maxRequests: 100, // 100 requests per minute (increased from 60)
 });
 
 export const resendCodeRateLimit = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  maxRequests: 3, // 3 verification emails per hour
+  windowMs: 5 * 60 * 1000, // 5 minutes (reduced from 1 hour)
+  maxRequests: 5, // 5 verification emails per 5 minutes (increased from 3)
 });

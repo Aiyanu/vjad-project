@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/lib/db";
-import { verifyJwt } from "@/lib/auth";
+import { requireAdmin } from "@/lib/authMiddleware";
+import { apiSuccess, apiError } from "@/lib/api-response-server";
 
 export async function GET(
   request: NextRequest,
@@ -8,26 +9,11 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    // Get auth token
-    const token = request.cookies.get("vj_session")?.value;
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
 
-    // Verify token and get user
-    const payload = verifyJwt(token);
-    if (!payload || typeof payload === "string") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    const currentUser = await db.user.findUnique({
-      where: { id: (payload as any).sub },
-    });
-
-    if (
-      !currentUser ||
-      (currentUser.role !== "admin" && currentUser.role !== "super_admin")
-    ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const { user, error, status } = requireAdmin(request);
+    if (error) {
+      const [response, respStatus] = apiError(error, status);
+      return NextResponse.json(response, { status: respStatus });
     }
 
     // Get affiliate details with referrals
@@ -40,46 +26,67 @@ export async function GET(
         id: true,
         email: true,
         fullName: true,
-        referralCode: true,
         emailVerified: true,
         isDisabled: true,
         createdAt: true,
         phone: true,
-        bankName: true,
-        accountNumber: true,
-        referrals: {
-          select: {
-            id: true,
-            email: true,
-            fullName: true,
-            emailVerified: true,
-            createdAt: true,
-          },
-          orderBy: {
-            createdAt: "desc",
+        affiliate: {
+          include: {
+            referrals: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    email: true,
+                    fullName: true,
+                    emailVerified: true,
+                    createdAt: true,
+                  },
+                },
+              },
+              orderBy: {
+                createdAt: "desc",
+              },
+            },
           },
         },
       },
     });
 
     if (!affiliate) {
-      return NextResponse.json(
-        { error: "Affiliate not found" },
-        { status: 404 }
-      );
+      const [response, respStatus] = apiError("Affiliate not found", 404);
+      return NextResponse.json(response, { status: respStatus });
     }
 
-    return NextResponse.json({
-      affiliate: {
-        ...affiliate,
-        referralsCount: affiliate.referrals.length,
+    const [response, respStatus] = apiSuccess(
+      {
+        affiliate: {
+          ...affiliate,
+          referralCode: affiliate.affiliate?.referralCode ?? null,
+          bankName: affiliate.affiliate?.bankName ?? null,
+          bankCode: affiliate.affiliate?.bankCode ?? null,
+          accountName: affiliate.affiliate?.accountName ?? null,
+          accountNumber: affiliate.affiliate?.accountNumber ?? null,
+          referrals: (affiliate.affiliate?.referrals || []).map((ref) => ({
+            id: ref.user.id,
+            email: ref.user.email,
+            fullName: ref.user.fullName,
+            emailVerified: ref.user.emailVerified,
+            createdAt: ref.user.createdAt,
+          })),
+          referralsCount: affiliate.affiliate?.referrals.length || 0,
+        },
       },
-    });
-  } catch (error) {
-    console.error("Get affiliate details error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch affiliate details" },
-      { status: 500 }
+      "Affiliate details retrieved",
+      200
     );
+    return NextResponse.json(response, { status: respStatus });
+  } catch (error) {
+    const [response, respStatus] = apiError(
+      "Failed to fetch affiliate details",
+      500,
+      error
+    );
+    return NextResponse.json(response, { status: respStatus });
   }
 }

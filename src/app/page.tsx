@@ -8,6 +8,7 @@ import { TestimonialsSection } from "@/components/landing-page/TestimonialSectio
 import VictoryCourtSection from "@/components/landing-page/VictoryCourtSection";
 import { Footer } from "@/components/landing-page/Footer";
 import { CTASection2 } from "@/components/landing-page/CTASection2";
+import { TeamSection } from "@/components/landing-page/TeamSection";
 
 
 export default function Home() {
@@ -21,6 +22,7 @@ export default function Home() {
         {/* <VictoryCourtSection />
         <VictoryCourtSection /> */}
         {/* <ProjectsSection /> */}
+        <TeamSection />
         <TestimonialsSection />
         <CTASection />
         {/* <CTASection2 /> */}

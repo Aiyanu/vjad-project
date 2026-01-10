@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import { prisma } from "@/lib/db";
 import { signJwt } from "@/lib/auth";
 import { authRateLimit, rateLimitResponse } from "@/lib/rateLimit";
+import { apiSuccess, apiError } from "@/lib/api-response-server";
 
 type Body = { email?: string; password?: string };
 
@@ -18,10 +19,11 @@ export async function POST(req: Request) {
     const password = body.password || "";
 
     if (!email || !password) {
-      return NextResponse.json(
-        { error: "Email and password are required" },
-        { status: 400 }
+      const [response, status] = apiError(
+        "Email and password are required",
+        400
       );
+      return NextResponse.json(response, { status });
     }
 
     // Apply rate limiting based on email
@@ -42,73 +44,72 @@ export async function POST(req: Request) {
         emailVerified: true,
         isDisabled: true,
         fullName: true,
-        referralCode: true,
         phone: true,
         createdAt: true,
+        affiliate: {
+          select: {
+            referralCode: true,
+            bankName: true,
+            bankCode: true,
+            accountNumber: true,
+            accountName: true,
+          },
+        },
       },
     });
 
     // do not reveal existence
     if (!user) {
       await delay(300);
-      return NextResponse.json(
-        { error: "Invalid credentials" },
-        { status: 401 }
-      );
+      const [response, status] = apiError("Invalid credentials", 401);
+      return NextResponse.json(response, { status });
     }
 
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) {
       await delay(300);
-      return NextResponse.json(
-        { error: "Invalid credentials" },
-        { status: 401 }
-      );
+      const [response, status] = apiError("Invalid credentials", 401);
+      return NextResponse.json(response, { status });
     }
 
     // Check if account is disabled
     if (user.isDisabled) {
-      return NextResponse.json(
-        {
-          error:
-            "Your account has been disabled. Please contact support for assistance.",
-          code: "ACCOUNT_DISABLED",
-        },
-        { status: 403 }
+      const [response, status] = apiError(
+        "Your account has been disabled. Please contact support for assistance.",
+        403
       );
+      return NextResponse.json(response, { status });
     }
 
     if (!user.emailVerified) {
+      const [response, status] = apiError("Email not verified", 403);
       return NextResponse.json(
-        {
-          error: "Email not verified",
-          code: "EMAIL_NOT_VERIFIED",
-          email: user.email,
-        },
-        { status: 403 }
+        { ...response, data: { email: user.email, isVerified: false } },
+        { status }
       );
     }
 
     const token = signJwt({ sub: user.id, email: user.email, role: user.role });
 
-    const res = NextResponse.json({
-      ok: true,
-      authToken: token,
-    });
-
-    res.cookies.set({
-      name: "vj_session",
-      value: token,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: Number(process.env.JWT_COOKIE_MAX_AGE ?? 60 * 60 * 24 * 7),
-    });
-
-    return res;
+    const [response, status] = apiSuccess(
+      {
+        token,
+        // user: {
+        //   id: user.id,
+        //   email: user.email,
+        //   fullName: user.fullName,
+        //   role: user.role,
+        //   referralCode: user.referralCode,
+        //   phone: user.phone,
+        //   emailVerified: user.emailVerified,
+        // },
+      },
+      "Login successful",
+      200
+    );
+    return NextResponse.json(response, { status });
   } catch (err) {
-    console.error("Login error:", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    const [response, status] = apiError("Server error", 500, err);
+    return NextResponse.json(response, { status });
   }
 }

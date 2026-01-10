@@ -297,7 +297,7 @@ export default function AdminSettings() {
               placeholder="Confirm new password"
             />
           </div>
-          <Button type="submit" variant="destructive" disabled={changingPassword}>
+          <Button type="submit" disabled={changingPassword}>
             {changingPassword && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
             Update Password
           </Button>

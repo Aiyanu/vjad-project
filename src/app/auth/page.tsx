@@ -12,7 +12,9 @@ import { toast } from "sonner";
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Loader2 } from "lucide-react";
 import { z } from "zod";
 import { useAppDispatch } from "@/store/hooks";
-import { setToken, setUser } from "@/store/authSlice";
+import { setToken } from "@/store/globalSlice";
+import { setUser } from "@/store/userSlice";
+import { useApi } from "@/hooks/useApi";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -40,6 +42,7 @@ const Auth = () => {
     const searchParams = useSearchParams();
     const router = useRouter();
     const dispatch = useAppDispatch();
+    const api = useApi();
     const initialMode = searchParams?.get("mode") === "register" ? "register" : "login";
 
     const [mode, setMode] = useState<AuthMode>(initialMode);
@@ -72,7 +75,7 @@ const Auth = () => {
         const ref = searchParams?.get("ref");
         if (ref) {
             try {
-                localStorage.setItem("vjad_ref", ref);
+                sessionStorage.setItem("vjad_ref", ref);
                 // Populate the referral code input field
                 setFormData((prev) => ({ ...prev, referralCode: ref }));
                 // Fetch referrer name for display
@@ -89,22 +92,20 @@ const Auth = () => {
         if (mode !== "register") return;
         const loadBanks = async () => {
             try {
-                const res = await fetch("/api/banks");
-                const json = await res.json();
-                setBanks(json?.banks || []);
+                const json = await api.get("/api/banks");
+                setBanks(json?.data || []);
             } catch (e) {
                 console.warn("Could not load banks", e);
             }
         };
         loadBanks();
-    }, [mode]);
+    }, [mode, api]);
 
     const fetchReferrerInfo = async (referralCode: string) => {
         try {
-            const res = await fetch(`/api/user?referralCode=${encodeURIComponent(referralCode)}`);
-            const data = await res.json();
-            if (data?.user?.fullName) {
-                setReferrerName(data.user.fullName);
+            const data = await api.get(`/api/user?referralCode=${encodeURIComponent(referralCode)}`);
+            if (data?.success && data?.data?.fullName) {
+                setReferrerName(data.data.fullName);
             }
         } catch (error) {
             console.error("Failed to fetch referrer info:", error);
@@ -176,30 +177,13 @@ const Auth = () => {
 
         try {
             if (mode === "login") {
-                const res = await fetch("/api/auth/login", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email: formData.email, password: formData.password }),
-                });
-
-                const json = await res.json().catch(() => ({}));
-
-                if (!res.ok) {
-                    // If email not verified, redirect to verification page
-                    if (json?.code === "EMAIL_NOT_VERIFIED") {
-                        toast.info("Email verification required", {
-                            description: "Check your inbox for the verification link",
-                        });
-                        router.push(`/auth/verify-email?email=${encodeURIComponent(json.email)}`);
-                        return;
-                    }
-                    toast.error(json?.error || "Login failed");
-                    return;
-                }
+                const json = await api.post("/api/auth/login", { email: formData.email, password: formData.password });
 
                 // Save authToken in session store (only token); then fetch user
                 try {
-                    dispatch(setToken(json?.authToken ?? null));
+                    if (json?.success && json?.data?.token) {
+                        dispatch(setToken(json.data.token));
+                    }
                 } catch (e) {
                     console.error("Failed to save token:", e);
                 }
@@ -207,10 +191,9 @@ const Auth = () => {
                 // Fetch user using session cookie to avoid storing user in response
                 let fetchedUser: any = null;
                 try {
-                    const userRes = await fetch("/api/user", { credentials: "same-origin" });
-                    const userJson = await userRes.json().catch(() => ({}));
-                    if (userRes.ok && userJson?.user) {
-                        fetchedUser = userJson.user;
+                    const userJson = await api.get("/api/user");
+                    if (userJson?.success && userJson?.data) {
+                        fetchedUser = userJson.data;
                         dispatch(setUser(fetchedUser));
                     }
                 } catch (e) {
@@ -230,72 +213,54 @@ const Auth = () => {
                 }
             } else {
                 // registration
-                // Use form input first, fallback to localStorage if input is empty
+                // Use form input first, fallback to sessionStorage if input is empty
                 const referralCode = formData.referralCode ||
-                    (typeof window !== "undefined" ? localStorage.getItem("vjad_ref") || undefined : undefined);
+                    (typeof window !== "undefined" ? sessionStorage.getItem("vjad_ref") || undefined : undefined);
 
-                const res = await fetch("/api/auth/register", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        fullName: formData.fullName,
-                        email: formData.email,
-                        password: formData.password,
-                        referralCode,
-                        bankName,
-                        bankCode,
-                        accountNumber,
-                        // accountName,
-                    }),
+                const json = await api.post("/api/auth/register", {
+                    fullName: formData.fullName,
+                    email: formData.email,
+                    password: formData.password,
+                    referralCode,
+                    bankName,
+                    bankCode,
+                    accountNumber,
+                    // accountName,
                 });
-
-                const json = await res.json().catch(() => ({}));
-
-                if (!res.ok) {
-                    // handle duplicate
-                    if (res.status === 409) {
-                        toast.error(json?.error || "Account already exists. Try logging in.");
-                        setMode("login");
-                        return;
-                    }
-                    toast.error(json?.error || "Registration failed");
-                    return;
-                }
 
                 // Successfully registered - redirect to verify email page
                 toast.success("Registration successful", {
                     description: "Please check your email to verify your account.",
                 });
 
-                // Get verification URL from response (in dev) or construct it
-                const verificationToken = json?.verificationUrl
-                    ? new URL(json.verificationUrl).searchParams.get("token")
-                    : null;
-
                 // If the backend returned a referral code for the new user, store and show it
-                const myReferral = json?.user?.referralCode ?? null;
+                const myReferral = json?.data?.referralCode ?? null;
                 if (myReferral) {
                     try {
-                        localStorage.setItem("vjad_my_ref", myReferral);
+                        sessionStorage.setItem("vjad_my_ref", myReferral);
                     } catch {
                         // ignore storage errors
                     }
-                    toast.success(`Your referral code: ${myReferral}`);
                 }
 
-                if (verificationToken) {
-                    // Redirect to verify email page with token
-                    router.push(`/auth/verify-email?token=${encodeURIComponent(verificationToken)}&email=${encodeURIComponent(formData.email)}`);
-                } else {
-                    // Fallback: show message and let user request resend
-                    toast.info("Check your email for the verification link", {
-                        description: "You can request a new link if needed.",
-                    });
-                    setFormData({ fullName: "", email: "", password: "", confirmPassword: "", referralCode: "" });
-                }
+                // Always redirect to verify email page
+                router.push(`/auth/verify-email?email=${encodeURIComponent(formData.email)}`);
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
+            
+            // Check if error is due to unverified email (403 status)
+            if (err?.status === 403 && err?.message === "Email not verified" && err?.data?.email) {
+                toast.error("Please verify your email to continue", {
+                    description: "Redirecting to verification page...",
+                });
+                // Redirect to verify-email page with the email from error response
+                setTimeout(() => {
+                    router.push(`/auth/verify-email?email=${encodeURIComponent(err.data.email)}`);
+                }, 1000);
+                return;
+            }
+            
             toast.error("An error occurred. Please try again later.");
         } finally {
             setIsLoading(false);

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
-import { setUser } from "@/store/authSlice";
+import { setUser } from "@/store/userSlice";
 import { useApi } from "./useApi";
 import { toast } from "sonner";
 
@@ -26,9 +26,9 @@ interface BankState {
 }
 
 export const useAffiliateSettings = () => {
-  const user = useAppSelector((state) => state.auth.user);
+  const user = useAppSelector((state) => state.user.user);
   const dispatch = useAppDispatch();
-  const { post } = useApi();
+  const { post, get } = useApi();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -60,15 +60,18 @@ export const useAffiliateSettings = () => {
   useEffect(() => {
     const getBanks = async () => {
       try {
-        const res = await fetch("/api/banks");
-        const json = await res.json();
-        setBanks(json?.banks || []);
+        const response = await get("/api/banks");
+        if (response?.success && response?.data) {
+          setBanks(response.data);
+        } else {
+          setBanks([]);
+        }
       } catch (e) {
         console.warn("Could not load banks", e);
       }
     };
     getBanks();
-  }, []);
+  }, [get]);
 
   // Fetch user profile on mount or when user changes
   useEffect(() => {
@@ -79,12 +82,14 @@ export const useAffiliateSettings = () => {
         phone: user.phone || "",
       });
 
-      const userBankCode = user.bankCode || "";
-      const userAccountNumber = user.accountNumber || "";
-      const userAccountName = user.accountName || "";
+      const userBankCode = (user as any).bankCode || "";
+      const userAccountNumber = (user as any).accountNumber || "";
+      const userAccountName = (user as any).accountName || "";
+      const userBankName = (user as any).bankName || "";
 
       setBankState((prev) => ({
         ...prev,
+        bankName: userBankName,
         bankCode: userBankCode,
         accountNumber: userAccountNumber,
         accountName: userAccountName,
@@ -96,11 +101,9 @@ export const useAffiliateSettings = () => {
       }));
 
       // Set bank name from banks list
-      if (userBankCode && banks.length > 0) {
+      if (!userBankName && userBankCode && banks.length > 0) {
         const bank = banks.find((b) => b.code === userBankCode);
-        if (bank) {
-          setBankState((prev) => ({ ...prev, bankName: bank.name }));
-        }
+        if (bank) setBankState((prev) => ({ ...prev, bankName: bank.name }));
       }
     }
     setLoading(false);

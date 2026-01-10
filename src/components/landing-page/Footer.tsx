@@ -2,30 +2,36 @@ import { Building2, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin,
 import Image from "next/image";
 
 const footerLinks = {
+    // Company: only include sections that exist
     company: [
         { label: "About Us", href: "#about" },
-        { label: "Our Team", href: "#" },
-        { label: "Careers", href: "#" },
-        { label: "Press Kit", href: "#" },
+        { label: "Our Team", href: "#team" },
+        { label: "Projects", href: "/projects" },
+        { label: "Testimonials", href: "#testimonials" },
+        // { label: "Careers", href: "#" },
+        // { label: "Press Kit", href: "#" },
     ],
-    properties: [
-        { label: "Featured Projects", href: "#projects" },
-        { label: "Lagos Properties", href: "#" },
-        { label: "Abuja Properties", href: "#" },
-        { label: "Investment Guide", href: "#" },
-    ],
+    // Properties: requested to comment out (all properties are in Lagos)
+    // properties: [
+    //     { label: "Featured Projects", href: "#projects" },
+    //     { label: "Lagos Properties", href: "#" },
+    //     { label: "Abuja Properties", href: "#" },
+    //     { label: "Investment Guide", href: "#" },
+    // ],
+    // Affiliates: keep only working routes
     affiliates: [
-        { label: "Join Program", href: "#" },
-        { label: "Affiliate Login", href: "#" },
-        { label: "Commission Structure", href: "#" },
-        { label: "Training Resources", href: "#" },
+        { label: "Join Program", href: "/auth?mode=register" },
+        { label: "Affiliate Login", href: "/auth?mode=login" },
+        // { label: "Commission Structure", href: "#" },
+        // { label: "Training Resources", href: "#" },
     ],
-    legal: [
-        { label: "Privacy Policy", href: "#" },
-        { label: "Terms of Service", href: "#" },
-        { label: "Cookie Policy", href: "#" },
-        { label: "Refund Policy", href: "#" },
-    ],
+    // Legal: requested to comment out
+    // legal: [
+    //     { label: "Privacy Policy", href: "#" },
+    //     { label: "Terms of Service", href: "#" },
+    //     { label: "Cookie Policy", href: "#" },
+    //     { label: "Refund Policy", href: "#" },
+    // ],
 };
 
 const socialLinks = [
@@ -39,7 +45,7 @@ export function Footer() {
     return (
         <footer className="bg-secondary text-secondary-foreground">
             <div className="container mx-auto px-4 py-16">
-                <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-12 mb-12">
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
                     {/* Brand Column */}
                     <div className="lg:col-span-2">
                         <a href="#home" className="flex items-center gap-3 mb-6">
@@ -82,18 +88,15 @@ export function Footer() {
                         </ul>
                     </div>
 
-                    <div>
-                        <h4 className="font-bold text-lg mb-4">Properties</h4>
-                        <ul className="space-y-3">
-                            {footerLinks.properties.map((link) => (
-                                <li key={link.label}>
-                                    <a href={link.href} className="text-secondary-foreground/70 hover:text-secondary-foreground transition-colors">
-                                        {link.label}
-                                    </a>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+                    {/* Properties column commented out per request */}
+                    {false && (
+                        <div>
+                            <h4 className="font-bold text-lg mb-4">Properties</h4>
+                            <ul className="space-y-3">
+                                {/* footerLinks.properties?.map((link) => ( ... )) */}
+                            </ul>
+                        </div>
+                    )}
 
                     <div>
                         <h4 className="font-bold text-lg mb-4">Affiliates</h4>
@@ -108,18 +111,15 @@ export function Footer() {
                         </ul>
                     </div>
 
-                    <div>
-                        <h4 className="font-bold text-lg mb-4">Legal</h4>
-                        <ul className="space-y-3">
-                            {footerLinks.legal.map((link) => (
-                                <li key={link.label}>
-                                    <a href={link.href} className="text-secondary-foreground/70 hover:text-secondary-foreground transition-colors">
-                                        {link.label}
-                                    </a>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
+                    {/* Legal column commented out per request */}
+                    {false && (
+                        <div>
+                            <h4 className="font-bold text-lg mb-4">Legal</h4>
+                            <ul className="space-y-3">
+                                {/* footerLinks.legal?.map((link) => ( ... )) */}
+                            </ul>
+                        </div>
+                    )}
                 </div>
 
                 {/* Bottom Bar */}

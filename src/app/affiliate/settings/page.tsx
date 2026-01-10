@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { motion } from "motion/react";
 import { useAffiliateSettings } from "@/hooks/useAffiliateSettings";
+import { useApi } from "@/hooks/useApi";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +32,7 @@ export default function AffiliateSettings() {
         handleProfileUpdate,
         handlePasswordChange,
     } = useAffiliateSettings();
+    const api = useApi();
 
     if (loading) {
         return (
@@ -171,16 +173,7 @@ export default function AffiliateSettings() {
                                 // auto-verify when it reaches 10 digits and bank is selected
                                 if (v.length === 10 && bankState.bankCode && !bankState.accountVerifying) {
                                     try {
-                                        const res = await fetch("/api/verify-account", {
-                                            method: "POST",
-                                            headers: { "Content-Type": "application/json" },
-                                            body: JSON.stringify({ accountNumber: v, bankCode: bankState.bankCode }),
-                                        });
-                                        const json = await res.json();
-                                        if (!res.ok || json.error) {
-                                            toast.error(json.error || "Could not verify account", { id: "account-verify" });
-                                            return;
-                                        }
+                                        const json = await api.post("/api/verify-account", { accountNumber: v, bankCode: bankState.bankCode });
                                         updateBankField("accountName", json.accountName);
                                         toast.success(`Verified: ${json.accountName}`, { id: "account-verify" });
                                     } catch (err) {
@@ -243,7 +236,7 @@ export default function AffiliateSettings() {
                             placeholder="Confirm new password"
                         />
                     </div>
-                    <Button type="submit" variant="destructive" disabled={changingPassword}>
+                    <Button type="submit" disabled={changingPassword}>
                         {changingPassword && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                         Update Password
                     </Button>

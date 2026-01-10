@@ -74,13 +74,21 @@ export function CTASection() {
                         viewport={{ once: true }}
                         transition={{ duration: 0.6, delay: 0.3 }}
                         className="flex flex-col sm:flex-row gap-4 justify-center"
-                        onClick={() => router.push("/auth?mode=register")}
                     >
-                        <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg px-10 py-6 group">
+                        <Button
+                            size="lg"
+                            className="bg-primary hover:bg-primary/90 text-lg px-10 py-6 group"
+                            onClick={() => router.push("/auth?mode=register")}
+                        >
                             Register as Affiliate
                             <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                         </Button>
-                        <Button size="lg" variant="outline" className="text-lg px-10 py-6">
+                        <Button
+                            size="lg"
+                            variant="outline"
+                            className="text-lg px-10 py-6"
+                            onClick={() => window.location.href = "mailto:support@vijadprojects.com"}
+                        >
                             Contact Sales Team
                         </Button>
                     </motion.div>

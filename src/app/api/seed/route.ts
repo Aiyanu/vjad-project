@@ -8,8 +8,7 @@ export async function POST(request: Request) {
     if (process.env.ENABLE_SEED !== "true") {
       return NextResponse.json(
         {
-          error:
-            "Seeding is disabled. Set ENABLE_SEED=true in your environment variables to enable.",
+          error: "Seeding is disabled",
         },
         { status: 403 }
       );
@@ -35,9 +34,6 @@ export async function POST(request: Request) {
     // Hash the password
     const passwordHash = await bcrypt.hash(superAdminPassword, 10);
 
-    // Generate a unique referral code
-    const referralCode = `ADMIN${Date.now()}`;
-
     // Create the super admin
     await prisma.user.create({
       data: {
@@ -46,7 +42,6 @@ export async function POST(request: Request) {
         fullName: superAdminName,
         role: "super_admin",
         emailVerified: true,
-        referralCode,
       },
     });
 

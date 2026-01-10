@@ -96,10 +96,10 @@ export default function AdminDashboard() {
 
   const statCards = [
     { title: "Total Affiliates", value: stats.totalAffiliates, icon: Users },
-    { title: "Total Sales", value: stats.totalSales, icon: DollarSign, prefix: "₦", format: true },
-    { title: "Total Commissions", value: stats.totalCommissions, icon: TrendingUp, prefix: "₦", format: true },
-    { title: "Pending Sales", value: stats.pendingSales, icon: Clock },
-    { title: "Approved Sales", value: stats.approvedSales, icon: CheckCircle },
+    // { title: "Total Sales", value: stats.totalSales, icon: DollarSign, prefix: "₦", format: true },
+    // { title: "Total Commissions", value: stats.totalCommissions, icon: TrendingUp, prefix: "₦", format: true },
+    // { title: "Pending Sales", value: stats.pendingSales, icon: Clock },
+    // { title: "Approved Sales", value: stats.approvedSales, icon: CheckCircle },
     { title: "Total Referrals", value: stats.totalReferrals, icon: UserCheck },
   ];
 
@@ -137,7 +137,7 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      {/* Quick Actions */}
+      {/* Quick Actions
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -171,7 +171,7 @@ export default function AdminDashboard() {
             </p>
           )}
         </div>
-      </motion.div>
+      </motion.div> */}
     </div>
   );
 }

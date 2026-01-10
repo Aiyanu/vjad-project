@@ -15,9 +15,9 @@ export default function ReferralLinkPage({ params }: PageProps) {
         const redirectToRegister = async () => {
             const { code } = await params;
 
-            // Store the referral code in localStorage
+            // Store the referral code in sessionStorage
             try {
-                localStorage.setItem("vjad_ref", code);
+                sessionStorage.setItem("vjad_ref", code);
             } catch {
                 // ignore storage failures (private mode)
             }

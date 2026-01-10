@@ -4,6 +4,7 @@ import crypto from "crypto";
 import { prisma } from "@/lib/db";
 import { sendMail } from "@/lib/mailer";
 import { emailTemplates } from "@/lib/emailTemplates";
+import { apiSuccess, apiError } from "@/lib/api-response-server";
 
 function randomTokenHex(len = 32) {
   return crypto.randomBytes(len).toString("hex");
@@ -12,7 +13,14 @@ function randomTokenHex(len = 32) {
 export async function POST(req: Request) {
   try {
     const { email } = await req.json().catch(() => ({}));
-    if (!email) return NextResponse.json({ ok: true }); // don't leak existence
+    if (!email) {
+      const [response, status] = apiSuccess(
+        null,
+        "If an account exists with this email, a reset link will be sent.",
+        200
+      );
+      return NextResponse.json(response, { status });
+    }
 
     // Check if user exists in database before sending email
     const user = await prisma.user.findUnique({ where: { email } });
@@ -20,7 +28,12 @@ export async function POST(req: Request) {
       console.log(
         `❌ Password reset attempted for non-existent email: ${email}`
       );
-      return NextResponse.json({ ok: true }); // silently succeed to prevent email enumeration
+      const [response, status] = apiSuccess(
+        null,
+        "If your account exists, you will receive a reset link.",
+        200
+      );
+      return NextResponse.json(response, { status });
     }
 
     const token = randomTokenHex(16);
@@ -58,13 +71,14 @@ export async function POST(req: Request) {
       console.error("Failed to send password reset email:", emailError);
       // Don't expose email sending errors to the client
     }
-
-    return NextResponse.json({
-      ok: true,
-      message: "If your account exists, you will receive a reset link.",
-    });
+    const [response, status] = apiSuccess(
+      null,
+      "If your account exists, you will receive a reset link.",
+      200
+    );
+    return NextResponse.json(response, { status });
   } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    const [response, status] = apiError("Server error", 500, err);
+    return NextResponse.json(response, { status });
   }
 }

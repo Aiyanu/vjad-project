@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useAppDispatch } from "@/store/hooks";
+import { setUser } from "@/store/userSlice";
+import { useToken } from "@/hooks/useToken";
+import { useApi } from "@/hooks/useApi";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -80,6 +84,9 @@ export function AuthForm({
     redirectTo = "/affiliate/dashboard",
 }: AuthFormProps) {
     const router = useRouter();
+    const dispatch = useAppDispatch();
+    const { saveToken } = useToken();
+    const api = useApi();
     const [serverError, setServerError] = React.useState<string | null>(null);
     const [loading, setLoading] = React.useState(false);
 
@@ -98,8 +105,8 @@ export function AuthForm({
         setLoading(true);
 
         try {
-            const endpoint = isLogin ? loginEndpoint : registerEndpoint;
-            const payload = isLogin
+            const isLoginMode = mode === "login";
+            const payload = isLoginMode
                 ? { email: (values as LoginValues).email, password: (values as LoginValues).password }
                 : {
                     email: (values as RegisterValues).email,
@@ -107,29 +114,44 @@ export function AuthForm({
                     fullName: (values as RegisterValues).fullName,
                 };
 
-            const res = await fetch(endpoint, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-            });
+            const data = isLoginMode 
+                ? await api.post(loginEndpoint, payload)
+                : await api.post(registerEndpoint, payload);
 
-            const data = await res.json();
+            // For login, save token and user data to Redux store
+            if (isLoginMode && data.token && data.user) {
+                console.log("🎯 [AuthForm] Login successful, saving token and user");
+                console.log("📦 [AuthForm] Token received:", data.token.substring(0, 20) + "...");
+                console.log("👤 [AuthForm] User data:", { id: data.user.id, email: data.user.email, role: data.user.role });
 
-            if (!res.ok) {
-                // Check for EMAIL_NOT_VERIFIED error code
-                if (data?.code === "EMAIL_NOT_VERIFIED" && data?.email) {
-                    // Redirect to verify email page
-                    router.push(`/auth/verify-email?email=${encodeURIComponent(data.email)}`);
-                    return;
-                }
-                setServerError(data?.error ?? "An error occurred. Please try again.");
+                // Save token using useToken hook (which will also save to sessionStorage via middleware)
+                saveToken(data.token);
+
+                // Save user data to Redux
+                dispatch(setUser(data.user));
+                console.log("✅ [AuthForm] Token and user data dispatched");
+
+                // Wait for state to be saved before navigating
+                await new Promise(resolve => setTimeout(resolve, 100));
+                console.log("🚀 [AuthForm] Navigating to:", redirectTo);
+                router.push(redirectTo);
+            } else if (!isLoginMode) {
+                // For registration, redirect to email verification page
+                console.log("✅ [AuthForm] Registration successful, redirecting to email verification");
+                const email = (values as RegisterValues).email;
+                router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`);
+            }
+        } catch (err: any) {
+            // Check if error is due to unverified email
+            if (err.status === 403 && err.message === "Email not verified") {
+                console.log("📧 [AuthForm] Email not verified, redirecting to verification page");
+                const email = mode === "login" 
+                    ? (values as LoginValues).email 
+                    : (values as RegisterValues).email;
+                router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`);
                 return;
             }
-
-            // success: redirect (for register, you might want a verify-email page)
-            router.push(redirectTo);
-        } catch (err) {
-            setServerError("An error occurred. Please try again.");
+            setServerError(err.message || "An error occurred. Please try again.");
         } finally {
             setLoading(false);
         }

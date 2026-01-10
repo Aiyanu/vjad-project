@@ -1,17 +1,20 @@
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
+import useApi from "./useApi";
 
 export interface Affiliate {
   id: string;
   email: string;
   fullName: string | null;
-  referralCode: string;
+  referralCode: string | null;
   emailVerified: boolean;
   isDisabled: boolean;
   createdAt: string;
   phone: string | null;
   bankName: string | null;
+  bankCode?: string | null;
   accountNumber: string | null;
+  accountName?: string | null;
   referralsCount: number;
 }
 
@@ -40,11 +43,13 @@ export const useAffiliates = () => {
     totalPages: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [pageLoading, setPageLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [sortField, setSortField] = useState<SortField>("createdAt");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [pageSize, setPageSize] = useState(10);
+  const api = useApi();
 
   // Debounce search query
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -59,7 +64,12 @@ export const useAffiliates = () => {
   // Fetch affiliates whenever pagination, search, or sort changes
   useEffect(() => {
     const fetchAffiliatesData = async () => {
-      setLoading(true);
+      const isInitialLoad = affiliates.length === 0;
+      if (isInitialLoad) {
+        setLoading(true);
+      } else {
+        setPageLoading(true);
+      }
       try {
         const params = new URLSearchParams({
           page: String(currentPage),
@@ -69,27 +79,28 @@ export const useAffiliates = () => {
           sortOrder,
         });
 
-        const res = await fetch(`/api/admin/affiliates?${params}`, {
-          credentials: "include",
-        });
+        const response = await api.get(`/api/admin/affiliates?${params}`);
 
-        if (!res.ok) {
-          throw new Error("Failed to fetch affiliates");
+        if (response?.success && response?.data) {
+          setAffiliates(response.data.affiliates || []);
+          setPagination(response.data.pagination || {});
+        } else {
+          setAffiliates([]);
+          toast.error("Failed to load affiliates");
         }
-
-        const data = await res.json();
-        setAffiliates(data.affiliates || []);
-        setPagination(data.pagination || {});
       } catch (error) {
         console.error("Error fetching affiliates:", error);
+        // Only show error if it's not just an empty result
+        setAffiliates([]);
         toast.error("Failed to load affiliates");
       } finally {
         setLoading(false);
+        setPageLoading(false);
       }
     };
 
     fetchAffiliatesData();
-  }, [currentPage, debouncedSearch, sortField, sortOrder, pageSize]);
+  }, [currentPage, debouncedSearch, sortField, sortOrder, pageSize, api]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -111,10 +122,58 @@ export const useAffiliates = () => {
     );
   };
 
+  const deleteAffiliate = useCallback(
+    async (affiliateId: string) => {
+      try {
+        const data = await api.del(`/api/admin/affiliates/${affiliateId}`);
+
+        removeAffiliate(affiliateId);
+        toast.success("Affiliate deleted successfully");
+        return data;
+      } catch (error: any) {
+        console.error("Error deleting affiliate:", error);
+        toast.error(error.message || "Failed to delete affiliate");
+        throw error;
+      }
+    },
+    [api]
+  );
+
+  const toggleAffiliateStatus = useCallback(
+    async (affiliateId: string, isDisabled: boolean) => {
+      try {
+        const data = await api.put(`/api/admin/affiliates/${affiliateId}`, {
+          isDisabled,
+        });
+
+        updateAffiliateStatus(affiliateId, isDisabled);
+        toast.success(
+          `Affiliate ${isDisabled ? "disabled" : "enabled"} successfully`
+        );
+        return data;
+      } catch (error: any) {
+        console.error("Error updating affiliate status:", error);
+        toast.error(error.message || "Failed to update affiliate status");
+        throw error;
+      }
+    },
+    [api]
+  );
+
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+  }, []);
+
+  const handlePageSizeChange = useCallback((size: number) => {
+    setPageSize(size);
+    setCurrentPage(1);
+  }, []);
+
   return {
     affiliates,
     pagination,
     loading,
+    pageLoading,
     searchQuery,
     setSearchQuery,
     currentPage,
@@ -124,7 +183,11 @@ export const useAffiliates = () => {
     handleSort,
     pageSize,
     setPageSize,
+    handlePageChange,
+    handlePageSizeChange,
     removeAffiliate,
     updateAffiliateStatus,
+    deleteAffiliate,
+    toggleAffiliateStatus,
   };
 };

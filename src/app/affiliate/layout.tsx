@@ -6,7 +6,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
-import { clearAuth, setUser } from "@/store/authSlice";
+import { clearUser, setUser } from "@/store/userSlice";
+import { clearToken } from "@/store/globalSlice";
+import { useApi } from "@/hooks/useApi";
 import {
     Building2,
     LayoutDashboard,
@@ -39,9 +41,10 @@ const AffiliateDashboardLayout = ({ children }: DashboardLayoutProps) => {
     const [isHydrated, setIsHydrated] = useState(false);
     const router = useRouter();
     const pathname = usePathname();
-    const user = useAppSelector((state) => state.auth.user);
-    const token = useAppSelector((state) => state.auth.token);
+    const user = useAppSelector((state) => state.user.user);
+    const token = useAppSelector((state) => state.global.token);
     const dispatch = useAppDispatch();
+    const api = useApi();
 
     // Wait for Redux persist to rehydrate from sessionStorage
     useEffect(() => {
@@ -62,17 +65,18 @@ const AffiliateDashboardLayout = ({ children }: DashboardLayoutProps) => {
                 return;
             }
             try {
-                const res = await fetch("/api/user", { credentials: "same-origin" });
-                const json = await res.json().catch(() => ({}));
-                if (!res.ok || !json.user) {
-                    dispatch(clearAuth());
+                const json = await api.get("/api/user");
+                if (!json?.success || !json?.data) {
+                    dispatch(clearUser());
+                    dispatch(clearToken());
                     router.replace("/auth");
                     return;
                 }
-                dispatch(setUser(json.user));
+                dispatch(setUser(json.data));
             } catch (err) {
                 console.error("Failed to fetch user", err);
-                dispatch(clearAuth());
+                dispatch(clearUser());
+                dispatch(clearToken());
                 router.replace("/auth");
             } finally {
                 setLoadingUser(false);
@@ -82,7 +86,8 @@ const AffiliateDashboardLayout = ({ children }: DashboardLayoutProps) => {
     }, [isHydrated, token, user, router, dispatch]);
 
     const handleLogout = async () => {
-        dispatch(clearAuth());
+        dispatch(clearUser());
+        dispatch(clearToken());
         router.push("/auth");
     };
 

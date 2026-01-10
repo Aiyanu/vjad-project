@@ -42,9 +42,8 @@ export function HeroSection() {
                             transition={{ duration: 0.6, delay: 0.1 }}
                             className="text-5xl md:text-6xl lg:text-7xl font-display font-bold leading-tight mb-6 text-white"
                         >
-                            Redefining{" "}
-                            <span className="text-vjad-gold">Modern Living</span>{" "}
-                            & Investment
+                            Don't Expect the{" "}
+                            <span className="text-vjad-gold">Usual</span>{" "}
                         </motion.h1>
 
                         <motion.p

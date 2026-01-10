@@ -1,21 +1,14 @@
 import { NextResponse } from "next/server";
-import { verifyJwt } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { requireAdmin } from "@/lib/authMiddleware";
+import { apiSuccess, apiError } from "@/lib/api-response-server";
 
-export async function GET(req: Request) {
+export async function GET(request: Request) {
   try {
-    const cookieHeader = req.headers.get("cookie") ?? "";
-    const match = cookieHeader.match(/vj_session=([^;]+)/);
-    const token = match ? decodeURIComponent(match[1]) : undefined;
-
-    const payload = verifyJwt(token);
-    if (!payload || typeof payload === "string") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const role = (payload as any).role as string | undefined;
-    if (role !== "admin" && role !== "super_admin") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const { user, error, status } = requireAdmin(request);
+    if (error) {
+      const [response, httpStatus] = apiError(error, status);
+      return NextResponse.json(response, { status: httpStatus });
     }
 
     const users = await prisma.user.findMany({
@@ -24,14 +17,14 @@ export async function GET(req: Request) {
         email: true,
         fullName: true,
         role: true,
-        referralCode: true,
         createdAt: true,
       },
     });
 
-    return NextResponse.json({ ok: true, users });
+    const [response, httpStatus] = apiSuccess(users, "Users fetched", 200);
+    return NextResponse.json(response, { status: httpStatus });
   } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    const [response, status] = apiError("Server error", 500, err);
+    return NextResponse.json(response, { status });
   }
 }

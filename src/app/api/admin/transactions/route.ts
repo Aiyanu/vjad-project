@@ -1,21 +1,14 @@
 import { NextResponse } from "next/server";
-import { verifyJwt } from "@/lib/auth";
+import { requireAdmin } from "@/lib/authMiddleware";
+import { apiSuccess, apiError } from "@/lib/api-response-server";
 
 // Admin transactions placeholder
-export async function GET(req: Request) {
+export async function GET(request: Request) {
   try {
-    const cookieHeader = req.headers.get("cookie") ?? "";
-    const match = cookieHeader.match(/vj_session=([^;]+)/);
-    const token = match ? decodeURIComponent(match[1]) : undefined;
-
-    const payload = verifyJwt(token);
-    if (!payload || typeof payload === "string") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const role = (payload as any).role as string | undefined;
-    if (role !== "admin" && role !== "super_admin") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const { user, error, status } = requireAdmin(request);
+    if (error) {
+      const [response, httpStatus] = apiError(error, status);
+      return NextResponse.json(response, { status: httpStatus });
     }
 
     const transactions = [
@@ -37,9 +30,14 @@ export async function GET(req: Request) {
       },
     ];
 
-    return NextResponse.json({ ok: true, transactions });
+    const [response, httpStatus] = apiSuccess(
+      transactions,
+      "Transactions fetched",
+      200
+    );
+    return NextResponse.json(response, { status: httpStatus });
   } catch (err) {
-    console.error(err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    const [response, status] = apiError("Server error", 500, err);
+    return NextResponse.json(response, { status });
   }
 }

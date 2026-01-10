@@ -4,6 +4,7 @@ import "./globals.css";
 import Head from "next/head";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthInitializer } from "@/components/AuthInitializer";
+import { GlobalModal } from "@/components/GlobalModal";
 import ReduxProvider from "@/store/ReduxProvider";
 
 const geistSans = Geist({
@@ -41,8 +42,9 @@ export default function RootLayout({
           <AuthInitializer>
             {children}
           </AuthInitializer>
+          <GlobalModal />
         </ReduxProvider>
-        <Toaster />
+        <Toaster expand richColors />
       </body>
     </html>
   );

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiSuccess, apiError } from "@/lib/api-response-server";
 
 // Fetch banks from Paystack API (free, no auth required)
 export async function GET() {
@@ -13,12 +14,14 @@ export async function GET() {
     }
 
     const json = await res.json();
-    return NextResponse.json({ banks: json.data || [] });
-  } catch (error) {
-    console.error("Error fetching banks:", error);
-    return NextResponse.json(
-      { error: "Could not load banks", banks: [] },
-      { status: 500 }
+    const [response, status] = apiSuccess(
+      json.data || [],
+      "Banks fetched",
+      200
     );
+    return NextResponse.json(response, { status });
+  } catch (error) {
+    const [response, status] = apiError("Could not load banks", 500, error);
+    return NextResponse.json(response, { status });
   }
 }

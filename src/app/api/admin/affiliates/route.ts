@@ -1,32 +1,18 @@
 import { NextResponse } from "next/server";
-import { verifyJwt } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { requireAdmin } from "@/lib/authMiddleware";
+import { apiSuccess, apiError } from "@/lib/api-response-server";
 
-export async function GET(req: Request) {
+export async function GET(request: Request) {
   try {
-    const cookieHeader = req.headers.get("cookie") ?? "";
-    const match = cookieHeader.match(/vj_session=([^;]+)/);
-    const token = match ? decodeURIComponent(match[1]) : undefined;
-
-    const payload = verifyJwt(token);
-    if (!payload || typeof payload === "string") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = (payload as any).sub as string;
-
-    // Verify user is admin or super_admin
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { role: true },
-    });
-
-    if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const { user, error, status } = requireAdmin(request);
+    if (error) {
+      const [response, httpStatus] = apiError(error, status);
+      return NextResponse.json(response, { status: httpStatus });
     }
 
     // Parse query parameters
-    const url = new URL(req.url);
+    const url = new URL(request.url);
     const page = Math.max(1, parseInt(url.searchParams.get("page") || "1"));
     const limit = Math.min(
       100,
@@ -39,13 +25,17 @@ export async function GET(req: Request) {
     ).toLowerCase();
 
     // Build where clause for search
-    const where: any = { role: "affiliate" };
+    const where: any = { role: "affiliate", affiliate: { isNot: null } };
     if (search) {
       where.OR = [
         { email: { contains: search, mode: "insensitive" } },
         { fullName: { contains: search, mode: "insensitive" } },
         { phone: { contains: search, mode: "insensitive" } },
-        { referralCode: { contains: search, mode: "insensitive" } },
+        {
+          affiliate: {
+            is: { referralCode: { contains: search, mode: "insensitive" } },
+          },
+        },
       ];
     }
 
@@ -71,16 +61,18 @@ export async function GET(req: Request) {
         id: true,
         email: true,
         fullName: true,
-        referralCode: true,
         emailVerified: true,
         isDisabled: true,
         createdAt: true,
         phone: true,
-        bankName: true,
-        accountNumber: true,
-        _count: {
+        affiliate: {
           select: {
-            referrals: true,
+            referralCode: true,
+            bankName: true,
+            accountNumber: true,
+            bankCode: true,
+            accountName: true,
+            _count: { select: { referrals: true } },
           },
         },
       },
@@ -95,8 +87,13 @@ export async function GET(req: Request) {
     // Map to response format with referralsCount
     let formattedAffiliates = affiliates.map((aff) => ({
       ...aff,
-      referralsCount: aff._count.referrals,
-      _count: undefined,
+      referralCode: aff.affiliate?.referralCode ?? null,
+      bankName: aff.affiliate?.bankName ?? null,
+      accountNumber: aff.affiliate?.accountNumber ?? null,
+      bankCode: aff.affiliate?.bankCode ?? null,
+      accountName: aff.affiliate?.accountName ?? null,
+      referralsCount: aff.affiliate?._count.referrals ?? 0,
+      affiliate: undefined,
     }));
 
     // Sort by referralsCount if needed (can't sort in DB query with _count)
@@ -107,20 +104,26 @@ export async function GET(req: Request) {
       });
     }
 
-    return NextResponse.json({
-      affiliates: formattedAffiliates,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
+    const [response, httpStatus] = apiSuccess(
+      {
+        affiliates: formattedAffiliates,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
       },
-    });
-  } catch (error) {
-    console.error("Error fetching affiliates:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch affiliates" },
-      { status: 500 }
+      "Affiliates fetched",
+      200
     );
+    return NextResponse.json(response, { status: httpStatus });
+  } catch (error) {
+    const [response, status] = apiError(
+      "Failed to fetch affiliates",
+      500,
+      error
+    );
+    return NextResponse.json(response, { status });
   }
 }

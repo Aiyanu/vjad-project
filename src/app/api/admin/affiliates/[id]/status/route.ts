@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import db from "@/lib/db";
-import { verifyJwt } from "@/lib/auth";
+import { requireAdmin } from "@/lib/authMiddleware";
+import { apiSuccess, apiError } from "@/lib/api-response-server";
 
 export async function PATCH(
   request: NextRequest,
@@ -8,36 +9,31 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
-    // Get auth token
-    const token = request.cookies.get("vj_session")?.value;
-    if (!token) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const { user, error, status } = requireAdmin(request);
+    if (error) {
+      const [response, respStatus] = apiError(error, status);
+      return NextResponse.json(response, { status: respStatus });
     }
 
-    // Verify token and get user
-    const payload = verifyJwt(token);
-    if (!payload || typeof payload === "string") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
     const currentUser = await db.user.findUnique({
-      where: { id: (payload as any).userId },
+      where: { id: user.userId },
     });
 
-    if (
-      !currentUser ||
-      (currentUser.role !== "admin" && currentUser.role !== "super_admin")
-    ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!currentUser) {
+      const [response, respStatus] = apiError("User not found", 404);
+      return NextResponse.json(response, { status: respStatus });
     }
 
     const body = await request.json();
     const { isDisabled } = body;
 
     if (typeof isDisabled !== "boolean") {
-      return NextResponse.json(
-        { error: "isDisabled must be a boolean" },
-        { status: 400 }
+      const [response, respStatus] = apiError(
+        "isDisabled must be a boolean",
+        400
       );
+      return NextResponse.json(response, { status: respStatus });
     }
 
     // Get the user to be updated
@@ -46,15 +42,17 @@ export async function PATCH(
     });
 
     if (!userToUpdate) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      const [response, respStatus] = apiError("User not found", 404);
+      return NextResponse.json(response, { status: respStatus });
     }
 
     // Prevent disabling yourself
     if (userToUpdate.id === currentUser.id) {
-      return NextResponse.json(
-        { error: "You cannot disable your own account" },
-        { status: 400 }
+      const [response, respStatus] = apiError(
+        "You cannot disable your own account",
+        400
       );
+      return NextResponse.json(response, { status: respStatus });
     }
 
     // Only super admin can disable other admins or super admins
@@ -62,10 +60,11 @@ export async function PATCH(
       (userToUpdate.role === "admin" || userToUpdate.role === "super_admin") &&
       currentUser.role !== "super_admin"
     ) {
-      return NextResponse.json(
-        { error: "Only super admin can disable admin accounts" },
-        { status: 403 }
+      const [response, respStatus] = apiError(
+        "Only super admin can disable admin accounts",
+        403
       );
+      return NextResponse.json(response, { status: respStatus });
     }
 
     // Update user disabled status
@@ -81,15 +80,18 @@ export async function PATCH(
       },
     });
 
-    return NextResponse.json({
-      message: `User ${isDisabled ? "disabled" : "enabled"} successfully`,
-      user: updatedUser,
-    });
-  } catch (error) {
-    console.error("Update user status error:", error);
-    return NextResponse.json(
-      { error: "Failed to update user status" },
-      { status: 500 }
+    const [response, respStatus] = apiSuccess(
+      { user: updatedUser },
+      `User ${isDisabled ? "disabled" : "enabled"} successfully`,
+      200
     );
+    return NextResponse.json(response, { status: respStatus });
+  } catch (error) {
+    const [response, respStatus] = apiError(
+      "Failed to update user status",
+      500,
+      error
+    );
+    return NextResponse.json(response, { status: respStatus });
   }
 }

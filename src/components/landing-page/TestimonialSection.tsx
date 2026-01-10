@@ -45,7 +45,7 @@ export function TestimonialsSection() {
                 >
                     <span className="gold-badge mb-4">Testimonials</span>
                     <h2 className="text-4xl md:text-5xl font-display font-bold mt-4 mb-4">
-                        What Our Affiliates Say
+                        What Our Clients Say
                     </h2>
                     <p className="text-xl text-secondary-foreground/70 max-w-2xl mx-auto">
                         Join hundreds of successful affiliates who are building wealth with VJAD Projects

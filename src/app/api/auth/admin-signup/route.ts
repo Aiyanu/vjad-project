@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import db from "@/lib/db";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
+import { apiSuccess, apiError } from "@/lib/api-response-server";
 
 function generateReferralCode() {
   return "REF" + crypto.randomBytes(4).toString("hex").toUpperCase();
@@ -14,18 +15,20 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     if (!fullName || !email || !password) {
-      return NextResponse.json(
-        { error: "Full name, email, and password are required" },
-        { status: 400 }
+      const [response, status] = apiError(
+        "Full name, email, and password are required",
+        400
       );
+      return NextResponse.json(response, { status });
     }
 
     // Validate password length
     if (password.length < 6) {
-      return NextResponse.json(
-        { error: "Password must be at least 6 characters" },
-        { status: 400 }
+      const [response, status] = apiError(
+        "Password must be at least 6 characters",
+        400
       );
+      return NextResponse.json(response, { status });
     }
 
     // Check if a super admin already exists
@@ -36,13 +39,11 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingSuperAdmin) {
-      return NextResponse.json(
-        {
-          error:
-            "A super admin account already exists. Only one super admin is allowed.",
-        },
-        { status: 400 }
+      const [response, status] = apiError(
+        "A super admin account already exists. Only one super admin is allowed.",
+        400
       );
+      return NextResponse.json(response, { status });
     }
 
     // Check if email is already taken
@@ -51,10 +52,11 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingUser) {
-      return NextResponse.json(
-        { error: "An account with this email already exists" },
-        { status: 400 }
+      const [response, status] = apiError(
+        "An account with this email already exists",
+        400
       );
+      return NextResponse.json(response, { status });
     }
 
     // Hash password
@@ -68,7 +70,6 @@ export async function POST(request: NextRequest) {
         fullName,
         role: "super_admin",
         emailVerified: true, // Auto-verify super admin
-        referralCode: generateReferralCode(),
         phone: phone || null,
       },
       select: {
@@ -80,18 +81,18 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(
-      {
-        message: "Super admin account created successfully",
-        user: superAdmin,
-      },
-      { status: 201 }
+    const [response, status] = apiSuccess(
+      superAdmin,
+      "Super admin account created successfully",
+      201
     );
+    return NextResponse.json(response, { status });
   } catch (error) {
-    console.error("Admin signup error:", error);
-    return NextResponse.json(
-      { error: "Failed to create admin account" },
-      { status: 500 }
+    const [response, status] = apiError(
+      "Failed to create admin account",
+      500,
+      error
     );
+    return NextResponse.json(response, { status });
   }
 }

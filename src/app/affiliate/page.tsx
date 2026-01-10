@@ -5,10 +5,13 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { toast, Toaster } from "sonner";
 import { useAppSelector } from "@/store/hooks";
+import { useApi } from "@/hooks/useApi";
+import { useReferralCount } from "@/hooks/useReferralCount";
 
 import { StatCard } from "@/components/landing-page/StatCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { StatCardSkeleton } from "@/components/SkeletonLoaders";
 
 import {
     Users,
@@ -24,31 +27,15 @@ import {
 const AffiliateDashboard = () => {
     const [copied, setCopied] = useState(false);
     const [origin, setOrigin] = useState("");
-    const [totalReferrals, setTotalReferrals] = useState(0);
-    const [loading, setLoading] = useState(true);
-    const user = useAppSelector((state) => state.auth.user);
+    const user = useAppSelector((state) => state.user.user);
     const referralCode = user?.referralCode || "";
+    const api = useApi();
+    const { count: totalReferrals, loading: countLoading } = useReferralCount();
 
     useEffect(() => {
         if (typeof window !== "undefined") setOrigin(window.location.origin);
     }, []);
-
-    useEffect(() => {
-        const fetchReferrals = async () => {
-            try {
-                const res = await fetch("/api/affiliate/referrals", { credentials: "include" });
-                if (res.ok) {
-                    const data = await res.json();
-                    setTotalReferrals(data.referrals?.length || 0);
-                }
-            } catch (err) {
-                console.error("Failed to fetch referrals:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchReferrals();
-    }, []);
+    
 
     const referralLink = `${origin}/ref/${referralCode}`;
 
@@ -70,7 +57,7 @@ const AffiliateDashboard = () => {
     const userName = user?.fullName || "Partner";
 
     const stats = [
-        { title: "Total Referrals", value: loading ? 0 : totalReferrals, icon: Users },
+        { title: "Total Referrals", value: totalReferrals, icon: Users },
     ];
 
     return (
@@ -117,11 +104,15 @@ const AffiliateDashboard = () => {
                 </motion.div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {stats.map((stat, i) => (
-                        <motion.div key={stat.title} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.2 + i * 0.1 }}>
-                            <StatCard {...stat} />
-                        </motion.div>
-                    ))}
+                    {countLoading ? (
+                        <StatCardSkeleton />
+                    ) : (
+                        stats.map((stat, i) => (
+                            <motion.div key={stat.title} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.2 + i * 0.1 }}>
+                                <StatCard {...stat} />
+                            </motion.div>
+                        ))
+                    )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
@@ -148,15 +139,15 @@ export default AffiliateDashboard;
 function VerifiedAffiliatesCard() {
     const [affiliates, setAffiliates] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const api = useApi();
 
     useEffect(() => {
         const fetchTopAffiliates = async () => {
             try {
-                const res = await fetch("/api/admin/affiliates");
-                if (!res.ok) throw new Error("Failed to fetch");
-                const json = await res.json();
-                // Expecting an array of affiliates; pick first 3 verified
-                const verified = (json?.affiliates || json || []).filter((a: any) => a.is_active || a.emailVerified).slice(0, 3);
+                const response = await api.get("/api/admin/affiliates");
+                // Expecting the affiliates in response.data.affiliates
+                const affiliatesList = response?.success && response?.data?.affiliates ? response.data.affiliates : [];
+                const verified = affiliatesList.filter((a: any) => a.emailVerified).slice(0, 3);
                 setAffiliates(verified);
             } catch (err) {
                 console.warn("Could not fetch affiliates", err);
@@ -167,7 +158,7 @@ function VerifiedAffiliatesCard() {
         };
 
         fetchTopAffiliates();
-    }, []);
+    }, [api]);
 
     return (
         <motion.div className="card-elegant" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.7 }}>

@@ -1,43 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyJwt } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { requireAdmin } from "@/lib/authMiddleware";
+import { apiSuccess, apiError } from "@/lib/api-response-server";
+import { verifyJwt } from "@/lib/auth";
 
 export async function PATCH(
-  req: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params;
-    const cookieHeader = req.headers.get("cookie") ?? "";
-    const match = cookieHeader.match(/vj_session=([^;]+)/);
-    const token = match ? decodeURIComponent(match[1]) : undefined;
 
-    const payload = verifyJwt(token);
-    if (!payload || typeof payload === "string") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userId = (payload as any).sub as string;
-
-    // Verify user is admin or super_admin
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { role: true },
-    });
-
-    if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const { user, error, status } = requireAdmin(request);
+    if (error) {
+      const [response, respStatus] = apiError(error, status);
+      return NextResponse.json(response, { status: respStatus });
     }
 
     const affiliateId = id;
-    const body = await req.json();
+    const body = await request.json();
     const { isDisabled } = body;
 
     if (typeof isDisabled !== "boolean") {
-      return NextResponse.json(
-        { error: "isDisabled must be a boolean" },
-        { status: 400 }
+      const [response, respStatus] = apiError(
+        "isDisabled must be a boolean",
+        400
       );
+      return NextResponse.json(response, { status: respStatus });
     }
 
     // Check if affiliate exists and is actually an affiliate
@@ -72,14 +61,15 @@ export async function PATCH(
       },
     });
 
-    return NextResponse.json({
-      ok: true,
-      message: "Affiliate updated successfully",
-      affiliate: updated,
-    });
+    const [response, respStatus] = apiSuccess(
+      { affiliate: updated },
+      "Affiliate updated successfully",
+      200
+    );
+    return NextResponse.json(response, { status: respStatus });
   } catch (err) {
-    console.error("Error updating affiliate:", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    const [response, respStatus] = apiError("Server error", 500, err);
+    return NextResponse.json(response, { status: respStatus });
   }
 }
 
@@ -95,7 +85,8 @@ export async function DELETE(
 
     const payload = verifyJwt(token);
     if (!payload || typeof payload === "string") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      const [response, respStatus] = apiError("Unauthorized", 401);
+      return NextResponse.json(response, { status: respStatus });
     }
 
     const userId = (payload as any).sub as string;
@@ -107,7 +98,8 @@ export async function DELETE(
     });
 
     if (!user || (user.role !== "admin" && user.role !== "super_admin")) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      const [response, respStatus] = apiError("Forbidden", 403);
+      return NextResponse.json(response, { status: respStatus });
     }
 
     const affiliateId = id;
@@ -137,12 +129,14 @@ export async function DELETE(
       where: { id: affiliateId },
     });
 
-    return NextResponse.json({
-      ok: true,
-      message: "Affiliate removed successfully",
-    });
+    const [response, respStatus] = apiSuccess(
+      null,
+      "Affiliate removed successfully",
+      200
+    );
+    return NextResponse.json(response, { status: respStatus });
   } catch (err) {
-    console.error("Error removing affiliate:", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    const [response, respStatus] = apiError("Server error", 500, err);
+    return NextResponse.json(response, { status: respStatus });
   }
 }
