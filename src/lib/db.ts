@@ -1,25 +1,20 @@
 import { PrismaClient } from "@/generated/prisma/client";
-import { PrismaMariaDb } from "@prisma/adapter-mariadb";
-import mariadb from "mariadb";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 
-// Parse DATABASE_URL for MariaDB pool config
-const databaseUrl = new URL(process.env.DATABASE_URL!);
+// Parse DATABASE_URL for PostgreSQL pool config
+const databaseUrl = process.env.DATABASE_URL!;
 
-// Create a connection pool for MariaDB
-const pool = mariadb.createPool({
-  host: databaseUrl.hostname,
-  port: parseInt(databaseUrl.port) || 3306,
-  user: databaseUrl.username,
-  password: databaseUrl.password,
-  database: databaseUrl.pathname.slice(1), // Remove leading slash
-  connectionLimit: 10,
-  acquireTimeout: 30000,
-  idleTimeout: 60000,
-  minimumIdle: 2,
+// Create a connection pool for PostgreSQL
+const pool = new Pool({
+  connectionString: databaseUrl,
+  max: 10,
+  idleTimeoutMillis: 60000,
+  connectionTimeoutMillis: 30000,
 });
 
-// Create MariaDB adapter with the connection string
-const adapter = new PrismaMariaDb(process.env.DATABASE_URL!);
+// Create PostgreSQL adapter with the pool
+const adapter = new PrismaPg(pool);
 
 // Ensure we reuse PrismaClient in development to avoid multiple instances
 declare global {
