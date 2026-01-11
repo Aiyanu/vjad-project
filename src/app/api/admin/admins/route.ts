@@ -7,6 +7,8 @@ import { emailTemplates } from "@/lib/emailTemplates";
 import { requireAdmin } from "@/lib/authMiddleware";
 import { apiSuccess, apiError } from "@/lib/api-response-server";
 
+export const dynamic = "force-dynamic";
+
 // GET - Fetch admins with pagination/sort
 export async function GET(request: NextRequest) {
   const { error, status } = requireAdmin(request);

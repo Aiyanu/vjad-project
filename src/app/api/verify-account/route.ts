@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 // Verify bank account using Paystack Resolve Account API
 export async function POST(req: NextRequest) {
   try {

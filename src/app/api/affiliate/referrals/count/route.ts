@@ -3,6 +3,8 @@ import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/authMiddleware";
 import { apiSuccess, apiError } from "@/lib/api-response-server";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   try {
     const { user, error, status } = requireAuth(request);

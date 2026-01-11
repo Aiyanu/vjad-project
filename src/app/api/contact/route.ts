@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { sendMail } from "@/lib/mailer";
 import { rateLimit } from "@/lib/rateLimit";
 
+export const dynamic = "force-dynamic";
+
 // Rate limit: 5 submissions per hour per IP
 const contactRateLimit = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour

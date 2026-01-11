@@ -4,6 +4,8 @@ import bcrypt from "bcrypt";
 import { requireAuth } from "@/lib/authMiddleware";
 import { apiSuccess, apiError } from "@/lib/api-response-server";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: NextRequest) {
   try {
     const { user, error, status } = requireAuth(request);

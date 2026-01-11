@@ -3,6 +3,8 @@ import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/authMiddleware";
 import { apiError, apiSuccess } from "@/lib/api-response-server";
 
+export const dynamic = "force-dynamic";
+
 export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ id: string }> }

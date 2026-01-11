@@ -6,6 +6,8 @@ import { signJwt } from "@/lib/auth";
 import { authRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 import { apiSuccess, apiError } from "@/lib/api-response-server";
 
+export const dynamic = "force-dynamic";
+
 type Body = { email?: string; password?: string };
 
 function delay(ms = 250) {

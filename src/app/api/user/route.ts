@@ -3,6 +3,8 @@ import { prisma } from "@/lib/db";
 import { requireAuth } from "@/lib/authMiddleware";
 import { apiSuccess, apiError } from "@/lib/api-response-server";
 
+export const dynamic = "force-dynamic";
+
 const flattenUser = (user: any) => {
   if (!user) return null;
   const affiliate = user.affiliate;

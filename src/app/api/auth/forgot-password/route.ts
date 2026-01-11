@@ -6,6 +6,8 @@ import { sendMail } from "@/lib/mailer";
 import { emailTemplates } from "@/lib/emailTemplates";
 import { apiSuccess, apiError } from "@/lib/api-response-server";
 
+export const dynamic = "force-dynamic";
+
 function randomTokenHex(len = 32) {
   return crypto.randomBytes(len).toString("hex");
 }

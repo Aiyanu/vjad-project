@@ -4,6 +4,8 @@ import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { apiSuccess, apiError } from "@/lib/api-response-server";
 
+export const dynamic = "force-dynamic";
+
 function generateReferralCode() {
   return "REF" + crypto.randomBytes(4).toString("hex").toUpperCase();
 }

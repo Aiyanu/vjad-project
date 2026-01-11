@@ -2,6 +2,8 @@ import { NextResponse, NextRequest } from "next/server";
 import bcrypt from "bcrypt";
 import { prisma } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: NextRequest) {
   try {
     // Check if seeding is enabled via environment variable

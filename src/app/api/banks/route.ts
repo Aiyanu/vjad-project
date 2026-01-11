@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { apiSuccess, apiError } from "@/lib/api-response-server";
 
+export const dynamic = "force-dynamic";
+
 // Fetch banks from Paystack API (free, no auth required)
 export async function GET() {
   try {

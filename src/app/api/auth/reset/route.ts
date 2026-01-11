@@ -4,6 +4,8 @@ import bcrypt from "bcrypt";
 import { prisma } from "@/lib/db";
 import { apiSuccess, apiError } from "@/lib/api-response-server";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: Request) {
   try {
     const { email, token, password } = await req.json().catch(() => ({}));
