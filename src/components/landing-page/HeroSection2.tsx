@@ -11,7 +11,7 @@ export default function HeroSection2() {
                 <div className="grid lg:grid-cols-2 gap-12 items-center">
                     <div className="text-white">
                         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-full text-sm font-medium text-white mb-8">
-                            <Shield className="w-4 h-4 text-vjad-gold" />
+                            <Shield className="w-4 h-4 text-vijad-gold" />
                             Trusted Real Estate Partner
                         </motion.div>
 
@@ -38,7 +38,7 @@ export default function HeroSection2() {
                                     { label: "Competitive Payouts", desc: "Transparent and timely commission payments", icon: Users },
                                 ].map((item, i) => (
                                     <div key={i} className="flex items-start gap-4 p-4 rounded-xl bg-white/5">
-                                        <div className="w-2 h-2 mt-2 rounded-full bg-vjad-gold" />
+                                        <div className="w-2 h-2 mt-2 rounded-full bg-vijad-gold" />
                                         <div>
                                             <div className="font-semibold text-white">{item.label}</div>
                                             <div className="text-sm text-white/60">{item.desc}</div>

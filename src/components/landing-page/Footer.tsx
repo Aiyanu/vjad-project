@@ -49,7 +49,7 @@ export function Footer() {
                     {/* Brand Column */}
                     <div className="lg:col-span-2">
                         <a href="#home" className="flex items-center gap-3 mb-6">
-                            <Image src={"/vijad-projects.png"} width={100} height={100} alt="vjad" />
+                            <Image src={"/vijad-projects.png"} width={100} height={100} alt="vijad" />
                         </a>
 
                         <p className="text-secondary-foreground/70 mb-6 max-w-sm">
@@ -59,9 +59,9 @@ export function Footer() {
 
                         {/* Contact Info */}
                         <div className="space-y-3">
-                            <a href="mailto:info@vjadprojects.com" className="flex items-center gap-3 text-secondary-foreground/70 hover:text-secondary-foreground transition-colors">
+                            <a href="mailto:info@vijadprojects.com" className="flex items-center gap-3 text-secondary-foreground/70 hover:text-secondary-foreground transition-colors">
                                 <Mail className="w-4 h-4" />
-                                info@vjadprojects.com
+                                info@vijadprojects.com
                             </a>
                             <a href="tel:+2341234567890" className="flex items-center gap-3 text-secondary-foreground/70 hover:text-secondary-foreground transition-colors">
                                 <Phone className="w-4 h-4" />
@@ -125,7 +125,7 @@ export function Footer() {
                 {/* Bottom Bar */}
                 <div className="pt-8 border-t border-secondary-foreground/10 flex flex-col md:flex-row justify-between items-center gap-4">
                     <p className="text-secondary-foreground/60 text-sm">
-                        © {new Date().getFullYear()} VJAD Projects. All rights reserved.
+                        © {new Date().getFullYear()} vijad Projects. All rights reserved.
                     </p>
 
                     {/* Social Links */}

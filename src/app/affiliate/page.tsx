@@ -35,7 +35,7 @@ const AffiliateDashboard = () => {
     useEffect(() => {
         if (typeof window !== "undefined") setOrigin(window.location.origin);
     }, []);
-    
+
 
     const referralLink = `${origin}/ref/${referralCode}`;
 
@@ -94,7 +94,7 @@ const AffiliateDashboard = () => {
                             <Button
                                 size="sm"
                                 onClick={copyToClipboard}
-                                className="bg-white text-[var(--color-vjad-navy)] hover:bg-white/90 shrink-0"
+                                className="bg-white text-[var(--color-vijad-navy)] hover:bg-white/90 shrink-0"
                                 aria-label="Copy referral link"
                             >
                                 {copied ? <CheckCircle className="h-4 w-4" /> : <Copy className="h-4 w-4" />}

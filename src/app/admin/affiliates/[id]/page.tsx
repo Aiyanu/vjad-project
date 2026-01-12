@@ -122,7 +122,7 @@ export default function AffiliateDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-[var(--color-vjad-navy)]" />
+        <Loader2 className="h-8 w-8 animate-spin text-[var(--color-vijad-navy)]" />
       </div>
     );
   }
@@ -144,7 +144,7 @@ export default function AffiliateDetailPage() {
               Back
             </Button>
 
-            <h1 className="text-2xl sm:text-3xl font-bold text-[var(--color-vjad-navy)]">
+            <h1 className="text-2xl sm:text-3xl font-bold text-[var(--color-vijad-navy)]">
               Affiliate Details
             </h1>
           </div>
@@ -209,7 +209,7 @@ export default function AffiliateDetailPage() {
           >
             <Card className="border-0 shadow-md h-full">
               <CardHeader>
-                <CardTitle className="text-[var(--color-vjad-navy)]">
+                <CardTitle className="text-[var(--color-vijad-navy)]">
                   Personal Information
                 </CardTitle>
               </CardHeader>
@@ -239,9 +239,9 @@ export default function AffiliateDetailPage() {
                   value={
                     affiliate.createdAt
                       ? format(
-                          new Date(affiliate.createdAt),
-                          "MMMM d, yyyy"
-                        )
+                        new Date(affiliate.createdAt),
+                        "MMMM d, yyyy"
+                      )
                       : "N/A"
                   }
                 />
@@ -257,7 +257,7 @@ export default function AffiliateDetailPage() {
           >
             <Card className="border-0 shadow-md h-full">
               <CardHeader>
-                <CardTitle className="text-[var(--color-vjad-navy)]">
+                <CardTitle className="text-[var(--color-vijad-navy)]">
                   Account Status
                 </CardTitle>
               </CardHeader>
@@ -298,7 +298,7 @@ export default function AffiliateDetailPage() {
                   <p className="text-sm text-[var(--color-muted-foreground)] mb-2">
                     Total Referrals
                   </p>
-                  <p className="text-2xl font-bold text-[var(--color-vjad-primary)]">
+                  <p className="text-2xl font-bold text-[var(--color-vijad-primary)]">
                     {affiliate.referralsCount}
                   </p>
                 </div>
@@ -315,7 +315,7 @@ export default function AffiliateDetailPage() {
           >
             <Card className="border-0 shadow-md h-full">
               <CardHeader>
-                <CardTitle className="text-[var(--color-vjad-navy)]">
+                <CardTitle className="text-[var(--color-vijad-navy)]">
                   Banking Information
                 </CardTitle>
               </CardHeader>
@@ -345,7 +345,7 @@ export default function AffiliateDetailPage() {
           >
             <Card className="border-0 shadow-md h-full overflow-hidden">
               <CardHeader>
-                <CardTitle className="text-[var(--color-vjad-navy)]">
+                <CardTitle className="text-[var(--color-vijad-navy)]">
                   Referrals ({affiliate.referralsCount})
                 </CardTitle>
               </CardHeader>
@@ -357,9 +357,9 @@ export default function AffiliateDetailPage() {
                   loading={false}
                   pageLoading={false}
                   pagination={referralsPagination}
-                  onPageChange={() => {}}
-                  onPageSizeChange={() => {}}
-                  onSort={() => {}}
+                  onPageChange={() => { }}
+                  onPageSizeChange={() => { }}
+                  onSort={() => { }}
                   sortField="createdAt"
                   emptyIcon={
                     <Users className="h-12 w-12 mx-auto mb-3 opacity-30" />

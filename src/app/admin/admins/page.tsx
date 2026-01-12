@@ -126,7 +126,7 @@ export default function AdminAdmins() {
         render: (value, admin) => (
           <div className="flex items-center gap-2 font-medium">
             {admin.role === "super_admin" && (
-              <Shield className="h-4 w-4 text-[hsl(var(--vjad-gold))]" />
+              <Shield className="h-4 w-4 text-[hsl(var(--vijad-gold))]" />
             )}
             {value || "N/A"}
           </div>
@@ -242,7 +242,7 @@ export default function AdminAdmins() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="role">Role</Label>
-                  <Select value={role} onValueChange={(value) => setRole(value as "admin" | "super_admin") }>
+                  <Select value={role} onValueChange={(value) => setRole(value as "admin" | "super_admin")}>
                     <SelectTrigger id="role" className="w-full">
                       <SelectValue placeholder="Select role" />
                     </SelectTrigger>

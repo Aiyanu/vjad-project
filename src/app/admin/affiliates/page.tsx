@@ -71,7 +71,7 @@ export default function AdminAffiliates() {
       header: "Referrals",
       key: "referralsCount",
       sortable: true,
-      render: (value) => <span className="font-semibold text-(--vjad-primary)">{value}</span>,
+      render: (value) => <span className="font-semibold text-(--vijad-primary)">{value}</span>,
     },
     {
       header: "Status",

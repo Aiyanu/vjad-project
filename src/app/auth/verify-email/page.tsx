@@ -143,7 +143,7 @@ const VerifyEmail = () => {
                             src="/vijad-projects-dark.png"
                             width={150}
                             height={70}
-                            alt="vjad"
+                            alt="vijad"
                         />
                     </Link>
 
@@ -153,8 +153,8 @@ const VerifyEmail = () => {
                             animate={{ opacity: 1, scale: 1 }}
                             className="space-y-4"
                         >
-                            <div className="w-16 h-16 mx-auto bg-[var(--color-vjad-gold)]/10 rounded-full flex items-center justify-center">
-                                <Loader2 className="h-8 w-8 text-[var(--color-vjad-gold)] animate-spin" />
+                            <div className="w-16 h-16 mx-auto bg-[var(--color-vijad-gold)]/10 rounded-full flex items-center justify-center">
+                                <Loader2 className="h-8 w-8 text-[var(--color-vijad-gold)] animate-spin" />
                             </div>
                             <h2 className="text-2xl font-display font-bold text-[var(--color-foreground)]">
                                 Verifying your email
@@ -185,8 +185,8 @@ const VerifyEmail = () => {
                             animate={{ opacity: 1, scale: 1 }}
                             className="space-y-6"
                         >
-                            <div className="w-16 h-16 mx-auto bg-[var(--color-vjad-gold)]/10 rounded-full flex items-center justify-center">
-                                <Mail className="h-8 w-8 text-[var(--color-vjad-gold)]" />
+                            <div className="w-16 h-16 mx-auto bg-[var(--color-vijad-gold)]/10 rounded-full flex items-center justify-center">
+                                <Mail className="h-8 w-8 text-[var(--color-vijad-gold)]" />
                             </div>
                             <div>
                                 <h2 className="text-2xl font-display font-bold text-[var(--color-foreground)] mb-2">

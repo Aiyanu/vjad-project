@@ -60,7 +60,7 @@ export default function AffiliateShare() {
         }
     };
 
-    const shareMessage = `Check out VJAD Projects! Premium real estate investments in Nigeria. Use my referral link: ${referralLink}`;
+    const shareMessage = `Check out vijad Projects! Premium real estate investments in Nigeria. Use my referral link: ${referralLink}`;
 
     const shareOptions = [
         {
@@ -91,7 +91,7 @@ export default function AffiliateShare() {
             name: "Email",
             icon: Mail,
             color: "bg-gray-600",
-            url: `mailto:?subject=${encodeURIComponent("Invest in Premium Real Estate with VJAD Projects")}&body=${encodeURIComponent(shareMessage)}`,
+            url: `mailto:?subject=${encodeURIComponent("Invest in Premium Real Estate with vijad Projects")}&body=${encodeURIComponent(shareMessage)}`,
         },
     ];
 
@@ -110,7 +110,7 @@ export default function AffiliateShare() {
         },
         {
             title: "Highlight project benefits",
-            description: "Emphasize location, ROI potential, and VJAD's track record",
+            description: "Emphasize location, ROI potential, and vijad's track record",
         },
     ];
 
@@ -153,7 +153,7 @@ export default function AffiliateShare() {
                     />
                     <Button
                         onClick={copyToClipboard}
-                        className="bg-white text-[hsl(var(--vjad-navy))] hover:bg-white/90 shrink-0"
+                        className="bg-white text-[hsl(var(--vijad-navy))] hover:bg-white/90 shrink-0"
                     >
                         {copied ? (
                             <>

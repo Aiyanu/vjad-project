@@ -19,7 +19,7 @@ export default function ReduxProvider({
         // Hydrate from sessionStorage on initialization
         if (typeof window !== "undefined") {
             // Try sessionStorage first for user data
-            const storedUser = sessionStorage.getItem("vjad_user_session");
+            const storedUser = sessionStorage.getItem("vijad_user_session");
             if (storedUser) {
                 try {
                     const parsed = JSON.parse(storedUser);
@@ -48,7 +48,7 @@ export default function ReduxProvider({
 
             // Persist user to sessionStorage
             sessionStorage.setItem(
-                "vjad_user_session",
+                "vijad_user_session",
                 JSON.stringify({
                     user: state.user.user,
                 })

@@ -7,14 +7,14 @@ const team = [
         name: "Victor Jimba",
         role: "MD/CEO",
         image: "/assets/teams/victor-jimba.jpg",
-        bio: "Victor Jimba is the CEO of VJAD Projects, a visionary real estate developer with a proven track record of excellence across the business, technology, and real estate sectors. He holds a degree in Human Kinetics and Health Education, as well as certifications in Real Estate Management and Entrepreneurship.",
+        bio: "Victor Jimba is the CEO of vijad Projects, a visionary real estate developer with a proven track record of excellence across the business, technology, and real estate sectors. He holds a degree in Human Kinetics and Health Education, as well as certifications in Real Estate Management and Entrepreneurship.",
         linkedin: "https://www.linkedin.com/in/victor-jimba-realor",
     },
     {
         name: "Ayo Afolayan",
         role: "Head of Projects",
         image: "/assets/teams/ayo-afolayan.png",
-        bio: "Ayo Afolayan is the Head of Projects at VJAD Projects with over eight years of experience in architecture and project management. He holds both a Bachelor's and a Master's degree in Architecture from Ahmadu Bello University.",
+        bio: "Ayo Afolayan is the Head of Projects at vijad Projects with over eight years of experience in architecture and project management. He holds both a Bachelor's and a Master's degree in Architecture from Ahmadu Bello University.",
         // linkedin: "https://www.linkedin.com/in/ayo-afolayan",
     },
     {
@@ -69,7 +69,7 @@ export function TeamSection() {
                         Leadership Team
                     </h2>
                     <p className="section-subheading mx-auto">
-                        VJAD Projects' success is driven by a diverse and experienced team of professionals who bring together expertise from various fields
+                        vijad Projects' success is driven by a diverse and experienced team of professionals who bring together expertise from various fields
                     </p>
                 </motion.div>
 
@@ -95,11 +95,11 @@ export function TeamSection() {
                                 {/* Social Link (only show if LinkedIn is provided) */}
                                 {member.linkedin && (
                                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                        <a 
+                                        <a
                                             href={member.linkedin}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="w-10 h-10 rounded-full bg-white flex items-center justify-center hover:bg-vjad-gold transition-colors"
+                                            className="w-10 h-10 rounded-full bg-white flex items-center justify-center hover:bg-vijad-gold transition-colors"
                                             aria-label={`Visit ${member.name}'s LinkedIn profile`}
                                         >
                                             <Linkedin className="w-5 h-5 text-primary" />
@@ -140,11 +140,11 @@ export function TeamSection() {
                                     {/* Social Link (only show if LinkedIn is provided) */}
                                     {member.linkedin && (
                                         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                            <a 
+                                            <a
                                                 href={member.linkedin}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="w-10 h-10 rounded-full bg-white flex items-center justify-center hover:bg-vjad-gold transition-colors"
+                                                className="w-10 h-10 rounded-full bg-white flex items-center justify-center hover:bg-vijad-gold transition-colors"
                                                 aria-label={`Visit ${member.name}'s LinkedIn profile`}
                                             >
                                                 <Linkedin className="w-5 h-5 text-primary" />

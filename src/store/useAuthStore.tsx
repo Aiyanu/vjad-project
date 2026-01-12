@@ -31,7 +31,7 @@ const useAuthStore = create<AuthState>()(
       clearAuth: () => set({ user: null, token: null }),
     }),
     {
-      name: "vjad_auth_session",
+      name: "vijad_auth_session",
       storage: createJSONStorage(() => sessionStorage),
       partialize: (state) => ({
         user: state.user,
