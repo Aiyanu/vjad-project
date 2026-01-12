@@ -3,16 +3,16 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { motion } from "motion/react";
-// import { supabase } from "@/lib/supabase/client";
-// import { User } from "@supabase/supabase-js";
+import { useAppSelector } from "@/store/hooks";
+import { useApi } from "@/hooks/useApi";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { User as UserIcon, Mail, Phone, Lock, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 const PhoneInput = dynamic(() => import("react-phone-input-2"), { ssr: false });
-// import { useToast } from "@/hooks/use-toast";
 
 interface Profile {
   full_name: string | null;
@@ -20,21 +20,13 @@ interface Profile {
   phone: string | null;
 }
 
-// Mock user type to replace Supabase User
-interface User {
-  id: string;
-  email?: string;
-  user_metadata?: Record<string, any>;
-  created_at?: string;
-}
-
 export default function AdminSettings() {
-  const [user, setUser] = useState<User | null>(null);
+  const user = useAppSelector((state) => state.user.user);
+  const api = useApi();
   const [profile, setProfile] = useState<Profile>({ full_name: "", email: "", phone: "" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
-  // const { toast } = useToast();
 
   const [passwordData, setPasswordData] = useState({
     newPassword: "",
@@ -42,70 +34,38 @@ export default function AdminSettings() {
   });
 
   useEffect(() => {
-    fetchUserAndProfile();
-  }, []);
-
-  const fetchUserAndProfile = async () => {
-    try {
-      // SUPABASE IMPLEMENTATION (COMMENTED OUT)
-      // const { data: { user } } = await supabase.auth.getUser();
-      // if (!user) return;
-      // setUser(user);
-
-      // const { data: profileData } = await supabase
-      //   .from("profiles")
-      //   .select("full_name, email, phone")
-      //   .eq("id", user.id)
-      //   .maybeSingle();
-
-      // if (profileData) {
-      //   setProfile(profileData);
-      // } else {
-      //   setProfile({
-      //     full_name: user.user_metadata?.full_name || "",
-      //     email: user.email || "",
-      //     phone: "",
-      //   });
-      // }
-
-      // MOCK DATA FOR DEVELOPMENT
-      setUser(null);
-      setProfile({ full_name: "", email: "", phone: "" });
-    } catch (error) {
-      console.error("Error fetching profile:", error);
-    } finally {
-      setLoading(false);
+    if (user) {
+      setProfile({
+        full_name: user.fullName || "",
+        email: user.email || "",
+        phone: user.phone || "",
+      });
     }
-  };
+    setLoading(false);
+  }, [user]);
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user) {
+      toast.error("User not authenticated");
+      return;
+    }
 
     setSaving(true);
     try {
-      // SUPABASE IMPLEMENTATION (COMMENTED OUT)
-      // const { error } = await supabase
-      //   .from("profiles")
-      //   .update({
-      //     full_name: profile.full_name,
-      //     phone: profile.phone,
-      //   })
-      //   .eq("id", user.id);
+      const response = await api.put(`/api/user/${user.id}`, {
+        fullName: profile.full_name,
+        phone: profile.phone,
+      });
 
-      // if (error) throw error;
-
-      // toast({
-      //   title: "Success",
-      //   description: "Profile updated successfully",
-      // });
-    } catch (error) {
+      if (response.success) {
+        toast.success("Profile updated successfully");
+      } else {
+        toast.error(response.message || "Failed to update profile");
+      }
+    } catch (error: any) {
       console.error("Error updating profile:", error);
-      // toast({
-      //   title: "Error",
-      //   description: "Failed to update profile",
-      //   variant: "destructive",
-      // });
+      toast.error(error.message || "Failed to update profile");
     } finally {
       setSaving(false);
     }
@@ -115,44 +75,30 @@ export default function AdminSettings() {
     e.preventDefault();
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      // toast({
-      //   title: "Error",
-      //   description: "Passwords do not match",
-      //   variant: "destructive",
-      // });
+      toast.error("Passwords do not match");
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      // toast({
-      //   title: "Error",
-      //   description: "Password must be at least 6 characters",
-      //   variant: "destructive",
-      // });
+      toast.error("Password must be at least 6 characters");
       return;
     }
 
     setChangingPassword(true);
     try {
-      // SUPABASE IMPLEMENTATION (COMMENTED OUT)
-      // const { error } = await supabase.auth.updateUser({
-      //   password: passwordData.newPassword,
-      // });
+      const response = await api.post("/api/auth/change-password", {
+        newPassword: passwordData.newPassword,
+      });
 
-      // if (error) throw error;
-
-      // toast({
-      //   title: "Success",
-      //   description: "Password updated successfully",
-      // });
-      setPasswordData({ newPassword: "", confirmPassword: "" });
-    } catch (error) {
+      if (response.success) {
+        toast.success("Password updated successfully");
+        setPasswordData({ newPassword: "", confirmPassword: "" });
+      } else {
+        toast.error(response.message || "Failed to update password");
+      }
+    } catch (error: any) {
       console.error("Error updating password:", error);
-      // toast({
-      //   title: "Error",
-      //   description: "Failed to update password",
-      //   variant: "destructive",
-      // });
+      toast.error(error.message || "Failed to update password");
     } finally {
       setChangingPassword(false);
     }
