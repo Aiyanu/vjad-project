@@ -9,11 +9,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Phone, 
-  Mail, 
-  MapPin, 
-  Clock, 
+import {
+  Phone,
+  Mail,
+  MapPin,
+  Clock,
   Send,
   Loader2,
   Facebook,
@@ -32,8 +32,8 @@ const contactInfo = [
   {
     icon: Mail,
     title: "Email",
-    details: ["info@vjadprojects.com", "hello@vjadprojects.com"],
-    action: "mailto:info@vjadprojects.com",
+    details: ["info@vijadprojects.com", "hello@vijadprojects.com"],
+    action: "mailto:info@vijadprojects.com",
   },
   {
     icon: MapPin,
@@ -68,7 +68,7 @@ export default function Contact() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate form data
     if (!formData.name || !formData.email || !formData.subject || !formData.message) {
       toast.error("Missing Information", {
@@ -78,7 +78,7 @@ export default function Contact() {
     }
 
     setIsSubmitting(true);
-    
+
     try {
       // Simulate form submission to API
       const response = await fetch("/api/contact", {
@@ -113,7 +113,7 @@ export default function Contact() {
         {/* Hero Section */}
         <section className="pt-32 pb-16 bg-hero-gradient relative overflow-hidden">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0aDR2NGgtNHpNNDAgMzBoNHY0aC00ek00NCAyNmg0djRoLTR6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
-          
+
           <div className="container mx-auto px-4 relative z-10">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -128,7 +128,7 @@ export default function Contact() {
                 Contact Us
               </h1>
               <p className="text-xl text-white/80 max-w-2xl mx-auto">
-                Have questions about our properties or services? We'd love to hear from you. 
+                Have questions about our properties or services? We'd love to hear from you.
                 Reach out and let's start a conversation.
               </p>
             </motion.div>
@@ -150,7 +150,7 @@ export default function Contact() {
                   Let's Connect
                 </h2>
                 <p className="text-muted-foreground mb-10 text-lg">
-                  Whether you're looking to buy property, invest in real estate, or join our 
+                  Whether you're looking to buy property, invest in real estate, or join our
                   affiliate program, our team is ready to assist you every step of the way.
                 </p>
 
@@ -171,7 +171,7 @@ export default function Contact() {
                         <h4 className="font-semibold text-foreground mb-1">{item.title}</h4>
                         {item.details.map((detail, i) => (
                           item.action ? (
-                            <a 
+                            <a
                               key={i}
                               href={item.action}
                               className="block text-muted-foreground hover:text-primary transition-colors"
@@ -216,7 +216,7 @@ export default function Contact() {
                   <h3 className="text-2xl font-display font-bold text-foreground mb-6">
                     Send us a Message
                   </h3>
-                  
+
                   <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="grid sm:grid-cols-2 gap-5">
                       <div className="space-y-2">
@@ -315,7 +315,7 @@ export default function Contact() {
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                title="VJAD Projects Office Location"
+                title="vijad Projects Office Location"
               />
             </motion.div>
           </div>

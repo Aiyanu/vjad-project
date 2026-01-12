@@ -8,9 +8,9 @@ export function CTASection2() {
     return (
         <section className="py-24 bg-background relative overflow-hidden">
             {/* Background Elements */}
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-vjad-gold/5" />
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-vijad-gold/5" />
             <div className="absolute top-20 left-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
-            <div className="absolute bottom-20 right-10 w-72 h-72 bg-vjad-gold/10 rounded-full blur-3xl" />
+            <div className="absolute bottom-20 right-10 w-72 h-72 bg-vijad-gold/10 rounded-full blur-3xl" />
 
             <div className="container mx-auto px-4 relative z-10">
                 <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -47,7 +47,7 @@ export function CTASection2() {
                                 </div>
                                 <div>
                                     <h4 className="font-semibold text-foreground mb-1">Email Us</h4>
-                                    <p className="text-muted-foreground">info@vjadprojects.com</p>
+                                    <p className="text-muted-foreground">info@vijadprojects.com</p>
                                 </div>
                             </div>
 
@@ -87,7 +87,7 @@ export function CTASection2() {
                                     "Training and marketing materials",
                                 ].map((benefit, index) => (
                                     <div key={index} className="flex items-center gap-3">
-                                        <div className="w-2 h-2 rounded-full bg-vjad-gold" />
+                                        <div className="w-2 h-2 rounded-full bg-vijad-gold" />
                                         <span className="text-secondary-foreground/80">{benefit}</span>
                                     </div>
                                 ))}

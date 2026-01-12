@@ -17,7 +17,7 @@ export default function ReferralLinkPage({ params }: PageProps) {
 
             // Store the referral code in sessionStorage
             try {
-                sessionStorage.setItem("vjad_ref", code);
+                sessionStorage.setItem("vijad_ref", code);
             } catch {
                 // ignore storage failures (private mode)
             }
@@ -32,7 +32,7 @@ export default function ReferralLinkPage({ params }: PageProps) {
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800">
             <div className="text-center">
-                <Loader2 className="h-12 w-12 animate-spin text-vjad-gold mx-auto mb-4" />
+                <Loader2 className="h-12 w-12 animate-spin text-vijad-gold mx-auto mb-4" />
                 <h1 className="text-2xl font-bold text-white mb-2">Welcome!</h1>
                 <p className="text-slate-300">Redirecting you to registration...</p>
             </div>

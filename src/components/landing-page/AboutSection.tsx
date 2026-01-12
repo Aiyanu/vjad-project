@@ -42,7 +42,7 @@ export function AboutSection() {
                     <span className="gold-badge mb-4">About Us</span>
                     <h2 className="section-heading mt-4">Who We Are</h2>
                     <p className="section-subheading mx-auto">
-                        VJAD Projects is a premier real estate marketing company dedicated to
+                        vijad Projects is a premier real estate marketing company dedicated to
                         bridging the gap between quality properties and aspiring homeowners.
                     </p>
                 </motion.div>
@@ -80,7 +80,7 @@ export function AboutSection() {
                         className="card-elegant"
                     >
                         <div className="flex items-center gap-4 mb-6">
-                            <div className="p-3 rounded-xl bg-vjad-gold/20 text-vjad-gold">
+                            <div className="p-3 rounded-xl bg-vijad-gold/20 text-vijad-gold">
                                 <Eye className="w-7 h-7" />
                             </div>
                             <h3 className="text-2xl font-bold text-foreground">Our Vision</h3>
@@ -99,7 +99,7 @@ export function AboutSection() {
                     transition={{ duration: 0.6, delay: 0.08 }}
                     className="text-center mt-16 mb-8"
                 >
-                    {/* <div className="inline-flex items-center gap-2 px-4 py-2 bg-vjad-gold/10 border border-vjad-gold/30 rounded-full text-sm font-medium text-vjad-gold mb-4">
+                    {/* <div className="inline-flex items-center gap-2 px-4 py-2 bg-vijad-gold/10 border border-vijad-gold/30 rounded-full text-sm font-medium text-vijad-gold mb-4">
                         What Drives Us
                     </div> */}
                     <h2 className="text-4xl font-bold text-foreground mb-4">Our Core Values</h2>

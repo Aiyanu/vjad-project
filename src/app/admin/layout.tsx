@@ -110,8 +110,8 @@ export default function AdminDashboardLayout({ children }: DashboardLayoutProps)
     return (
       <div className="min-h-screen flex items-center justify-center bg-(--color-background)">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-(--color-vjad-navy)"></div>
-          <p className="mt-4 text-(--color-vjad-navy)">Loading...</p>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-(--color-vijad-navy)"></div>
+          <p className="mt-4 text-(--color-vijad-navy)">Loading...</p>
         </div>
       </div>
     );
@@ -121,9 +121,9 @@ export default function AdminDashboardLayout({ children }: DashboardLayoutProps)
     <ProtectedRoute allowedRoles={["admin", "super_admin"]}>
       <div className="min-h-screen bg-(--color-background)">
         {/* Mobile Header */}
-        <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-(--color-vjad-navy) px-4 py-3 flex items-center justify-between">
+        <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-(--color-vijad-navy) px-4 py-3 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <Image src="/vijad-projects.png" alt="VJAD" width={120} height={70} className="h-8 w-auto" />
+            <Image src="/vijad-projects.png" alt="vijad" width={120} height={70} className="h-8 w-auto" />
           </Link>
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -136,14 +136,14 @@ export default function AdminDashboardLayout({ children }: DashboardLayoutProps)
 
         {/* Sidebar */}
         <aside
-          className={`fixed top-0 left-0 h-full w-64 bg-(--color-vjad-navy) z-40 transform transition-transform duration-300 ease-in-out
+          className={`fixed top-0 left-0 h-full w-64 bg-(--color-vijad-navy) z-40 transform transition-transform duration-300 ease-in-out
           ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
         >
           <div className="flex flex-col h-full">
             {/* Logo */}
             <div className="p-6 border-b border-white/10">
               <Link href="/" className="flex items-center gap-3">
-                <Image src="/vijad-projects.png" alt="VJAD" width={120} height={70} className="h-10 w-auto" />
+                <Image src="/vijad-projects.png" alt="vijad" width={120} height={70} className="h-10 w-auto" />
               </Link>
             </div>
 
@@ -155,7 +155,7 @@ export default function AdminDashboardLayout({ children }: DashboardLayoutProps)
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-white truncate">{user?.fullName || user?.email?.split("@")[0] || "Admin"}</p>
-                  <p className="text-xs text-white/60 truncate">{user?.email || "admin@vjad.com"}</p>
+                  <p className="text-xs text-white/60 truncate">{user?.email || "admin@vijad.com"}</p>
                 </div>
               </div>
             </div>

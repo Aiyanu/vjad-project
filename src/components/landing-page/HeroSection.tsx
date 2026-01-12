@@ -32,7 +32,7 @@ export function HeroSection() {
                             transition={{ duration: 0.6 }}
                             className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-full text-sm font-medium text-white mb-8"
                         >
-                            <Shield className="w-4 h-4 text-vjad-gold" />
+                            <Shield className="w-4 h-4 text-vijad-gold" />
                             Licensed Real Estate Company • RC 7755787
                         </motion.div>
 
@@ -43,7 +43,7 @@ export function HeroSection() {
                             className="text-5xl md:text-6xl lg:text-7xl font-display font-bold leading-tight mb-6 text-white"
                         >
                             Don't Expect the{" "}
-                            <span className="text-vjad-gold">Usual</span>{" "}
+                            <span className="text-vijad-gold">Usual</span>{" "}
                         </motion.h1>
 
                         <motion.p
@@ -52,7 +52,7 @@ export function HeroSection() {
                             transition={{ duration: 0.6, delay: 0.2 }}
                             className="text-xl text-white/80 mb-10 max-w-xl"
                         >
-                            VJAD Projects delivers exceptional property solutions in Nigeria's dynamic real estate industry —
+                            vijad Projects delivers exceptional property solutions in Nigeria's dynamic real estate industry —
                             from residential to commercial and industrial projects. We bridge the gap between housing needs and investment opportunities.
                         </motion.p>
 
@@ -85,7 +85,7 @@ export function HeroSection() {
                         >
                             <div className="flex items-center gap-3">
                                 <div className="p-2 rounded-lg bg-white/10">
-                                    <Building2 className="w-5 h-5 text-vjad-gold" />
+                                    <Building2 className="w-5 h-5 text-vijad-gold" />
                                 </div>
                                 <div>
                                     <div className="text-2xl font-bold text-white">20+ Acres</div>
@@ -94,7 +94,7 @@ export function HeroSection() {
                             </div>
                             <div className="flex items-center gap-3">
                                 <div className="p-2 rounded-lg bg-white/10">
-                                    <Users className="w-5 h-5 text-vjad-gold" />
+                                    <Users className="w-5 h-5 text-vijad-gold" />
                                 </div>
                                 <div>
                                     <div className="text-2xl font-bold text-white">500+</div>
@@ -115,7 +115,7 @@ export function HeroSection() {
                             {/* Main Card */}
                             <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 border border-white/20">
                                 <div className="text-white mb-6">
-                                    <h3 className="text-2xl font-bold mb-2">Why Partner With VJAD?</h3>
+                                    <h3 className="text-2xl font-bold mb-2">Why Partner With vijad?</h3>
                                     <p className="text-white/70">
                                         Creating enduring legacies through quality real estate
                                     </p>
@@ -129,7 +129,7 @@ export function HeroSection() {
                                         { label: "Real Estate Consultancy", desc: "Portfolio & market entry strategies" },
                                     ].map((item, i) => (
                                         <div key={i} className="flex items-start gap-4 p-4 rounded-xl bg-white/5">
-                                            <div className="w-2 h-2 mt-2 rounded-full bg-vjad-gold" />
+                                            <div className="w-2 h-2 mt-2 rounded-full bg-vijad-gold" />
                                             <div>
                                                 <div className="font-semibold text-white">{item.label}</div>
                                                 <div className="text-sm text-white/60">{item.desc}</div>
@@ -143,7 +143,7 @@ export function HeroSection() {
                             <motion.div
                                 animate={{ y: [0, -10, 0] }}
                                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                                className="absolute -top-4 -right-4 bg-vjad-gold text-vjad-dark px-6 py-3 rounded-full font-bold shadow-gold-glow"
+                                className="absolute -top-4 -right-4 bg-vijad-gold text-vijad-dark px-6 py-3 rounded-full font-bold shadow-gold-glow"
                             >
                                 C of O Verified
                             </motion.div>

@@ -93,7 +93,7 @@ export function ProjectsSection() {
 
                                     {/* C of O Badge */}
                                     {project.cofo && (
-                                        <div className="absolute top-4 right-4 px-4 py-2 bg-vjad-gold text-vjad-dark text-sm font-bold rounded-full flex items-center gap-2">
+                                        <div className="absolute top-4 right-4 px-4 py-2 bg-vijad-gold text-vijad-dark text-sm font-bold rounded-full flex items-center gap-2">
                                             <Shield className="w-4 h-4" />
                                             C of O Verified
                                         </div>
@@ -124,7 +124,7 @@ export function ProjectsSection() {
                                     </div>
                                     {project.cofo && (
                                         <div className="flex items-center gap-2 px-4 py-2 bg-card rounded-xl border border-border">
-                                            <Shield className="w-4 h-4 text-vjad-gold" />
+                                            <Shield className="w-4 h-4 text-vijad-gold" />
                                             <span className="text-sm font-medium">C of O: {project.cofo}</span>
                                         </div>
                                     )}

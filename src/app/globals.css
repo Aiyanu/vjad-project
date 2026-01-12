@@ -4,14 +4,14 @@
 @import "react-phone-input-2/lib/style.css";
 
 @theme {
-  /* VJAD Brand Colors */
-  --color-vjad-primary: oklch(0.61 0.24 264); /* RISD Blue #0046FF */
-  --color-vjad-navy: oklch(0.35 0.14 264); /* Deep Navy #002583 */
-  --color-vjad-gold: oklch(0.75 0.09 88); /* Luxury Gold #D4B46A */
-  --color-vjad-dark: oklch(0.23 0.03 256); /* Neutral Dark #0F172A */
-  --color-vjad-light: oklch(0.98 0.01 240); /* Neutral Light #F8FAFC */
+  /* vijad Brand Colors */
+  --color-vijad-primary: oklch(0.61 0.24 264); /* RISD Blue #0046FF */
+  --color-vijad-navy: oklch(0.35 0.14 264); /* Deep Navy #002583 */
+  --color-vijad-gold: oklch(0.75 0.09 88); /* Luxury Gold #D4B46A */
+  --color-vijad-dark: oklch(0.23 0.03 256); /* Neutral Dark #0F172A */
+  --color-vijad-light: oklch(0.98 0.01 240); /* Neutral Light #F8FAFC */
 
-  /* Semantic Colors mapped to VJAD - Light Mode (Default) */
+  /* Semantic Colors mapped to vijad - Light Mode (Default) */
   --color-background: oklch(0.98 0.01 240);
   --color-foreground: oklch(0.23 0.03 256);
 
@@ -211,8 +211,8 @@ h6 {
 .bg-hero-gradient {
   background-image: linear-gradient(
     135deg,
-    var(--color-vjad-navy) 0%,
-    var(--color-vjad-primary) 100%
+    var(--color-vijad-navy) 0%,
+    var(--color-vijad-primary) 100%
   );
 }
 
@@ -227,7 +227,7 @@ h6 {
 .bg-gold-gradient {
   background-image: linear-gradient(
     135deg,
-    var(--color-vjad-gold) 0%,
+    var(--color-vijad-gold) 0%,
     oklch(0.77 0.09 88) 100%
   );
 }
@@ -300,11 +300,11 @@ h6 {
   padding: 0.5rem 1rem;
   background: linear-gradient(
     to right,
-    oklch(from var(--color-vjad-gold) l c h / 0.2),
-    oklch(from var(--color-vjad-gold) l c h / 0.1)
+    oklch(from var(--color-vijad-gold) l c h / 0.2),
+    oklch(from var(--color-vijad-gold) l c h / 0.1)
   );
-  color: var(--color-vjad-gold);
-  border: 1px solid oklch(from var(--color-vjad-gold) l c h / 0.3);
+  color: var(--color-vijad-gold);
+  border: 1px solid oklch(from var(--color-vijad-gold) l c h / 0.3);
   border-radius: 9999px;
   font-size: 0.875rem;
   font-weight: 500;
@@ -427,7 +427,7 @@ h6 {
 }
 
 [data-sonner-toast] [data-button] {
-  background: var(--color-vjad-navy) !important;
+  background: var(--color-vijad-navy) !important;
   color: white !important;
   border-radius: 6px;
   font-weight: 500;
@@ -436,7 +436,7 @@ h6 {
 }
 
 [data-sonner-toast] [data-button]:hover {
-  background: var(--color-vjad-primary) !important;
+  background: var(--color-vijad-primary) !important;
 }
 
 [data-sonner-toast] [data-close-button] {

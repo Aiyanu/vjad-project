@@ -54,7 +54,7 @@ export default function AffiliateReferrals() {
       key: "referralCode",
       render: (value) =>
         value ? (
-          <code className="px-2 py-1 rounded bg-(--vjad-navy)/10 text-(--vjad-navy) text-sm font-mono">
+          <code className="px-2 py-1 rounded bg-(--vijad-navy)/10 text-(--vijad-navy) text-sm font-mono">
             {value}
           </code>
         ) : (

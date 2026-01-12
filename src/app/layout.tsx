@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+// import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Head from "next/head";
 import { Toaster } from "@/components/ui/sonner";
@@ -7,15 +7,15 @@ import { AuthInitializer } from "@/components/AuthInitializer";
 import { GlobalModal } from "@/components/GlobalModal";
 import ReduxProvider from "@/store/ReduxProvider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+// const geistSans = Geist({
+//   variable: "--font-geist-sans",
+//   subsets: ["latin"],
+// });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+// const geistMono = Geist_Mono({
+//   variable: "--font-geist-mono",
+//   subsets: ["latin"],
+// });
 
 export const metadata: Metadata = {
   title: "Vijad Projects",
@@ -36,7 +36,7 @@ export default function RootLayout({
         <link rel="icon" href="/vijad-favicon.png" />
       </Head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable}`}
+      // className={`${geistSans.variable} ${geistMono.variable}`}
       >
         <ReduxProvider>
           <AuthInitializer>

@@ -85,8 +85,8 @@ export function ProtectedRoute({
         return (
             <div className="min-h-screen flex items-center justify-center bg-(--color-background)">
                 <div className="text-center">
-                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-(--color-vjad-navy)"></div>
-                    <p className="mt-4 text-(--color-vjad-navy)">Loading...</p>
+                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-(--color-vijad-navy)"></div>
+                    <p className="mt-4 text-(--color-vijad-navy)">Loading...</p>
                 </div>
             </div>
         );

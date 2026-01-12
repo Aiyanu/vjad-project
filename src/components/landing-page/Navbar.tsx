@@ -29,12 +29,12 @@ export function Navbar() {
                 <div className="flex items-center justify-between h-20">
                     {/* Logo */}
                     <a href="#home" className="flex items-center gap-3">
-                        <Image src={"/vijad-projects-dark.png"} width={130} height={100} alt="vjad" />
+                        <Image src={"/vijad-projects-dark.png"} width={130} height={100} alt="vijad" />
                         {/* <div className="p-2 bg-primary rounded-xl">
                             <Building2 className="w-6 h-6 text-primary-foreground" />
                         </div>
                         <span className="font-display font-bold text-xl text-foreground">
-                            VJAD<span className="text-primary">Projects</span>
+                            vijad<span className="text-primary">Projects</span>
                         </span> */}
                     </a>
 

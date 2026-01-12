@@ -97,8 +97,8 @@ const AffiliateDashboardLayout = ({ children }: DashboardLayoutProps) => {
         return (
             <div className="min-h-screen flex items-center justify-center bg-(--color-background)">
                 <div className="text-center">
-                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-(--color-vjad-navy)"></div>
-                    <p className="mt-4 text-(--color-vjad-navy)">Loading...</p>
+                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-(--color-vijad-navy)"></div>
+                    <p className="mt-4 text-(--color-vijad-navy)">Loading...</p>
                 </div>
             </div>
         );
@@ -108,12 +108,12 @@ const AffiliateDashboardLayout = ({ children }: DashboardLayoutProps) => {
         <ProtectedRoute requiredRole="affiliate">
             <div className="min-h-screen bg-(--color-background)">
                 {/* Mobile Header */}
-                <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-(--color-vjad-navy) px-4 py-3 flex items-center justify-between">
+                <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-(--color-vijad-navy) px-4 py-3 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-2">
                         {/* <Building2 className="h-6 w-6 text-white" />
-                    <span className="text-lg font-display font-bold text-white">VJAD</span>
+                    <span className="text-lg font-display font-bold text-white">vijad</span>
                      */}
-                        <Image src={"/vijad-projects.png"} width={120} height={70} alt="vjad" />
+                        <Image src={"/vijad-projects.png"} width={120} height={70} alt="vijad" />
                     </Link>
 
                     <button onClick={() => setIsSidebarOpen((s) => !s)} className="text-white p-2" aria-label="Toggle menu">
@@ -123,15 +123,15 @@ const AffiliateDashboardLayout = ({ children }: DashboardLayoutProps) => {
 
                 {/* Sidebar */}
                 <aside
-                    className={`fixed top-0 left-0 h-full w-64 bg-(--color-vjad-navy) z-40 transform transition-transform duration-300 ease-in-out
+                    className={`fixed top-0 left-0 h-full w-64 bg-(--color-vijad-navy) z-40 transform transition-transform duration-300 ease-in-out
           ${isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
                 >
                     <div className="flex flex-col h-full">
                         <div className="p-6 border-b border-white/10">
                             <Link href="/" className="flex items-center gap-3">
                                 {/* <Building2 className="h-8 w-8 text-white" />
-                            <span className="text-xl font-display font-bold text-white">VJAD Projects</span> */}
-                                <Image src={"/vijad-projects.png"} width={120} height={70} alt="vjad" />
+                            <span className="text-xl font-display font-bold text-white">vijad Projects</span> */}
+                                <Image src={"/vijad-projects.png"} width={120} height={70} alt="vijad" />
                             </Link>
                         </div>
 

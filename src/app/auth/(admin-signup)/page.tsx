@@ -67,15 +67,15 @@
 //     };
 
 //     return (
-//         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[var(--color-vjad-navy)] via-[var(--color-vjad-primary)] to-[var(--color-vjad-navy)] p-4">
+//         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[var(--color-vijad-navy)] via-[var(--color-vijad-primary)] to-[var(--color-vijad-navy)] p-4">
 //             <Card className="w-full max-w-2xl shadow-2xl">
 //                 <CardHeader className="space-y-1 text-center">
 //                     <div className="flex justify-center mb-4">
-//                         <div className="h-16 w-16 rounded-full bg-[var(--color-vjad-navy)] flex items-center justify-center">
-//                             <Shield className="h-8 w-8 text-[var(--color-vjad-gold)]" />
+//                         <div className="h-16 w-16 rounded-full bg-[var(--color-vijad-navy)] flex items-center justify-center">
+//                             <Shield className="h-8 w-8 text-[var(--color-vijad-gold)]" />
 //                         </div>
 //                     </div>
-//                     <CardTitle className="text-3xl font-bold text-[var(--color-vjad-navy)]">
+//                     <CardTitle className="text-3xl font-bold text-[var(--color-vijad-navy)]">
 //                         Admin Registration
 //                     </CardTitle>
 //                     <CardDescription>
@@ -174,7 +174,7 @@
 
 //                         <Button
 //                             type="submit"
-//                             className="w-full bg-[var(--color-vjad-navy)] hover:bg-[var(--color-vjad-primary)] text-white"
+//                             className="w-full bg-[var(--color-vijad-navy)] hover:bg-[var(--color-vijad-primary)] text-white"
 //                             disabled={loading}
 //                         >
 //                             {loading ? (
@@ -194,7 +194,7 @@
 //                             Already have an account?{" "}
 //                             <Button
 //                                 variant="link"
-//                                 className="p-0 h-auto text-[var(--color-vjad-primary)]"
+//                                 className="p-0 h-auto text-[var(--color-vijad-primary)]"
 //                                 onClick={() => router.push("/auth")}
 //                                 type="button"
 //                             >

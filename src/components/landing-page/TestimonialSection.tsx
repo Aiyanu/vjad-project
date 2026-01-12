@@ -8,7 +8,7 @@ const testimonials = [
         name: "Adebayo Johnson",
         role: "Top Affiliate • Lagos",
         image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80",
-        content: "VJAD Projects transformed my side income into a full-time business. The commission structure is unmatched, and the support team is always there when I need them.",
+        content: "vijad Projects transformed my side income into a full-time business. The commission structure is unmatched, and the support team is always there when I need them.",
         rating: 5,
         earnings: "₦4.2M earned",
     },
@@ -48,7 +48,7 @@ export function TestimonialsSection() {
                         What Our Clients Say
                     </h2>
                     <p className="text-xl text-secondary-foreground/70 max-w-2xl mx-auto">
-                        Join hundreds of successful affiliates who are building wealth with VJAD Projects
+                        Join hundreds of successful affiliates who are building wealth with vijad Projects
                     </p>
                 </motion.div>
 
@@ -60,10 +60,10 @@ export function TestimonialsSection() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: index * 0.1 }}
-                            className="bg-secondary-foreground/5 backdrop-blur-sm rounded-3xl p-8 border border-secondary-foreground/10 hover:border-vjad-gold/30 transition-all duration-300"
+                            className="bg-secondary-foreground/5 backdrop-blur-sm rounded-3xl p-8 border border-secondary-foreground/10 hover:border-vijad-gold/30 transition-all duration-300"
                         >
                             {/* Quote Icon */}
-                            <Quote className="w-10 h-10 text-vjad-gold/50 mb-6" />
+                            <Quote className="w-10 h-10 text-vijad-gold/50 mb-6" />
 
                             {/* Content */}
                             <p className="text-lg text-secondary-foreground/90 mb-6 leading-relaxed">
@@ -73,7 +73,7 @@ export function TestimonialsSection() {
                             {/* Rating */}
                             <div className="flex gap-1 mb-6">
                                 {[...Array(testimonial.rating)].map((_, i) => (
-                                    <Star key={i} className="w-5 h-5 fill-vjad-gold text-vjad-gold" />
+                                    <Star key={i} className="w-5 h-5 fill-vijad-gold text-vijad-gold" />
                                 ))}
                             </div>
 
@@ -82,12 +82,12 @@ export function TestimonialsSection() {
                                 <img
                                     src={testimonial.image}
                                     alt={testimonial.name}
-                                    className="w-14 h-14 rounded-full object-cover border-2 border-vjad-gold/30"
+                                    className="w-14 h-14 rounded-full object-cover border-2 border-vijad-gold/30"
                                 />
                                 <div>
                                     <div className="font-bold text-secondary-foreground">{testimonial.name}</div>
                                     <div className="text-sm text-secondary-foreground/60">{testimonial.role}</div>
-                                    <div className="text-sm font-semibold text-vjad-gold mt-1">{testimonial.earnings}</div>
+                                    <div className="text-sm font-semibold text-vijad-gold mt-1">{testimonial.earnings}</div>
                                 </div>
                             </div>
                         </motion.div>

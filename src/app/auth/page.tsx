@@ -75,7 +75,7 @@ const Auth = () => {
         const ref = searchParams?.get("ref");
         if (ref) {
             try {
-                sessionStorage.setItem("vjad_ref", ref);
+                sessionStorage.setItem("vijad_ref", ref);
                 // Populate the referral code input field
                 setFormData((prev) => ({ ...prev, referralCode: ref }));
                 // Fetch referrer name for display
@@ -215,7 +215,7 @@ const Auth = () => {
                 // registration
                 // Use form input first, fallback to sessionStorage if input is empty
                 const referralCode = formData.referralCode ||
-                    (typeof window !== "undefined" ? sessionStorage.getItem("vjad_ref") || undefined : undefined);
+                    (typeof window !== "undefined" ? sessionStorage.getItem("vijad_ref") || undefined : undefined);
 
                 const json = await api.post("/api/auth/register", {
                     fullName: formData.fullName,
@@ -237,7 +237,7 @@ const Auth = () => {
                 const myReferral = json?.data?.referralCode ?? null;
                 if (myReferral) {
                     try {
-                        sessionStorage.setItem("vjad_my_ref", myReferral);
+                        sessionStorage.setItem("vijad_my_ref", myReferral);
                     } catch {
                         // ignore storage errors
                     }
@@ -248,7 +248,7 @@ const Auth = () => {
             }
         } catch (err: any) {
             console.error(err);
-            
+
             // Check if error is due to unverified email (403 status)
             if (err?.status === 403 && err?.message === "Email not verified" && err?.data?.email) {
                 toast.error("Please verify your email to continue", {
@@ -260,7 +260,7 @@ const Auth = () => {
                 }, 1000);
                 return;
             }
-            
+
             toast.error("An error occurred. Please try again later.");
         } finally {
             setIsLoading(false);
@@ -328,17 +328,17 @@ const Auth = () => {
                 <div className="relative z-10 flex flex-col justify-center px-12 xl:px-20">
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
                         <Link href="/" className="flex items-center gap-3 mb-12">
-                            <Image src={"/vijad-projects.png"} width={150} height={100} alt="vjad" />
+                            <Image src={"/vijad-projects.png"} width={150} height={100} alt="vijad" />
                         </Link>
 
                         <h1 className="text-4xl xl:text-5xl font-display font-bold text-white mb-6 leading-tight">
                             Join Our Elite
                             <br />
-                            <span className="text-vjad-gold">Affiliate Network</span>
+                            <span className="text-vijad-gold">Affiliate Network</span>
                         </h1>
 
                         <p className="text-lg text-white/80 mb-8 max-w-md">
-                            Partner with VJAD Projects and earn competitive commissions by connecting buyers with premium real estate opportunities.
+                            Partner with vijad Projects and earn competitive commissions by connecting buyers with premium real estate opportunities.
                         </p>
 
                         <div className="space-y-4">
@@ -349,7 +349,7 @@ const Auth = () => {
                                 "Dedicated affiliate support team",
                             ].map((benefit, index) => (
                                 <motion.div key={index} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.4, delay: 0.2 + index * 0.1 }} className="flex items-center gap-3">
-                                    <div className="w-2 h-2 rounded-full bg-vjad-gold" />
+                                    <div className="w-2 h-2 rounded-full bg-vijad-gold" />
                                     <span className="text-white/90">{benefit}</span>
                                 </motion.div>
                             ))}
@@ -358,22 +358,22 @@ const Auth = () => {
                 </div>
 
                 <div className="absolute -bottom-20 -right-20 w-80 h-80 rounded-full bg-white/5 blur-3xl" />
-                <div className="absolute top-20 -left-10 w-40 h-40 rounded-full bg-vjad-gold/10 blur-2xl" />
+                <div className="absolute top-20 -left-10 w-40 h-40 rounded-full bg-vijad-gold/10 blur-2xl" />
             </div>
 
             {/* Right Panel - Auth Form */}
             <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-background">
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-md">
                     <Link href="/" className="flex lg:hidden items-center gap-2 mb-8">
-                        <Image src={"/vijad-projects-dark.png"} width={130} height={100} alt="vjad" />
+                        <Image src={"/vijad-projects-dark.png"} width={130} height={100} alt="vijad" />
                     </Link>
 
                     <div className="mb-8">
                         <h2 className="text-3xl font-display font-bold text-foreground mb-2">{mode === "login" ? "Welcome back" : "Create your account"}</h2>
-                        <p className="text-muted-foreground">{mode === "login" ? "Enter your credentials to access your dashboard" : "Start your journey as a VJAD affiliate partner"}</p>
+                        <p className="text-muted-foreground">{mode === "login" ? "Enter your credentials to access your dashboard" : "Start your journey as a vijad affiliate partner"}</p>
                         {mode === "register" && referrerName && (
-                            <div className="mt-4 p-3 rounded-lg bg-vjad-gold/10 border border-vjad-gold/20">
-                                <p className="text-sm text-vjad-gold font-medium">
+                            <div className="mt-4 p-3 rounded-lg bg-vijad-gold/10 border border-vijad-gold/20">
+                                <p className="text-sm text-vijad-gold font-medium">
                                     ✨ Referred by <span className="font-bold">{referrerName}</span>
                                 </p>
                             </div>
@@ -519,7 +519,7 @@ const Auth = () => {
                                             className={`h-12 ${errors.referralCode ? "border-destructive" : ""}`}
                                         />
                                         {referrerName && (
-                                            <p className="text-sm text-vjad-gold font-medium">✨ Referred by {referrerName}</p>
+                                            <p className="text-sm text-vijad-gold font-medium">✨ Referred by {referrerName}</p>
                                         )}
                                         {errors.referralCode && <p className="text-sm text-destructive">{errors.referralCode}</p>}
                                         <p className="text-xs text-muted-foreground">

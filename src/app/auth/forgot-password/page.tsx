@@ -42,13 +42,13 @@ const ForgotPassword = () => {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-md">
                 <div className="text-center mb-8">
                     <Link href="/" className="inline-flex items-center gap-2 mb-8">
-                        <Image src={"/vijad-projects-dark.png"} width={150} height={70} alt="vjad" />
+                        <Image src={"/vijad-projects-dark.png"} width={150} height={70} alt="vijad" />
                     </Link>
 
                     {isSubmitted ? (
                         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-4">
-                            <div className="w-16 h-16 mx-auto bg-[var(--color-vjad-gold)]/10 rounded-full flex items-center justify-center">
-                                <CheckCircle className="h-8 w-8 text-[var(--color-vjad-gold)]" />
+                            <div className="w-16 h-16 mx-auto bg-[var(--color-vijad-gold)]/10 rounded-full flex items-center justify-center">
+                                <CheckCircle className="h-8 w-8 text-[var(--color-vijad-gold)]" />
                             </div>
                             <h2 className="text-2xl font-display font-bold text-[var(--color-foreground)]">Check your email</h2>
                             <p className="text-[var(--color-muted-foreground)]">

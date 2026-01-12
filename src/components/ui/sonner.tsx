@@ -37,7 +37,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
         info: <InfoIcon className="size-5 text-blue-600" />,
         warning: <TriangleAlertIcon className="size-5 text-amber-600" />,
         error: <OctagonXIcon className="size-5 text-red-600" />,
-        loading: <Loader2Icon className="size-5 animate-spin text-[var(--color-vjad-navy)]" />,
+        loading: <Loader2Icon className="size-5 animate-spin text-[var(--color-vijad-navy)]" />,
       }}
       {...props}
     />
