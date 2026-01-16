@@ -9,9 +9,9 @@ const projects = [
         title: "Victory Court",
         location: "Iloti Epe-Ijebu Ode Express",
         description: "Now Introducing Victory Court - ESTD 2024",
-        image: "/assets/projects/victory-court.jpg",
+        image: "/assets/projects/victory-court.jpeg",
         status: "Now Introducing",
-        cofo: "IJO/SL/C50",
+        cofo: "IJO/SL/C113",
         features: [
             "Title",
             "24/7 Security",
@@ -125,7 +125,7 @@ export function ProjectsSection() {
                                     {project.cofo && (
                                         <div className="flex items-center gap-2 px-4 py-2 bg-card rounded-xl border border-border">
                                             <Shield className="w-4 h-4 text-vijad-gold" />
-                                            <span className="text-sm font-medium">file no:{project.cofo}</span>
+                                            <span className="text-sm font-medium">FILE NO: {project.cofo}</span>
                                         </div>
                                     )}
                                 </div>
