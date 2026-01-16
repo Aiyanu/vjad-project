@@ -375,6 +375,28 @@ export function DaySlotManager() {
     const currentDaySlots = getDaySlots(selectedDay);
     const currentTotal = calculateTotalHours(currentDaySlots);
     const tempTotal = calculateTotalHours(tempSlots);
+    // Validation for all temp slots
+    let slotValidationError: string | null = null;
+    for (const slot of tempSlots) {
+        const error = validateTimeSlot(slot.startTime, slot.endTime);
+        if (error) {
+            slotValidationError = error;
+            break;
+        }
+        const [startHour, startMin] = slot.startTime.split(":").map(Number);
+        const [endHour, endMin] = slot.endTime.split(":").map(Number);
+        const startMinutes = startHour * 60 + startMin;
+        const endMinutes = endHour * 60 + endMin;
+        const slotDuration = endMinutes - startMinutes;
+        if (slot.duration <= 0) {
+            slotValidationError = "Duration must be greater than 0";
+            break;
+        }
+        if (slot.duration > slotDuration) {
+            slotValidationError = "Duration cannot be greater than the slot time range";
+            break;
+        }
+    }
     const hasOverlap = checkOverlappingSlots() !== null;
 
     return (
@@ -411,6 +433,12 @@ export function DaySlotManager() {
                                             </Badge>
                                         )}
                                     </h3>
+                                    {/* Show error message near total time if invalid */}
+                                    {slotValidationError && (
+                                        <span style={{ color: 'red', fontSize: '0.9em', fontWeight: 500 }}>
+                                            {slotValidationError}
+                                        </span>
+                                    )}
                                     {currentDaySlots.length > 0 && (
                                         <div className="flex items-center gap-2">
                                             <Button
@@ -592,7 +620,7 @@ export function DaySlotManager() {
                                     </Button>
                                     <Button
                                         onClick={saveDaySlots}
-                                        disabled={saving || tempTotal.totalMinutes > 24 * 60 || hasOverlap}
+                                        disabled={saving || tempTotal.totalMinutes > 24 * 60 || hasOverlap || !!slotValidationError}
                                         className="w-full sm:flex-1 bg-vijad-gold hover:bg-vijad-gold/90 text-vijad-dark"
                                     >
                                         {saving ? "Saving..." : `Save Slots`}
