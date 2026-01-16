@@ -38,10 +38,10 @@ export default function VictoryCourtSection() {
                         className="relative group rounded-3xl overflow-hidden"
                     >
                         {/* halo */}
-                        <div className="absolute -inset-1 rounded-3xl bg-gradient-to-br from-primary/6 via-vijad-gold/6 to-secondary/6 opacity-80 blur-3xl pointer-events-none transition-opacity group-hover:opacity-90" />
+                        <div className="absolute -inset-1 rounded-3xl bg-linear-to-br from-primary/6 via-vijad-gold/6 to-secondary/6 opacity-80 blur-3xl pointer-events-none transition-opacity group-hover:opacity-90" />
 
                         {/* single positioned container with explicit height */}
-                        <div className="relative w-full h-80 md:h-[480px] lg:h-full rounded-3xl overflow-hidden bg-card border border-border/50 shadow-elegant">
+                        <div className="relative w-full h-80 md:h-120 lg:h-full rounded-3xl overflow-hidden bg-card border border-border/50 shadow-elegant">
                             <Image
                                 src="/flyer.jpg"                  // ensure file exists in public/
                                 alt="Victory Court - Premium real estate development project"
@@ -52,7 +52,7 @@ export default function VictoryCourtSection() {
                             />
 
                             {/* subtle overlay */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
+                            <div className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
                         </div>
                     </motion.div>
 

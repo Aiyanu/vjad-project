@@ -155,7 +155,7 @@ export function HeroSection() {
             </div>
 
             {/* Bottom Wave */}
-            <div className="absolute bottom-[-1px] left-0 right-0 overflow-hidden">
+            <div className="absolute -bottom-px left-0 right-0 overflow-hidden">
                 <svg
                     viewBox="0 0 1440 120"
                     xmlns="http://www.w3.org/2000/svg"

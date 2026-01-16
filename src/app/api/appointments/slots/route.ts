@@ -98,12 +98,12 @@ export async function POST(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { slotId } = body;
+    const { searchParams } = new URL(request.url);
+    const slotId = searchParams.get("slotId");
 
     if (!slotId) {
       return NextResponse.json(
-        { error: "slotId is required" },
+        { success: false, error: "slotId is required" },
         { status: 400 }
       );
     }
@@ -119,7 +119,11 @@ export async function DELETE(request: NextRequest) {
   } catch (error: any) {
     console.error("Error deleting slot:", error);
     return NextResponse.json(
-      { error: "Failed to delete appointment slot", details: error.message },
+      {
+        success: false,
+        error: "Failed to delete appointment slot",
+        details: error.message,
+      },
       { status: 500 }
     );
   }

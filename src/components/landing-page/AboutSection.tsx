@@ -39,9 +39,11 @@ export function AboutSection() {
                     transition={{ duration: 0.6 }}
                     className="text-center mb-12"
                 >
-                    <span className="gold-badge mb-4">About Vijad Projects</span>
-                    <h2 className="section-heading mt-4">A Real Estate Development & Investment Firm</h2>
-                    <p className="section-subheading mx-auto max-w-4xl">
+                    <span className="inline-flex items-center gap-2 px-4 py-2 bg-vijad-gold/10 border border-vijad-gold/30 rounded-full text-xs font-semibold text-vijad-gold mb-6 tracking-wider uppercase">About Vijad Projects</span>
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-6 leading-tight tracking-tight">
+                        A Real Estate Development &<br className="hidden sm:block" /> Investment Firm
+                    </h2>
+                    <p className="text-base md:text-lg text-muted-foreground mx-auto max-w-4xl leading-relaxed">
                         Vijad Projects is a vertically integrated real estate development and investment firm delivering premium residential projects and secure land opportunities across Lagos. We bridge Nigeria's housing gap by combining quality development, regulatory compliance, and investor-focused execution.
                     </p>
                 </motion.div>
@@ -60,9 +62,9 @@ export function AboutSection() {
                             <div className="p-3 rounded-xl bg-primary/10 text-primary">
                                 <Target className="w-7 h-7" />
                             </div>
-                            <h3 className="text-2xl font-bold text-foreground">Our Mission</h3>
+                            <h3 className="text-xl md:text-2xl font-bold text-foreground tracking-tight">Our Mission</h3>
                         </div>
-                        <p className="text-muted-foreground leading-relaxed">
+                        <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
                             Our mission is to create exceptional real estate projects that enhance the lives of our customers and contribute to the development of vibrant communities.
                         </p>
                     </motion.div>
@@ -79,9 +81,9 @@ export function AboutSection() {
                             <div className="p-3 rounded-xl bg-vijad-gold/20 text-vijad-gold">
                                 <Eye className="w-7 h-7" />
                             </div>
-                            <h3 className="text-2xl font-bold text-foreground">Our Vision</h3>
+                            <h3 className="text-xl md:text-2xl font-bold text-foreground tracking-tight">Our Vision</h3>
                         </div>
-                        <p className="text-muted-foreground leading-relaxed">
+                        <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
                             To be the leading real estate brand in the industry, known for our commitment to excellence and quality projects that exceed customer expectations.
                         </p>
                     </motion.div>
@@ -95,11 +97,8 @@ export function AboutSection() {
                     transition={{ duration: 0.6, delay: 0.08 }}
                     className="text-center mt-16 mb-8"
                 >
-                    {/* <div className="inline-flex items-center gap-2 px-4 py-2 bg-vijad-gold/10 border border-vijad-gold/30 rounded-full text-sm font-medium text-vijad-gold mb-4">
-                        What Drives Us
-                    </div> */}
-                    <h2 className="text-4xl font-bold text-foreground mb-4">Our Core Values</h2>
-                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                    <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 tracking-tight">Our Core Values</h2>
+                    <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
                         These principles guide everything we do and define our commitment to you
                     </p>
                 </motion.div>
@@ -128,10 +127,10 @@ export function AboutSection() {
                                     </div>
                                 </div>
 
-                                <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">
+                                <h3 className="text-lg md:text-xl font-bold text-foreground group-hover:text-primary transition-colors tracking-tight">
                                     {v.title}
                                 </h3>
-                                <p className="text-sm text-muted-foreground mt-2">{v.description}</p>
+                                <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{v.description}</p>
                             </motion.div>
                         );
                     })}

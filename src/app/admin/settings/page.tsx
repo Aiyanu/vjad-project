@@ -18,6 +18,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { User as UserIcon, Mail, Phone, Lock, Loader2, Calendar, Clock, Plus, Trash2, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { DaySlotManager } from "@/components/appointments/DaySlotManager";
 
 const PhoneInput = dynamic(() => import("react-phone-input-2"), { ssr: false });
 
@@ -201,7 +202,7 @@ export default function AdminSettings() {
 
   const handleDeleteSlot = async (id: string) => {
     try {
-      const response = await fetch(`/api/appointments/slots?id=${id}`, {
+      const response = await fetch(`/api/appointments/slots?slotId=${id}`, {
         method: "DELETE",
       });
 
@@ -490,152 +491,7 @@ export default function AdminSettings() {
 
       {/* Appointment Slots Section */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="max-w-2xl">
-        <Card className="border-0">
-          <CardHeader>
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-              <div className="flex-1">
-                <CardTitle className="flex flex-col sm:flex-row sm:items-center gap-2 text-lg sm:text-xl">
-                  <Calendar className="w-5 h-5 text-[hsl(var(--primary))]" />
-                  Appointment Availability
-                </CardTitle>
-                <CardDescription className="text-xs sm:text-sm mt-2">Set your available time slots for appointments</CardDescription>
-              </div>
-              <Button
-                className="gap-2 w-full sm:w-auto"
-                onClick={() => setShowAppointmentForm(!showAppointmentForm)}
-                variant={showAppointmentForm ? "default" : "outline"}
-              >
-                <Plus className="w-4 h-4" />
-                {showAppointmentForm ? "Cancel" : "Add Time Slot"}
-              </Button>
-            </div>
-          </CardHeader>
-
-          <CardContent className="space-y-2">
-            {showAppointmentForm && (
-              <form onSubmit={handleAddSlot} className="space-y-2 mb-6">
-                <Label className="text-sm sm:text-base font-semibold">Add Time Slots</Label>
-
-                <div className="space-y-3">
-                  {timeSlots.map((slot, index) => (
-                    <div key={index} className="space-y-2">
-                      {index === 0 && (
-                        <div className="hidden sm:grid sm:grid-cols-4 gap-2 mb-3">
-                          <div>
-                            <Label className="text-xs">Day</Label>
-                          </div>
-                          <div>
-                            <Label className="text-xs">From</Label>
-                          </div>
-                          <div>
-                            <Label className="text-xs">To</Label>
-                          </div>
-                          <div></div>
-                        </div>
-                      )}
-
-                      <div className="space-y-2 sm:space-y-0 sm:grid sm:grid-cols-4 sm:gap-2 sm:items-end p-3 sm:p-0 bg-muted/30 sm:bg-transparent rounded-lg sm:rounded-none">
-                        <div>
-                          <Label className="text-xs sm:hidden mb-1 block">Day</Label>
-                          <Select value={slot.dayOfWeek} onValueChange={(value) => updateTimeSlot(index, "dayOfWeek", value)}>
-                            <SelectTrigger className="h-8 text-xs sm:text-sm">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {DAYS.map((day, dayIndex) => (
-                                <SelectItem key={dayIndex} value={dayIndex.toString()}>
-                                  {day}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div>
-                          <Label className="text-xs sm:hidden mb-1 block">From</Label>
-                          <Input
-                            type="time"
-                            value={slot.startTime}
-                            onChange={(e) => updateTimeSlot(index, "startTime", e.target.value)}
-                            className="h-8 text-xs sm:text-sm"
-                          />
-                        </div>
-
-                        <div>
-                          <Label className="text-xs sm:hidden mb-1 block">To</Label>
-                          <Input
-                            type="time"
-                            value={slot.endTime}
-                            onChange={(e) => updateTimeSlot(index, "endTime", e.target.value)}
-                            className="h-8 text-xs sm:text-sm"
-                          />
-                        </div>
-
-                        <div className="flex gap-1 sm:gap-0.5">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            onClick={handleAddTimeSlot}
-                            className="flex-1 sm:flex-none sm:w-8 h-8 text-green-600 hover:text-green-700 hover:bg-green-50 text-xs sm:text-base"
-                            title="Add another slot"
-                          >
-                            <Plus className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            onClick={() => handleRemoveTimeSlot(index)}
-                            disabled={timeSlots.length === 1}
-                            className="flex-1 sm:flex-none sm:w-8 h-8 text-red-600 hover:text-red-700 hover:bg-red-50 disabled:opacity-50 text-xs sm:text-base"
-                            title="Remove this slot"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <Button type="submit" className="w-full mt-2">
-                  Save Availability
-                </Button>
-              </form>
-            )}
-
-            {slots.length === 0 ? (
-              <p className="text-xs sm:text-sm text-muted-foreground">No appointment slots added yet</p>
-            ) : (
-              <div className="space-y-3">
-                {slots.map((slot) => (
-                  <div key={slot.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-muted/50 rounded-lg">
-                    <div className="flex items-center gap-4">
-                      <div>
-                        <p className="font-medium text-sm sm:text-base">{DAYS[slot.dayOfWeek]}</p>
-                        <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
-                          <Clock className="w-3 h-3" />
-                          <span>
-                            {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-red-500 hover:text-red-600"
-                      onClick={() => handleDeleteSlot(slot.id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <DaySlotManager />
       </motion.div>
 
       {/* All Appointments Section

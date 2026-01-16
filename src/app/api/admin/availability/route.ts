@@ -4,7 +4,7 @@ import prisma from "@/lib/db";
 // GET all availability blocks
 export async function GET() {
   try {
-    const availability = await prisma.availabilityBlock.findMany({
+    const availability = await prisma.dailyAvailability.findMany({
       include: {
         timeBlocks: {
           orderBy: {
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if date already has availability
-    const existing = await prisma.availabilityBlock.findUnique({
+    const existing = await prisma.dailyAvailability.findUnique({
       where: { date: new Date(date) },
     });
 
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create availability block with time blocks
-    const availability = await prisma.availabilityBlock.create({
+    const availability = await prisma.dailyAvailability.create({
       data: {
         date: new Date(date),
         timeBlocks: {
@@ -134,7 +134,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    await prisma.availabilityBlock.delete({
+    await prisma.dailyAvailability.delete({
       where: { date: new Date(date) },
     });
 

@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const availability = await prisma.availabilityBlock.findUnique({
+    const availability = await prisma.dailyAvailability.findUnique({
       where: { date: new Date(date) },
     });
 
@@ -29,10 +29,10 @@ export async function POST(request: NextRequest) {
 
     const timeBlock = await prisma.timeBlock.create({
       data: {
-        availabilityBlockId: availability.id,
+        dailyAvailabilityId: availability.id,
         startTime,
         endTime,
-        durationMinutes,
+        slotDuration: durationMinutes,
       },
     });
 
@@ -66,7 +66,7 @@ export async function DELETE(request: NextRequest) {
     const timeBlock = await prisma.timeBlock.findUnique({
       where: { id: blockId },
       include: {
-        availabilityBlock: true,
+        dailyAvailability: true,
       },
     });
 
@@ -79,7 +79,7 @@ export async function DELETE(request: NextRequest) {
 
     const bookedAppointments = await prisma.appointment.count({
       where: {
-        appointmentDate: timeBlock.availabilityBlock.date,
+        appointmentDate: timeBlock.dailyAvailability.date,
         startTime: {
           gte: timeBlock.startTime,
           lt: timeBlock.endTime,

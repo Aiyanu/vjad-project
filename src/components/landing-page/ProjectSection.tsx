@@ -82,14 +82,14 @@ export function ProjectsSection() {
                                     <img
                                         src={project.image}
                                         alt={project.title}
-                                        className="w-full aspect-[4/3] object-cover"
+                                        className="w-full aspect-4/3 object-cover"
                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                                    <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent" />
 
                                     {/* Status Badge */}
-                                    <div className="absolute top-4 left-4 px-4 py-2 bg-primary text-primary-foreground text-sm font-semibold rounded-full">
+                                    {/* <div className="absolute top-4 left-4 px-4 py-2 bg-primary text-primary-foreground text-sm font-semibold rounded-full">
                                         {project.status}
-                                    </div>
+                                    </div> */}
 
                                     {/* C of O Badge */}
                                     {project.cofo && (
@@ -136,7 +136,7 @@ export function ProjectsSection() {
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                         {project.features.map((feature, i) => (
                                             <div key={i} className="flex items-center gap-2">
-                                                <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
+                                                <CheckCircle className="w-4 h-4 text-primary shrink-0" />
                                                 <span className="text-sm text-muted-foreground">{feature}</span>
                                             </div>
                                         ))}

@@ -111,10 +111,8 @@ export function AppointmentSlotManager() {
     if (!confirm("Are you sure you want to delete this slot?")) return;
 
     try {
-      const response = await fetch("/api/appointments/slots", {
+      const response = await fetch(`/api/appointments/slots?slotId=${slotId}`, {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slotId }),
       });
 
       const data = await response.json();

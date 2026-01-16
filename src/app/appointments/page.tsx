@@ -2,34 +2,42 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Calendar, Clock, User, Mail, Phone, CheckCircle, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, CheckCircle, User, Mail, Phone } from "lucide-react";
+import { Navbar } from "@/components/landing-page/Navbar";
+import { Footer } from "@/components/landing-page/Footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Navbar } from "@/components/landing-page/Navbar";
-import { Footer } from "@/components/landing-page/Footer";
-import { toast } from "sonner";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format, addDays, isBefore, startOfToday } from "date-fns";
+import { toast } from "sonner";
+
+interface AppointmentSlot {
+  id: string;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  isAvailable: boolean;
+}
 
 interface TimeSlot {
   time: string;
   available: boolean;
 }
 
-const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-
-export default function Appointments() {
-  const [step, setStep] = useState(1); // Multi-step form state
-  const [date, setDate] = useState<Date | undefined>(undefined);
-  const [selectedTime, setSelectedTime] = useState<string>("");
-  const [availability, setAvailability] = useState<{ dayOfWeek: number; startTime: string; endTime: string; isAvailable: boolean }[]>([]);
-  const [bookedSlots, setBookedSlots] = useState<string[]>([]);
+export default function AppointmentsPage() {
+  const [step, setStep] = useState<1 | 2>(1);
+  const [date, setDate] = useState<Date>();
+  const [selectedTime, setSelectedTime] = useState("");
+  const [availability, setAvailability] = useState<AppointmentSlot[]>([]);
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isLoadingAvailability, setIsLoadingAvailability] = useState(true);
+  const [isLoadingTimeSlots, setIsLoadingTimeSlots] = useState(false);
+  const [dayAvailability, setDayAvailability] = useState<Record<string, { total: number; available: number }>>({});
   const [formData, setFormData] = useState({
     visitorName: "",
     visitorEmail: "",
@@ -43,77 +51,143 @@ export default function Appointments() {
 
   useEffect(() => {
     if (date) {
-      fetchBookedSlots(date);
-      generateTimeSlots(date);
+      generateTimeSlots();
     }
   }, [date, availability]);
 
+  // Preload day availability for next 30 days
+  useEffect(() => {
+    if (availability.length > 0 && !isLoadingAvailability) {
+      preloadDayAvailability();
+    }
+  }, [availability, isLoadingAvailability]);
+
+  const preloadDayAvailability = async () => {
+    const today = startOfToday();
+    const promises = [];
+
+    for (let i = 0; i < 30; i++) {
+      const checkDate = addDays(today, i);
+      const dayOfWeek = checkDate.getDay();
+      const hasSlots = availability.some((a) => a.dayOfWeek === dayOfWeek && a.isAvailable);
+
+      if (hasSlots) {
+        promises.push(fetchDayAvailability(checkDate));
+      }
+    }
+
+    await Promise.all(promises);
+  };
+
+  const fetchDayAvailability = async (checkDate: Date) => {
+    try {
+      const dateStr = format(checkDate, "yyyy-MM-dd");
+      const dayOfWeek = checkDate.getDay();
+
+      const daySlots = availability.filter((slot) => slot.dayOfWeek === dayOfWeek && slot.isAvailable);
+      if (daySlots.length === 0) return;
+
+      const response = await fetch(`/api/appointments/book?date=${dateStr}`);
+      const data = await response.json();
+      const bookedSlots = data.bookings?.map((b: any) => b.startTime) || [];
+
+      let totalSlots = 0;
+      daySlots.forEach((slot) => {
+        const [startHour, startMin] = slot.startTime.split(":").map(Number);
+        const [endHour, endMin] = slot.endTime.split(":").map(Number);
+        const startMinutes = startHour * 60 + startMin;
+        const endMinutes = endHour * 60 + endMin;
+        totalSlots += Math.floor((endMinutes - startMinutes) / 30);
+      });
+
+      const availableCount = totalSlots - bookedSlots.length;
+
+      setDayAvailability(prev => ({
+        ...prev,
+        [dateStr]: { total: totalSlots, available: availableCount }
+      }));
+    } catch (error) {
+      // Silently fail for preloading
+    }
+  };
+
   const fetchAvailability = async () => {
     try {
+      setIsLoadingAvailability(true);
       const response = await fetch("/api/appointments/slots");
       const data = await response.json();
-
       if (data.success) {
-        setAvailability(data.slots);
+        setAvailability(data.slots || []);
       }
     } catch (error) {
       console.error("Error fetching availability:", error);
+      toast.error("Failed to load availability");
+    } finally {
+      setIsLoadingAvailability(false);
     }
   };
 
-  const fetchBookedSlots = async (selectedDate: Date) => {
+  const generateTimeSlots = async () => {
+    if (!date) return;
+
+    setIsLoadingTimeSlots(true);
     try {
-      const dateStr = format(selectedDate, "yyyy-MM-dd");
-      const response = await fetch(`/api/appointments/get-slots?date=${dateStr}`);
+      const dayOfWeek = date.getDay();
+      const dateStr = format(date, "yyyy-MM-dd");
+
+      // Get slots for this day of week
+      const daySlots = availability.filter((slot) => slot.dayOfWeek === dayOfWeek && slot.isAvailable);
+
+      if (daySlots.length === 0) {
+        setTimeSlots([]);
+        return;
+      }
+
+      // Fetch existing bookings for this date
+      const response = await fetch(`/api/appointments/book?date=${dateStr}`);
       const data = await response.json();
+      const bookedSlots = data.bookings?.map((b: any) => b.startTime) || [];
 
-      if (data.success) {
-        const booked = data.availableSlots
-          .filter((slot: any) => !slot.available)
-          .map((slot: any) => slot.time);
-        setBookedSlots(booked);
-      }
-    } catch (error) {
-      console.error("Error fetching booked slots:", error);
-    }
-  };
+      const slots: TimeSlot[] = [];
 
-  const generateTimeSlots = (selectedDate: Date) => {
-    const dayOfWeek = selectedDate.getDay();
-    const dayAvailability = availability.filter((a) => a.dayOfWeek === dayOfWeek);
+      daySlots.forEach((slot) => {
+        const [startHour, startMin] = slot.startTime.split(":").map(Number);
+        const [endHour, endMin] = slot.endTime.split(":").map(Number);
 
-    if (dayAvailability.length === 0) {
-      setTimeSlots([]);
-      return;
-    }
+        let currentHour = startHour;
+        let currentMinute = startMin;
 
-    const slots: TimeSlot[] = [];
+        while (currentHour < endHour || (currentHour === endHour && currentMinute < endMin)) {
+          const timeString = `${currentHour.toString().padStart(2, "0")}:${currentMinute.toString().padStart(2, "0")}`;
+          const isBooked = bookedSlots.includes(timeString);
 
-    dayAvailability.forEach((avail) => {
-      const [startHour, startMinute] = avail.startTime.split(":").map(Number);
-      const [endHour, endMinute] = avail.endTime.split(":").map(Number);
+          slots.push({
+            time: timeString,
+            available: !isBooked,
+          });
 
-      let currentHour = startHour;
-      let currentMinute = startMinute;
-
-      while (currentHour < endHour || (currentHour === endHour && currentMinute < endMinute)) {
-        const timeString = `${currentHour.toString().padStart(2, "0")}:${currentMinute.toString().padStart(2, "0")}:00`;
-        const isBooked = bookedSlots.includes(timeString);
-
-        slots.push({
-          time: timeString,
-          available: !isBooked,
-        });
-
-        currentMinute += 30;
-        if (currentMinute >= 60) {
-          currentMinute = 0;
-          currentHour++;
+          currentMinute += 30;
+          if (currentMinute >= 60) {
+            currentMinute = 0;
+            currentHour++;
+          }
         }
-      }
-    });
+      });
 
-    setTimeSlots(slots);
+      setTimeSlots(slots);
+
+      // Track day availability
+      const availableCount = slots.filter(s => s.available).length;
+      setDayAvailability(prev => ({
+        ...prev,
+        [dateStr]: { total: slots.length, available: availableCount }
+      }));
+    } catch (error) {
+      console.error("Error generating time slots:", error);
+      toast.error("Failed to load time slots");
+    } finally {
+      setIsLoadingTimeSlots(false);
+    }
   };
 
   const formatTimeDisplay = (time: string) => {
@@ -128,6 +202,17 @@ export default function Appointments() {
     if (isBefore(date, startOfToday())) return true;
     const dayOfWeek = date.getDay();
     return !availability.some((a) => a.dayOfWeek === dayOfWeek && a.isAvailable);
+  };
+
+  const getDayAvailabilityStatus = (date: Date) => {
+    const dateStr = format(date, "yyyy-MM-dd");
+    const dayData = dayAvailability[dateStr];
+
+    if (!dayData) return null;
+
+    if (dayData.available === 0) return "fully-booked";
+    if (dayData.available < dayData.total * 0.3) return "limited";
+    return "available";
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -197,8 +282,11 @@ export default function Appointments() {
               <p className="text-muted-foreground mb-2">
                 Your appointment has been scheduled for:
               </p>
-              <p className="text-xl font-semibold text-vijad-gold mb-6">
+              <p className="text-xl font-semibold text-vijad-gold mb-2">
                 {date && format(date, "EEEE, MMMM d, yyyy")} at {formatTimeDisplay(selectedTime)}
+              </p>
+              <p className="text-sm text-muted-foreground mb-6">
+                Duration: 30 minutes
               </p>
               <p className="text-muted-foreground mb-8">
                 A confirmation email will be sent to {formData.visitorEmail}
@@ -261,123 +349,117 @@ export default function Appointments() {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
               >
-                <div className="grid lg:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Calendar Section */}
-                  <div className="bg-background rounded-lg p-6">
-                    <h2 className="text-2xl font-bold text-foreground flex items-center gap-2 mb-6">
-                      <Calendar className="w-6 h-6 text-vijad-gold" />
+                  <div className="space-y-4 flex flex-col items-center">
+                    <h3 className="flex items-center gap-2 text-lg font-semibold">
+                      <CalendarIcon className="w-5 h-5 text-vijad-gold" />
                       Select Date
-                    </h2>
-
-                    <div className="bg-card rounded-lg p-4 mb-6 inline-block">
-                      <CalendarComponent
-                        mode="single"
-                        selected={date}
-                        onSelect={(newDate) => {
-                          setDate(newDate);
-                          setSelectedTime("");
-                        }}
-                        disabled={isDateDisabled}
-                        fromDate={startOfToday()}
-                        toDate={addDays(new Date(), 60)}
-                        className="[&_.rdp]:w-auto [&_.rdp-months]:w-auto [&_.rdp-month]:w-auto [&_.rdp-caption]:text-sm [&_.rdp-caption]:font-semibold [&_.rdp-cell]:p-0 [&_.rdp-cell]:w-10 [&_.rdp-day]:w-10 [&_.rdp-day]:h-10 [&_.rdp-day]:text-sm [&_.rdp-day_button]:w-full [&_.rdp-day_button]:h-full [&_.rdp-day_button]:text-foreground [&_.rdp-day_button]:font-medium [&_.rdp-day_button]:rounded-md [&_.rdp-day_button:hover]:bg-vijad-gold/10 [&_.rdp-day_selected]:bg-vijad-gold [&_.rdp-day_selected]:text-vijad-dark [&_.rdp-day_today]:border-2 [&_.rdp-day_today]:border-vijad-gold"
-                      />
-                    </div>
+                    </h3>
+                    {isLoadingAvailability ? (
+                      <div className="flex flex-col items-center justify-center h-64">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-vijad-gold mb-4"></div>
+                        <p className="text-muted-foreground text-sm">Loading available dates...</p>
+                      </div>
+                    ) : (
+                      <div className="flex justify-center w-full">
+                        <CalendarComponent
+                          mode="single"
+                          selected={date}
+                          onSelect={(newDate) => {
+                            setDate(newDate);
+                            setSelectedTime("");
+                          }}
+                          disabled={isDateDisabled}
+                          fromDate={startOfToday()}
+                          toDate={addDays(new Date(), 60)}
+                          className="rounded-md scale-90 origin-top w-full max-w-xs"
+                        />
+                      </div>
+                    )}
 
                     {/* Legend */}
-                    <div className="bg-card rounded-lg p-4">
-                      <h3 className="text-sm font-semibold text-foreground mb-3">Legend</h3>
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-md bg-green-100 border-2 border-green-300"></div>
-                          <span className="text-sm text-muted-foreground">Available</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-md bg-orange-100 border-2 border-orange-300"></div>
-                          <span className="text-sm text-muted-foreground">Booked</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-md bg-gray-100 border-2 border-gray-300"></div>
-                          <span className="text-sm text-muted-foreground">Unavailable</span>
-                        </div>
+                    <div className="flex flex-wrap items-center justify-center gap-3 text-xs bg-muted/50 p-2 rounded-lg w-full">
+                      <div className="flex items-center gap-1">
+                        <div className="w-2.5 h-2.5 rounded-full bg-vijad-gold"></div>
+                        <span className="text-muted-foreground text-[11px]">Available</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <div className="w-2.5 h-2.5 rounded-full bg-orange-500"></div>
+                        <span className="text-muted-foreground text-[11px]">Limited</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
+                        <span className="text-muted-foreground text-[11px]">Fully Booked</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <div className="w-2.5 h-2.5 rounded-full bg-muted"></div>
+                        <span className="text-muted-foreground text-[11px]">Unavailable</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Time Slots Section */}
-                  <div className="bg-background rounded-lg p-6">
-                    <h2 className="text-2xl font-bold text-foreground flex items-center gap-2 mb-6">
-                      <Clock className="w-6 h-6 text-vijad-gold" />
-                      Select Time
-                    </h2>
+                  <div className="space-y-4 flex flex-col items-center">
+                    <div className="w-full">
+                      <h3 className="flex items-center gap-2 text-lg font-semibold">
+                        <Clock className="w-5 h-5 text-vijad-gold" />
+                        Select Time
+                      </h3>
+                      {date && (
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Available times for {format(date, "EEEE, MMM d")}
+                        </p>
+                      )}
+                    </div>
 
                     {!date ? (
                       <div className="flex flex-col items-center justify-center h-64 text-center">
-                        <Calendar className="w-16 h-16 text-muted-foreground/30 mb-4" />
+                        <CalendarIcon className="w-16 h-16 text-muted-foreground/30 mb-4" />
                         <p className="text-muted-foreground">Please select a date first</p>
+                      </div>
+                    ) : isLoadingTimeSlots ? (
+                      <div className="flex flex-col items-center justify-center h-64">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-vijad-gold mb-4"></div>
+                        <p className="text-muted-foreground text-sm">Loading available times...</p>
                       </div>
                     ) : timeSlots.length === 0 ? (
                       <div className="flex items-center gap-2 p-4 bg-orange-50 rounded-lg text-orange-900">
-                        <AlertCircle className="w-5 h-5" />
                         <p className="text-sm">No available times for this date</p>
                       </div>
                     ) : (
-                      <>
-                        <p className="text-sm text-muted-foreground mb-4">
-                          Available times for {format(date, "EEEE, MMM d")}
-                        </p>
-                        <div className="grid grid-cols-2 gap-3 max-h-[500px] overflow-y-auto pr-2">
-                          {timeSlots.map((slot) => (
-                            <motion.button
-                              key={slot.time}
-                              whileHover={{ scale: slot.available ? 1.05 : 1 }}
-                              type="button"
-                              onClick={() => slot.available && setSelectedTime(slot.time)}
-                              className={`p-4 rounded-lg font-medium text-sm transition-all ${selectedTime === slot.time
-                                  ? "bg-vijad-gold text-vijad-dark shadow-md border-2 border-vijad-gold"
-                                  : slot.available
-                                    ? "bg-green-50 text-green-900 border border-green-200 hover:border-green-400 hover:bg-green-100"
-                                    : "bg-gray-100 text-gray-400 cursor-not-allowed opacity-50"
-                                }`}
-                              disabled={!slot.available}
-                              title={slot.available ? "Available" : "Booked"}
-                            >
-                              {formatTimeDisplay(slot.time)}
-                            </motion.button>
-                          ))}
-                        </div>
-                      </>
+                      <div className="grid grid-cols-2 gap-2 max-h-87.5 overflow-y-auto pr-2 w-full">
+                        {timeSlots.map((slot) => (
+                          <Button
+                            key={slot.time}
+                            type="button"
+                            onClick={() => slot.available && setSelectedTime(slot.time)}
+                            variant={selectedTime === slot.time ? "default" : "outline"}
+                            disabled={!slot.available}
+                            className={`text-sm h-9 w-full ${selectedTime === slot.time ? "bg-vijad-gold hover:bg-vijad-gold/90 text-vijad-dark" : ""}`}
+                          >
+                            {formatTimeDisplay(slot.time)}
+                          </Button>
+                        ))}
+                      </div>
                     )}
-
-                    {/* Selected Date and Time Preview */}
                     {date && selectedTime && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="mt-6 p-4 bg-vijad-gold/10 rounded-lg border border-vijad-gold/20"
-                      >
-                        <div className="flex items-start gap-2">
-                          <CheckCircle2 className="w-5 h-5 text-vijad-gold flex-shrink-0 mt-0.5" />
-                          <div>
-                            <p className="text-sm font-semibold text-foreground mb-1">
-                              Selected Appointment
-                            </p>
-                            <p className="text-vijad-gold font-medium">
-                              {format(date, "EEEE, MMMM d, yyyy")}
-                            </p>
-                            <p className="text-vijad-gold font-medium">
-                              {formatTimeDisplay(selectedTime)}
-                            </p>
-                          </div>
-                        </div>
-                      </motion.div>
+                      <div className="mt-4 p-4 bg-vijad-gold/10 rounded-lg border border-vijad-gold/20 w-full">
+                        <p className="text-sm font-semibold text-foreground mb-1">
+                          Selected Appointment
+                        </p>
+                        <p className="text-vijad-gold font-medium">
+                          {format(date, "EEEE, MMMM d, yyyy")} at {formatTimeDisplay(selectedTime)}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Duration: 30 minutes
+                        </p>
+                      </div>
                     )}
-
-                    {/* Next Button */}
                     <Button
                       onClick={() => setStep(2)}
                       disabled={!date || !selectedTime}
-                      className="w-full mt-6 bg-vijad-gold text-vijad-dark hover:bg-vijad-gold/90"
+                      className="w-full bg-vijad-gold text-vijad-dark hover:bg-vijad-gold/90"
                       size="lg"
                     >
                       Continue to Information
@@ -395,10 +477,10 @@ export default function Appointments() {
                 exit={{ opacity: 0, x: 20 }}
                 className="max-w-2xl mx-auto"
               >
-                <Card className="border-0 shadow-lg">
+                <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-2xl">
-                      <User className="w-6 h-6 text-vijad-gold" />
+                    <CardTitle className="flex items-center gap-2">
+                      <User className="w-5 h-5 text-vijad-gold" />
                       Your Information
                     </CardTitle>
                     <CardDescription>
@@ -406,26 +488,23 @@ export default function Appointments() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    {/* Selected Appointment Summary */}
                     {date && selectedTime && (
                       <div className="mb-6 p-4 bg-vijad-gold/10 rounded-lg border border-vijad-gold/20">
-                        <div className="flex items-start gap-2">
-                          <CheckCircle2 className="w-5 h-5 text-vijad-gold flex-shrink-0 mt-0.5" />
-                          <div>
-                            <p className="text-sm font-semibold text-foreground mb-1">
-                              Selected Appointment
-                            </p>
-                            <p className="text-[hsl(var(--primary))] font-medium">
-                              {format(date, "EEEE, MMMM d, yyyy")} at {formatTimeDisplay(selectedTime)}
-                            </p>
-                          </div>
-                        </div>
+                        <p className="text-sm font-semibold text-foreground mb-1">
+                          Selected Appointment
+                        </p>
+                        <p className="text-vijad-gold font-medium">
+                          {format(date, "EEEE, MMMM d, yyyy")} at {formatTimeDisplay(selectedTime)}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Duration: 30 minutes
+                        </p>
                       </div>
                     )}
 
                     <form onSubmit={handleSubmit} className="space-y-5">
                       <div className="space-y-2">
-                        <Label htmlFor="name" className="flex items-center gap-2 text-base">
+                        <Label htmlFor="name" className="flex items-center gap-2">
                           <User className="w-4 h-4" />
                           Full Name *
                         </Label>
@@ -435,12 +514,11 @@ export default function Appointments() {
                           value={formData.visitorName}
                           onChange={(e) => setFormData({ ...formData, visitorName: e.target.value })}
                           placeholder="Enter your full name"
-                          className="h-12"
                         />
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="email" className="flex items-center gap-2 text-base">
+                        <Label htmlFor="email" className="flex items-center gap-2">
                           <Mail className="w-4 h-4" />
                           Email Address *
                         </Label>
@@ -451,12 +529,11 @@ export default function Appointments() {
                           value={formData.visitorEmail}
                           onChange={(e) => setFormData({ ...formData, visitorEmail: e.target.value })}
                           placeholder="Enter your email"
-                          className="h-12"
                         />
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="phone" className="flex items-center gap-2 text-base">
+                        <Label htmlFor="phone" className="flex items-center gap-2">
                           <Phone className="w-4 h-4" />
                           Phone Number *
                         </Label>
@@ -467,12 +544,11 @@ export default function Appointments() {
                           value={formData.visitorPhone}
                           onChange={(e) => setFormData({ ...formData, visitorPhone: e.target.value })}
                           placeholder="Enter your phone number"
-                          className="h-12"
                         />
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="notes" className="text-base">Additional Notes</Label>
+                        <Label htmlFor="notes">Additional Notes</Label>
                         <Textarea
                           id="notes"
                           value={formData.message}
@@ -488,15 +564,13 @@ export default function Appointments() {
                           onClick={() => setStep(1)}
                           variant="outline"
                           className="flex-1"
-                          size="lg"
                         >
                           Back
                         </Button>
                         <Button
                           type="submit"
-                          className="flex-1 bg-primary hover:bg-primary/90"
+                          className="flex-1 bg-vijad-gold hover:bg-vijad-gold/90 text-vijad-dark"
                           disabled={isSubmitting}
-                          size="lg"
                         >
                           {isSubmitting ? "Booking..." : "Confirm Appointment"}
                         </Button>
