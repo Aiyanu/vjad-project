@@ -46,14 +46,14 @@ export function HeroSection() {
                             <span className="text-vijad-gold">Usual</span>{" "}
                         </motion.h1>
 
-                        <motion.p
+                        {/* <motion.p
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, delay: 0.15 }}
                             className="text-2xl text-white font-semibold mb-4 max-w-xl"
                         >
                             Premium real estate developments and investment opportunities across Lagos, built for long-term value.
-                        </motion.p>
+                        </motion.p> */}
 
                         <motion.p
                             initial={{ opacity: 0, y: 30 }}
