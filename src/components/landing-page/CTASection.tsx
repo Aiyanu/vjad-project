@@ -6,12 +6,12 @@ import { useRouter } from "next/navigation";
 
 
 const benefits = [
-    "Up to 15% commission on every sale",
-    "Real-time tracking dashboard",
-    "Dedicated support team",
-    "Training and marketing materials",
-    "Exclusive property access",
-    "Monthly bonus incentives",
+    "Commission on completed property sales",
+    "Access to verified Vijad Projects listings",
+    "Training and marketing support",
+    "Transparent performance tracking",
+    "Exclusive partner resources",
+    "Professional certification program",
 ];
 
 export function CTASection() {
@@ -32,19 +32,18 @@ export function CTASection() {
                         transition={{ duration: 0.6 }}
                         className="text-center mb-12"
                     >
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-6">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-vijad-gold/10 text-vijad-gold rounded-full text-sm font-medium mb-6">
                             <Zap className="w-4 h-4" />
-                            Start Earning Today
+                            Vijad Partner Network
                         </div>
 
                         <h2 className="section-heading mb-4">
-                            Ready to Build Your{" "}
-                            <span className="text-primary">Real Estate Empire?</span>
+                            Earn by Connecting Buyers to{" "}
+                            <span className="text-primary">Verified Real Estate Opportunities</span>
                         </h2>
 
                         <p className="section-subheading mx-auto">
-                            Join our affiliate program and unlock unlimited earning potential.
-                            No experience required — we provide everything you need to succeed.
+                            The Vijad Partner Network is our structured affiliate program designed for professionals and entrepreneurs who want to earn commissions by referring qualified buyers to verified Vijad Projects developments. Partners are supported with training, materials, and transparent tracking.
                         </p>
                     </motion.div>
 
@@ -80,7 +79,7 @@ export function CTASection() {
                             className="bg-primary hover:bg-primary/90 text-lg px-10 py-6 group"
                             onClick={() => router.push("/auth?mode=register")}
                         >
-                            Register as Affiliate
+                            Join the Partner Network
                             <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                         </Button>
                         <Button
@@ -89,19 +88,19 @@ export function CTASection() {
                             className="text-lg px-10 py-6"
                             onClick={() => window.location.href = "mailto:support@vijadprojects.com"}
                         >
-                            Contact Sales Team
+                            Contact Partner Support
                         </Button>
                     </motion.div>
 
-                    {/* Trust Badge */}
+                    {/* Disclaimer */}
                     <motion.p
                         initial={{ opacity: 0 }}
                         whileInView={{ opacity: 1 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.6, delay: 0.4 }}
-                        className="text-center text-muted-foreground mt-8"
+                        className="text-center text-muted-foreground mt-8 text-sm max-w-2xl mx-auto"
                     >
-                        Free to join • No hidden fees • Start earning immediately
+                        This program operates as a sales partnership channel and does not represent ownership or control of project assets. All commissions are subject to successful property transactions.
                     </motion.p>
                 </div>
             </div>

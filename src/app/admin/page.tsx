@@ -11,7 +11,8 @@ import {
   TrendingUp,
   UserCheck,
   Clock,
-  CheckCircle
+  CheckCircle,
+  Calendar
 } from "lucide-react";
 
 interface Stats {
@@ -21,6 +22,9 @@ interface Stats {
   pendingSales: number;
   approvedSales: number;
   totalReferrals: number;
+  totalAppointments: number;
+  pendingAppointments: number;
+  confirmedAppointments: number;
 }
 
 export default function AdminDashboard() {
@@ -78,11 +82,40 @@ export default function AdminDashboard() {
         pendingSales: 0,
         approvedSales: 0,
         totalReferrals: 0,
+        totalAppointments: 0,
+        pendingAppointments: 0,
+        confirmedAppointments: 0,
       });
     } catch (error) {
       console.error("Error fetching stats:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAppointmentStats();
+  }, []);
+
+  const fetchAppointmentStats = async () => {
+    try {
+      const response = await fetch("/api/appointments/book");
+      const data = await response.json();
+      
+      if (data.success && data.appointments) {
+        const appointments = data.appointments;
+        const pending = appointments.filter((a: any) => a.status === "pending").length;
+        const confirmed = appointments.filter((a: any) => a.status === "confirmed").length;
+        
+        setStats(prev => ({
+          ...prev,
+          totalAppointments: appointments.length,
+          pendingAppointments: pending,
+          confirmedAppointments: confirmed,
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching appointment stats:", error);
     }
   };
 
@@ -96,6 +129,9 @@ export default function AdminDashboard() {
 
   const statCards = [
     { title: "Total Affiliates", value: stats.totalAffiliates, icon: Users },
+    { title: "Total Appointments", value: stats.totalAppointments, icon: Calendar },
+    { title: "Pending Appointments", value: stats.pendingAppointments, icon: Clock },
+    { title: "Confirmed Appointments", value: stats.confirmedAppointments, icon: CheckCircle },
     // { title: "Total Sales", value: stats.totalSales, icon: DollarSign, prefix: "₦", format: true },
     // { title: "Total Commissions", value: stats.totalCommissions, icon: TrendingUp, prefix: "₦", format: true },
     // { title: "Pending Sales", value: stats.pendingSales, icon: Clock },
@@ -110,16 +146,16 @@ export default function AdminDashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-3xl font-display font-bold text-[hsl(var(--foreground))]">
+        <h1 className="text-2xl sm:text-3xl font-display font-bold text-[hsl(var(--foreground))]">
           Admin Dashboard
         </h1>
-        <p className="text-[hsl(var(--muted-foreground))] mt-1">
-          Overview of affiliate program performance
+        <p className="text-xs sm:text-base text-[hsl(var(--muted-foreground))] mt-1">
+          Overview of affiliate program and appointments
         </p>
       </motion.div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         {statCards.map((stat, index) => (
           <motion.div
             key={stat.title}

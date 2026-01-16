@@ -61,3 +61,90 @@ enum Role {
   admin
   super_admin
 }
+
+// ─── Appointment Booking System ───
+model AppointmentSlot {
+  id          String   @id @default(uuid())
+  dayOfWeek   Int      // 0-6 (Sunday-Saturday)
+  startTime   String   // HH:mm format
+  endTime     String   // HH:mm format
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([dayOfWeek, startTime, endTime])
+}
+
+model AppointmentBooking {
+  id            String   @id @default(uuid())
+  visitorName   String
+  visitorEmail  String
+  visitorPhone  String
+  appointmentDate DateTime
+  startTime     String   // HH:mm format
+  endTime       String   // HH:mm format
+  message       String?
+  status        AppointmentStatus @default(pending)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([appointmentDate])
+  @@index([status])
+}
+
+enum AppointmentStatus {
+  pending
+  confirmed
+  completed
+  cancelled
+}
+
+// ─── New Appointment Availability System ───
+model AppointmentSettings {
+  id              Int      @id @default(autoincrement())
+  durationMinutes Int      @default(60) // Default 1 hour
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model AvailabilityBlock {
+  id         String      @id @default(cuid())
+  date       DateTime    @unique
+  timeBlocks TimeBlock[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@index([date])
+}
+
+model TimeBlock {
+  id                  String            @id @default(cuid())
+  availabilityBlockId String
+  availabilityBlock   AvailabilityBlock @relation(fields: [availabilityBlockId], references: [id], onDelete: Cascade)
+  startTime           String // Format: "HH:mm:ss"
+  endTime             String // Format: "HH:mm:ss"
+  durationMinutes     Int    @default(60) // Duration for slots in this block
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  @@index([availabilityBlockId])
+}
+
+// Updated Appointment model
+model Appointment {
+  id              String            @id @default(uuid())
+  visitorName     String
+  visitorEmail    String
+  visitorPhone    String
+  appointmentDate DateTime
+  startTime       String // HH:mm:ss format
+  endTime         String // HH:mm:ss format
+  message         String?
+  status          AppointmentStatus @default(pending)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@index([appointmentDate])
+  @@index([status])
+  @@index([appointmentDate, startTime])
+}

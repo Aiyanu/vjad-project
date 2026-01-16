@@ -5,7 +5,7 @@ const footerLinks = {
     // Company: only include sections that exist
     company: [
         { label: "About Us", href: "#about" },
-        { label: "Our Team", href: "#team" },
+        { label: "Our Team", href: "/team" },
         { label: "Projects", href: "/projects" },
         { label: "Testimonials", href: "#testimonials" },
         // { label: "Careers", href: "#" },

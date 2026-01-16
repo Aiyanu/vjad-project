@@ -57,10 +57,10 @@ export function ProjectsSection() {
                 >
                     <span className="gold-badge mb-4">Our Projects</span>
                     <h2 className="section-heading mt-4">
-                        Traction & Milestones
+                        Our Real Estate Developments
                     </h2>
-                    <p className="section-subheading mx-auto">
-                        Explore our ongoing developments that showcase our commitment to quality and excellence in real estate
+                    <p className="section-subheading mx-auto max-w-3xl">
+                        Explore our ongoing and upcoming real estate projects, carefully selected for strategic location, secure titles, and long-term value creation.
                     </p>
                 </motion.div>
 
@@ -118,14 +118,14 @@ export function ProjectsSection() {
 
                                 {/* Key Info */}
                                 <div className="flex flex-wrap gap-4 mb-6">
-                                    <div className="flex items-center gap-2 px-4 py-2 bg-card rounded-xl border border-border">
+                                    {project.size && <div className="flex items-center gap-2 px-4 py-2 bg-card rounded-xl border border-border">
                                         <Ruler className="w-4 h-4 text-primary" />
                                         <span className="text-sm font-medium">{project.size}</span>
-                                    </div>
+                                    </div>}
                                     {project.cofo && (
                                         <div className="flex items-center gap-2 px-4 py-2 bg-card rounded-xl border border-border">
                                             <Shield className="w-4 h-4 text-vijad-gold" />
-                                            <span className="text-sm font-medium">C of O: {project.cofo}</span>
+                                            <span className="text-sm font-medium">{project.cofo}</span>
                                         </div>
                                     )}
                                 </div>

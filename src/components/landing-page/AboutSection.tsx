@@ -9,21 +9,21 @@ export function AboutSection() {
             icon: Target,
             title: "Professionalism",
             description:
-                "We are committed to continuous improvement and professional growth. Our team operates in a respectful and collaborative environment, where every effort is directed toward achieving superior results.",
+                "Disciplined execution, continuous improvement, and respect for industry best practices. Our team delivers superior results through collaboration and expertise.",
             circleClasses: "bg-gradient-to-br from-sky-500 to-sky-700",
         },
         {
             icon: Shield,
             title: "Integrity",
             description:
-                "Transparency and honesty are the bedrock of our business. We stand by our commitments and conduct all transactions with integrity, ensuring that each project is forward-thinking and future-proof.",
+                "Transparency, compliance, and accountability in every transaction. We stand by our commitments and ensure every project meets the highest standards.",
             circleClasses: "bg-gradient-to-br from-emerald-500 to-emerald-600",
         },
         {
             icon: Award,
             title: "Excellence",
             description:
-                "Exceeding expectations is at the heart of Dexta Africa's mission. We relentlessly pursue excellence, always seeking better ways to achieve our goals and setting new industry benchmarks with every project.",
+                "Relentless focus on quality, durability, and long-term performance. We set new industry benchmarks with every project we deliver.",
             circleClasses: "bg-gradient-to-br from-[#0046ff] to-[#002583]",
         },
     ];
@@ -39,11 +39,10 @@ export function AboutSection() {
                     transition={{ duration: 0.6 }}
                     className="text-center mb-12"
                 >
-                    <span className="gold-badge mb-4">About Us</span>
-                    <h2 className="section-heading mt-4">Who We Are</h2>
-                    <p className="section-subheading mx-auto">
-                        vijad Projects is a premier real estate marketing company dedicated to
-                        bridging the gap between quality properties and aspiring homeowners.
+                    <span className="gold-badge mb-4">About Vijad Projects</span>
+                    <h2 className="section-heading mt-4">A Real Estate Development & Investment Firm</h2>
+                    <p className="section-subheading mx-auto max-w-4xl">
+                        Vijad Projects is a vertically integrated real estate development and investment firm delivering premium residential projects and secure land opportunities across Lagos. We bridge Nigeria's housing gap by combining quality development, regulatory compliance, and investor-focused execution.
                     </p>
                 </motion.div>
 
@@ -64,10 +63,7 @@ export function AboutSection() {
                             <h3 className="text-2xl font-bold text-foreground">Our Mission</h3>
                         </div>
                         <p className="text-muted-foreground leading-relaxed">
-                            To revolutionize the real estate industry by connecting exceptional developers
-                            with a network of empowered affiliates, delivering premium properties and
-                            creating sustainable wealth opportunities for our partners while maintaining
-                            the highest standards of integrity and excellence.
+                            Our mission is to create exceptional real estate projects that enhance the lives of our customers and contribute to the development of vibrant communities.
                         </p>
                     </motion.div>
 

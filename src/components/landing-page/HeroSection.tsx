@@ -49,11 +49,19 @@ export function HeroSection() {
                         <motion.p
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6, delay: 0.2 }}
-                            className="text-xl text-white/80 mb-10 max-w-xl"
+                            transition={{ duration: 0.6, delay: 0.15 }}
+                            className="text-2xl text-white font-semibold mb-4 max-w-xl"
                         >
-                            vijad Projects delivers exceptional property solutions in Nigeria's dynamic real estate industry —
-                            from residential to commercial and industrial projects. We bridge the gap between housing needs and investment opportunities.
+                            Premium real estate developments and investment opportunities across Lagos, built for long-term value.
+                        </motion.p>
+
+                        <motion.p
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, delay: 0.2 }}
+                            className="text-lg text-white/80 mb-10 max-w-xl"
+                        >
+                            At Vijad Projects, we set the standard for excellence in real estate by creating innovative housing and land solutions that bridge Nigeria's housing gap and elevate the quality of life.
                         </motion.p>
 
                         <motion.div
@@ -76,30 +84,24 @@ export function HeroSection() {
                             </Button>
                         </motion.div>
 
-                        {/* Quick Stats */}
+                        {/* Trust Signals */}
                         <motion.div
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, delay: 0.4 }}
-                            className="flex flex-wrap gap-8"
+                            className="flex flex-wrap gap-6 text-white/90"
                         >
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-lg bg-white/10">
-                                    <Building2 className="w-5 h-5 text-vijad-gold" />
-                                </div>
-                                <div>
-                                    <div className="text-2xl font-bold text-white">20+ Acres</div>
-                                    <div className="text-sm text-white/60">Under Development</div>
-                                </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-vijad-gold" />
+                                <span className="text-sm font-medium">Active developments in Lagos</span>
                             </div>
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 rounded-lg bg-white/10">
-                                    <Users className="w-5 h-5 text-vijad-gold" />
-                                </div>
-                                <div>
-                                    <div className="text-2xl font-bold text-white">500+</div>
-                                    <div className="text-sm text-white/60">Happy Clients</div>
-                                </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-vijad-gold" />
+                                <span className="text-sm font-medium">Secure titles & regulatory compliance</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-vijad-gold" />
+                                <span className="text-sm font-medium">Serving local & diaspora investors</span>
                             </div>
                         </motion.div>
                     </div>

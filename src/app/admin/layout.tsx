@@ -20,7 +20,8 @@ import {
   Menu,
   X,
   ChevronRight,
-  Shield
+  Shield,
+  Calendar
 } from "lucide-react";
 
 interface DashboardLayoutProps {
@@ -101,6 +102,7 @@ export default function AdminDashboardLayout({ children }: DashboardLayoutProps)
     { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
     { icon: Users, label: "Affiliates", href: "/admin/affiliates" },
     ...(isSuperAdmin ? [{ icon: UserCog, label: "Admins", href: "/admin/admins" }] : []),
+    { icon: Calendar, label: "Appointments", href: "/admin/appointments" },
     { icon: Settings, label: "Settings", href: "/admin/settings" },
   ];
 
