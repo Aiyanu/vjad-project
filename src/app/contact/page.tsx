@@ -317,7 +317,7 @@ export default function Contact() {
                 allowFullScreen
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                title="vijad Projects Office Location"
+                title="Vijad Projects Office Location"
               />
             </motion.div>
           </div>

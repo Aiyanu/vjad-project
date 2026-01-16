@@ -338,7 +338,7 @@ const Auth = () => {
                         </h1>
 
                         <p className="text-lg text-white/80 mb-8 max-w-md">
-                            Partner with vijad Projects and earn competitive commissions by connecting buyers with premium real estate opportunities.
+                            Partner with Vijad Projects and earn competitive commissions by connecting buyers with premium real estate opportunities.
                         </p>
 
                         <div className="space-y-4">

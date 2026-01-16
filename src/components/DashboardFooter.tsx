@@ -9,7 +9,7 @@ export function DashboardFooter() {
             <div className="max-w-7xl mx-auto">
                 <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-3 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
-                        <span>© {currentYear} vijad Projects. All rights reserved.</span>
+                        <span>© {currentYear} Vijad Projects. All rights reserved.</span>
                     </div>
 
                 </div>

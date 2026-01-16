@@ -8,7 +8,7 @@ const testimonials = [
         name: "Adebayo Johnson",
         role: "Top Affiliate • Lagos",
         image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80",
-        content: "vijad Projects transformed my side income into a full-time business. The commission structure is unmatched, and the support team is always there when I need them.",
+        content: "Vijad Projects transformed my side income into a full-time business. The commission structure is unmatched, and the support team is always there when I need them.",
         rating: 5,
         earnings: "₦4.2M earned",
     },
@@ -48,7 +48,7 @@ export function TestimonialsSection() {
                         What Our Clients Say
                     </h2>
                     <p className="text-xl text-secondary-foreground/70 max-w-2xl mx-auto">
-                        Join hundreds of successful affiliates who are building wealth with vijad Projects
+                        Join hundreds of successful affiliates who are building wealth with Vijad Projects
                     </p>
                 </motion.div>
 

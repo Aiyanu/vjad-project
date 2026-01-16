@@ -130,7 +130,7 @@ const AffiliateDashboardLayout = ({ children }: DashboardLayoutProps) => {
                         <div className="p-6 border-b border-white/10">
                             <Link href="/" className="flex items-center gap-3">
                                 {/* <Building2 className="h-8 w-8 text-white" />
-                            <span className="text-xl font-display font-bold text-white">vijad Projects</span> */}
+                            <span className="text-xl font-display font-bold text-white">Vijad Projects</span> */}
                                 <Image src={"/vijad-projects.png"} width={120} height={70} alt="vijad" />
                             </Link>
                         </div>

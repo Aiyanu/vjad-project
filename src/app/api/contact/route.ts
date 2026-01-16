@@ -81,14 +81,14 @@ export async function POST(request: NextRequest) {
     // Send confirmation email to user
     await sendMail({
       to: email,
-      subject: "We received your message - vijad Projects",
+      subject: "We received your message - Vijad Projects",
       html: `
         <h2>Thank You for Contacting Us</h2>
         <p>Dear ${name},</p>
         <p>We have received your message and appreciate you reaching out to us. Our team will review your inquiry and get back to you within 24 hours.</p>
         <p><strong>Your Message Details:</strong></p>
         <p><strong>Subject:</strong> ${subject}</p>
-        <p>Best regards,<br>vijad Projects Team</p>
+        <p>Best regards,<br>Vijad Projects Team</p>
       `,
     });
 

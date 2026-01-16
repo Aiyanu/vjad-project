@@ -7,14 +7,14 @@ const team = [
         name: "Victor Jimba",
         role: "MD/CEO",
         image: "/assets/teams/victor-jimba.jpg",
-        bio: "Victor Jimba is the CEO of vijad Projects, a visionary real estate developer with a proven track record of excellence across the business, technology, and real estate sectors. He holds a degree in Human Kinetics and Health Education, as well as certifications in Real Estate Management and Entrepreneurship.",
+        bio: "Victor Jimba is the CEO of Vijad Projects, a visionary real estate developer with a proven track record of excellence across the business, technology, and real estate sectors. He holds a degree in Human Kinetics and Health Education, as well as certifications in Real Estate Management and Entrepreneurship.",
         linkedin: "https://www.linkedin.com/in/victor-jimba-realor",
     },
     {
         name: "Ayo Afolayan",
         role: "Head of Projects",
         image: "/assets/teams/ayo-afolayan.png",
-        bio: "Ayo Afolayan is the Head of Projects at vijad Projects with over eight years of experience in architecture and project management. He holds both a Bachelor's and a Master's degree in Architecture from Ahmadu Bello University.",
+        bio: "Ayo Afolayan is the Head of Projects at Vijad Projects with over eight years of experience in architecture and project management. He holds both a Bachelor's and a Master's degree in Architecture from Ahmadu Bello University.",
         // linkedin: "https://www.linkedin.com/in/ayo-afolayan",
     },
     {
@@ -69,7 +69,7 @@ export function TeamSection() {
                         Leadership Team
                     </h2>
                     <p className="section-subheading mx-auto">
-                        vijad Projects' success is driven by a diverse and experienced team of professionals who bring together expertise from various fields
+                        Vijad Projects' success is driven by a diverse and experienced team of professionals who bring together expertise from various fields
                     </p>
                 </motion.div>
 
