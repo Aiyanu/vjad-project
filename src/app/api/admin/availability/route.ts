@@ -119,7 +119,7 @@ export async function DELETE(request: NextRequest) {
       where: {
         appointmentDate: new Date(date),
         status: {
-          in: ["PENDING", "CONFIRMED"],
+          in: ["pending", "confirmed"],
         },
       },
     });

@@ -35,6 +35,9 @@ export default function AdminDashboard() {
     pendingSales: 0,
     approvedSales: 0,
     totalReferrals: 0,
+    totalAppointments: 0,
+    pendingAppointments: 0,
+    confirmedAppointments: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -101,12 +104,12 @@ export default function AdminDashboard() {
     try {
       const response = await fetch("/api/appointments/book");
       const data = await response.json();
-      
+
       if (data.success && data.appointments) {
         const appointments = data.appointments;
         const pending = appointments.filter((a: any) => a.status === "pending").length;
         const confirmed = appointments.filter((a: any) => a.status === "confirmed").length;
-        
+
         setStats(prev => ({
           ...prev,
           totalAppointments: appointments.length,

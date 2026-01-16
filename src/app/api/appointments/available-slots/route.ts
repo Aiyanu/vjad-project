@@ -35,6 +35,19 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    // Get booked appointments for this date
+    const bookedAppointments = await prisma.appointment.findMany({
+      where: {
+        appointmentDate: date,
+        status: {
+          in: ["pending", "confirmed"],
+        },
+      },
+      select: {
+        startTime: true,
+      },
+    });
+
     // Generate slots from time blocks using each block's duration
     const slots: any[] = [];
 

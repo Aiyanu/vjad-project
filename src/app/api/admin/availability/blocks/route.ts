@@ -85,7 +85,7 @@ export async function DELETE(request: NextRequest) {
           lt: timeBlock.endTime,
         },
         status: {
-          in: ["PENDING", "CONFIRMED"],
+          in: ["pending", "confirmed"],
         },
       },
     });

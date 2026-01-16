@@ -79,7 +79,7 @@ export default function AdminSettings() {
     { dayOfWeek: "1", startTime: "09:00", endTime: "10:00" }
   ]);
 
-  const [passwordData,setPasswordData] = useState({
+  const [passwordData, setPasswordData] = useState({
     newPassword: "", confirmPassword: "",
   });
 
@@ -131,10 +131,7 @@ export default function AdminSettings() {
       }
     } catch (error) {
       console.error("Error fetching slots:", error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch appointment slots",
-      });
+      toast.error("Failed to fetch appointment slots");
     }
   };
 
@@ -147,10 +144,7 @@ export default function AdminSettings() {
       }
     } catch (error) {
       console.error("Error fetching appointments:", error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch appointments",
-      });
+      toast.error("Failed to fetch appointments");
     } finally {
       setAppointmentsLoading(false);
     }
@@ -203,6 +197,7 @@ export default function AdminSettings() {
     const updated = [...timeSlots];
     updated[index][field] = value;
     setTimeSlots(updated);
+  };
 
   const handleDeleteSlot = async (id: string) => {
     try {
@@ -222,7 +217,6 @@ export default function AdminSettings() {
       toast.error("Failed to delete slot");
     }
   };
-}
 
   const formatTime = (time: string) => {
     const [hours, minutes] = time.split(":");
@@ -357,58 +351,58 @@ export default function AdminSettings() {
           </div>
 
           <form onSubmit={handleProfileUpdate} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="full_name">Full Name</Label>
-            <Input
-              id="full_name"
-              value={profile.full_name || ""}
-              onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
-              placeholder="Your full name"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(var(--muted-foreground))]" />
+            <div className="space-y-2">
+              <Label htmlFor="full_name">Full Name</Label>
               <Input
-                id="email"
-                value={user?.email || ""}
-                disabled
-                className="pl-10 bg-[hsl(var(--muted))]"
+                id="full_name"
+                value={profile.full_name || ""}
+                onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
+                placeholder="Your full name"
               />
             </div>
-            <p className="text-xs text-[hsl(var(--muted-foreground))]">
-              Email cannot be changed
-            </p>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number</Label>
-            {typeof window !== "undefined" ? (
-              <PhoneInput
-                country={"ng"}
-                value={profile.phone || ""}
-                onChange={(value: any) => setProfile({ ...profile, phone: value ? `+${value}` : "" })}
-                inputStyle={{ width: "100%" }}
-              />
-            ) : (
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
               <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(var(--muted-foreground))]" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(var(--muted-foreground))]" />
                 <Input
-                  id="phone"
-                  value={profile.phone || ""}
-                  onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                  placeholder="+234 800 000 0000"
-                  className="pl-10"
+                  id="email"
+                  value={user?.email || ""}
+                  disabled
+                  className="pl-10 bg-[hsl(var(--muted))]"
                 />
               </div>
-            )}
-          </div>
-          <Button type="submit" disabled={saving}>
-            {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            Save Changes
-          </Button>
-        </form>
-      </div>
+              <p className="text-xs text-[hsl(var(--muted-foreground))]">
+                Email cannot be changed
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
+              {typeof window !== "undefined" ? (
+                <PhoneInput
+                  country={"ng"}
+                  value={profile.phone || ""}
+                  onChange={(value: any) => setProfile({ ...profile, phone: value ? `+${value}` : "" })}
+                  inputStyle={{ width: "100%" }}
+                />
+              ) : (
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(var(--muted-foreground))]" />
+                  <Input
+                    id="phone"
+                    value={profile.phone || ""}
+                    onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                    placeholder="+234 800 000 0000"
+                    className="pl-10"
+                  />
+                </div>
+              )}
+            </div>
+            <Button type="submit" disabled={saving}>
+              {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Save Changes
+            </Button>
+          </form>
+        </div>
       </motion.div>
 
       {/* Password Settings */}
@@ -433,33 +427,33 @@ export default function AdminSettings() {
             </div>
           </div>
 
-        <form onSubmit={handlePasswordChange} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="newPassword">New Password</Label>
-            <Input
-              id="newPassword"
-              type="password"
-              value={passwordData.newPassword}
-              onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-              placeholder="Enter new password"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm New Password</Label>
-            <Input
-              id="confirmPassword"
-              type="password"
-              value={passwordData.confirmPassword}
-              onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-              placeholder="Confirm new password"
-            />
-          </div>
-          <Button type="submit" disabled={changingPassword}>
-            {changingPassword && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            Update Password
-          </Button>
-        </form>
-      </div>
+          <form onSubmit={handlePasswordChange} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="newPassword">New Password</Label>
+              <Input
+                id="newPassword"
+                type="password"
+                value={passwordData.newPassword}
+                onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                placeholder="Enter new password"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm New Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={passwordData.confirmPassword}
+                onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                placeholder="Confirm new password"
+              />
+            </div>
+            <Button type="submit" disabled={changingPassword}>
+              {changingPassword && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Update Password
+            </Button>
+          </form>
+        </div>
       </motion.div>
 
       {/* Account Info */}
@@ -470,28 +464,28 @@ export default function AdminSettings() {
         className="max-w-2xl"
       >
         <div className="card-elegant">
-        <h2 className="font-display font-bold text-lg text-[hsl(var(--foreground))] mb-4">
-          Account Information
-        </h2>
-        <div className="space-y-3 text-xs sm:text-sm">
-          <div className="flex justify-between">
-            <span className="text-[hsl(var(--muted-foreground))]">Account ID</span>
-            <span className="font-mono text-[hsl(var(--foreground))]">{user?.id.slice(0, 8)}...</span>
-          </div>
-          <Separator />
-          <div className="flex justify-between">
-            <span className="text-[hsl(var(--muted-foreground))]">Account Type</span>
-            <span className="text-[hsl(var(--foreground))]">Admin</span>
-          </div>
-          <Separator />
-          <div className="flex justify-between">
-            <span className="text-[hsl(var(--muted-foreground))]">Member Since</span>
-            <span className="text-[hsl(var(--foreground))]">
-              {user?.created_at ? new Date(user.created_at).toLocaleDateString() : "-"}
-            </span>
+          <h2 className="font-display font-bold text-lg text-[hsl(var(--foreground))] mb-4">
+            Account Information
+          </h2>
+          <div className="space-y-3 text-xs sm:text-sm">
+            <div className="flex justify-between">
+              <span className="text-[hsl(var(--muted-foreground))]">Account ID</span>
+              <span className="font-mono text-[hsl(var(--foreground))]">{user?.id.slice(0, 8)}...</span>
+            </div>
+            <Separator />
+            <div className="flex justify-between">
+              <span className="text-[hsl(var(--muted-foreground))]">Account Type</span>
+              <span className="text-[hsl(var(--foreground))]">Admin</span>
+            </div>
+            <Separator />
+            <div className="flex justify-between">
+              <span className="text-[hsl(var(--muted-foreground))]">Member Since</span>
+              <span className="text-[hsl(var(--foreground))]">
+                {user?.created_at ? new Date(user.created_at).toLocaleDateString() : "-"}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
       </motion.div>
 
       {/* Appointment Slots Section */}
@@ -506,7 +500,7 @@ export default function AdminSettings() {
                 </CardTitle>
                 <CardDescription className="text-xs sm:text-sm mt-2">Set your available time slots for appointments</CardDescription>
               </div>
-              <Button 
+              <Button
                 className="gap-2 w-full sm:w-auto"
                 onClick={() => setShowAppointmentForm(!showAppointmentForm)}
                 variant={showAppointmentForm ? "default" : "outline"}
@@ -521,7 +515,7 @@ export default function AdminSettings() {
             {showAppointmentForm && (
               <form onSubmit={handleAddSlot} className="space-y-2 mb-6">
                 <Label className="text-sm sm:text-base font-semibold">Add Time Slots</Label>
-                
+
                 <div className="space-y-3">
                   {timeSlots.map((slot, index) => (
                     <div key={index} className="space-y-2">
@@ -539,7 +533,7 @@ export default function AdminSettings() {
                           <div></div>
                         </div>
                       )}
-                      
+
                       <div className="space-y-2 sm:space-y-0 sm:grid sm:grid-cols-4 sm:gap-2 sm:items-end p-3 sm:p-0 bg-muted/30 sm:bg-transparent rounded-lg sm:rounded-none">
                         <div>
                           <Label className="text-xs sm:hidden mb-1 block">Day</Label>
@@ -556,7 +550,7 @@ export default function AdminSettings() {
                             </SelectContent>
                           </Select>
                         </div>
-                        
+
                         <div>
                           <Label className="text-xs sm:hidden mb-1 block">From</Label>
                           <Input
@@ -566,7 +560,7 @@ export default function AdminSettings() {
                             className="h-8 text-xs sm:text-sm"
                           />
                         </div>
-                        
+
                         <div>
                           <Label className="text-xs sm:hidden mb-1 block">To</Label>
                           <Input
