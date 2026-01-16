@@ -209,11 +209,10 @@ export function DaySlotManager() {
     };
 
     const saveDaySlots = async () => {
-        // Validate all temp slots
+        // Validate all temp slots (no need for toast, handled inline)
         for (const slot of tempSlots) {
             const error = validateTimeSlot(slot.startTime, slot.endTime);
             if (error) {
-                toast.error(error);
                 return;
             }
             // Additional validation: duration must be positive and not exceed slot range
@@ -223,11 +222,9 @@ export function DaySlotManager() {
             const endMinutes = endHour * 60 + endMin;
             const slotDuration = endMinutes - startMinutes;
             if (slot.duration <= 0) {
-                toast.error("Duration must be greater than 0");
                 return;
             }
             if (slot.duration > slotDuration) {
-                toast.error("Duration cannot be greater than the slot time range");
                 return;
             }
         }
