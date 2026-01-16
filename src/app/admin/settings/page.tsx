@@ -3,19 +3,56 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { motion } from "motion/react";
-// import { supabase } from "@/lib/supabase/client";
-// import { User } from "@supabase/supabase-js";
+import { useAppSelector } from "@/store/hooks";
+import { useApi } from "@/hooks/useApi";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { User as UserIcon, Mail, Phone, Lock, Loader2, Calendar, Clock, Plus, Trash2, Eye } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  User as UserIcon,
+  Mail,
+  Phone,
+  Lock,
+  Loader2,
+  Calendar,
+  Clock,
+  Plus,
+  Trash2,
+  Eye,
+} from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { DaySlotManager } from "@/components/appointments/DaySlotManager";
@@ -49,6 +86,16 @@ interface Appointment {
   createdAt: string;
 }
 
+// Keep a local User type so TypeScript is happy; shape should match what your store provides.
+interface User {
+  id: string;
+  email?: string;
+  user_metadata?: Record<string, any>;
+  created_at?: string;
+  fullName?: string;
+  phone?: string;
+}
+
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 const statusColors: Record<string, string> = {
@@ -58,16 +105,12 @@ const statusColors: Record<string, string> = {
   cancelled: "bg-red-500/20 text-red-700 border-red-500/30",
 };
 
-// Mock user type to replace Supabase User
-interface User {
-  id: string;
-  email?: string;
-  user_metadata?: Record<string, any>;
-  created_at?: string;
-}
-
 export default function AdminSettings() {
-  const [user, setUser] = useState<User | null>(null);
+  // Read authenticated user from your Redux store (like the working file)
+  const user = useAppSelector((state) => state.user.user) as User | null;
+  const api = useApi();
+
+  // Local state
   const [profile, setProfile] = useState<Profile>({ full_name: "", email: "", phone: "" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -76,52 +119,35 @@ export default function AdminSettings() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [appointmentsLoading, setAppointmentsLoading] = useState(true);
   const [showAppointmentForm, setShowAppointmentForm] = useState(false);
-  const [timeSlots, setTimeSlots] = useState<Array<{ dayOfWeek: string; startTime: string; endTime: string }>>([
-    { dayOfWeek: "1", startTime: "09:00", endTime: "10:00" }
-  ]);
+  const [timeSlots, setTimeSlots] = useState<
+    Array<{ dayOfWeek: string; startTime: string; endTime: string }>
+  >([{ dayOfWeek: "1", startTime: "09:00", endTime: "10:00" }]);
 
   const [passwordData, setPasswordData] = useState({
-    newPassword: "", confirmPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
 
+  // Populate profile from store user when it becomes available
   useEffect(() => {
-    fetchUserAndProfile();
+    if (user) {
+      setProfile({
+        full_name: (user as any).fullName || user.user_metadata?.full_name || "",
+        email: user.email || "",
+        phone: (user as any).phone || "",
+      });
+    } else {
+      // If no user, reset profile to empty (depends on desired UX)
+      setProfile({ full_name: "", email: "", phone: "" });
+    }
+    setLoading(false);
+  }, [user]);
+
+  // Fetch slots and appointments on mount
+  useEffect(() => {
     fetchSlots();
     fetchAppointments();
   }, []);
-
-  const fetchUserAndProfile = async () => {
-    try {
-      // SUPABASE IMPLEMENTATION (COMMENTED OUT)
-      // const { data: { user } } = await supabase.auth.getUser();
-      // if (!user) return;
-      // setUser(user);
-
-      // const { data: profileData } = await supabase
-      //   .from("profiles")
-      //   .select("full_name, email, phone")
-      //   .eq("id", user.id)
-      //   .maybeSingle();
-
-      // if (profileData) {
-      //   setProfile(profileData);
-      // } else {
-      //   setProfile({
-      //     full_name: user.user_metadata?.full_name || "",
-      //     email: user.email || "",
-      //     phone: "",
-      //   });
-      // }
-
-      // MOCK DATA FOR DEVELOPMENT
-      setUser(null);
-      setProfile({ full_name: "", email: "", phone: "" });
-    } catch (error) {
-      console.error("Error fetching profile:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const fetchSlots = async () => {
     try {
@@ -194,8 +220,13 @@ export default function AdminSettings() {
     }
   };
 
-  const updateTimeSlot = (index: number, field: "dayOfWeek" | "startTime" | "endTime", value: string) => {
+  const updateTimeSlot = (
+    index: number,
+    field: "dayOfWeek" | "startTime" | "endTime",
+    value: string
+  ) => {
     const updated = [...timeSlots];
+    // @ts-ignore
     updated[index][field] = value;
     setTimeSlots(updated);
   };
@@ -229,32 +260,29 @@ export default function AdminSettings() {
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user) {
+      toast.error("User not authenticated");
+      return;
+    }
 
     setSaving(true);
     try {
-      // SUPABASE IMPLEMENTATION (COMMENTED OUT)
-      // const { error } = await supabase
-      //   .from("profiles")
-      //   .update({
-      //     full_name: profile.full_name,
-      //     phone: profile.phone,
-      //   })
-      //   .eq("id", user.id);
+      // If you want to use your api helper to update the profile:
+      const response = await api.put(`/api/user/${user.id}`, {
+        fullName: profile.full_name,
+        phone: profile.phone,
+      });
 
-      // if (error) throw error;
+      if (response?.success) {
+        toast.success("Profile updated successfully");
+      } else {
+        toast.error(response?.message || "Failed to update profile");
+      }
 
-      // toast({
-      //   title: "Success",
-      //   description: "Profile updated successfully",
-      // });
-    } catch (error) {
+      // If you use Supabase, restore your supabase update logic here
+    } catch (error: any) {
       console.error("Error updating profile:", error);
-      // toast({
-      //   title: "Error",
-      //   description: "Failed to update profile",
-      //   variant: "destructive",
-      // });
+      toast.error(error?.message || "Failed to update profile");
     } finally {
       setSaving(false);
     }
@@ -264,44 +292,31 @@ export default function AdminSettings() {
     e.preventDefault();
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      // toast({
-      //   title: "Error",
-      //   description: "Passwords do not match",
-      //   variant: "destructive",
-      // });
+      // Optionally show toast
       return;
     }
 
     if (passwordData.newPassword.length < 6) {
-      // toast({
-      //   title: "Error",
-      //   description: "Password must be at least 6 characters",
-      //   variant: "destructive",
-      // });
+      // Optionally show toast
       return;
     }
 
     setChangingPassword(true);
     try {
-      // SUPABASE IMPLEMENTATION (COMMENTED OUT)
-      // const { error } = await supabase.auth.updateUser({
-      //   password: passwordData.newPassword,
-      // });
+      // Replace with your auth endpoint or supabase call
+      const response = await api.post("/api/auth/change-password", {
+        newPassword: passwordData.newPassword,
+      });
 
-      // if (error) throw error;
-
-      // toast({
-      //   title: "Success",
-      //   description: "Password updated successfully",
-      // });
-      setPasswordData({ newPassword: "", confirmPassword: "" });
-    } catch (error) {
+      if (response?.success) {
+        toast.success("Password updated successfully");
+        setPasswordData({ newPassword: "", confirmPassword: "" });
+      } else {
+        toast.error(response?.message || "Failed to update password");
+      }
+    } catch (error: any) {
       console.error("Error updating password:", error);
-      // toast({
-      //   title: "Error",
-      //   description: "Failed to update password",
-      //   variant: "destructive",
-      // });
+      toast.error(error?.message || "Failed to update password");
     } finally {
       setChangingPassword(false);
     }
@@ -317,10 +332,7 @@ export default function AdminSettings() {
 
   return (
     <div className="space-y-8">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-2xl sm:text-3xl font-display font-bold text-[hsl(var(--foreground))]">
           Settings
         </h1>
@@ -367,14 +379,12 @@ export default function AdminSettings() {
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[hsl(var(--muted-foreground))]" />
                 <Input
                   id="email"
-                  value={user?.email || ""}
+                  value={user?.email || profile.email || ""}
                   disabled
                   className="pl-10 bg-[hsl(var(--muted))]"
                 />
               </div>
-              <p className="text-xs text-[hsl(var(--muted-foreground))]">
-                Email cannot be changed
-              </p>
+              <p className="text-xs text-[hsl(var(--muted-foreground))]">Email cannot be changed</p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone">Phone Number</Label>
@@ -471,7 +481,9 @@ export default function AdminSettings() {
           <div className="space-y-3 text-xs sm:text-sm">
             <div className="flex justify-between">
               <span className="text-[hsl(var(--muted-foreground))]">Account ID</span>
-              <span className="font-mono text-[hsl(var(--foreground))]">{user?.id.slice(0, 8)}...</span>
+              <span className="font-mono text-[hsl(var(--foreground))]">
+                {user?.id ? `${user.id.slice(0, 8)}...` : "-"}
+              </span>
             </div>
             <Separator />
             <div className="flex justify-between">
@@ -494,66 +506,7 @@ export default function AdminSettings() {
         <DaySlotManager />
       </motion.div>
 
-      {/* All Appointments Section
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-        <Card className="border-0">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Eye className="w-5 h-5 text-[hsl(var(--primary))]" />
-              All Appointments
-            </CardTitle>
-            <CardDescription>View all bookings made through your availability</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {appointmentsLoading ? (
-              <div className="text-center py-8 text-muted-foreground">Loading...</div>
-            ) : appointments.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">No appointments yet</div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Client</TableHead>
-                      <TableHead>Date & Time</TableHead>
-                      <TableHead>Contact</TableHead>
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {appointments.map((apt) => (
-                      <TableRow key={apt.id}>
-                        <TableCell>
-                          <div className="font-medium">{apt.visitorName}</div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-muted-foreground" />
-                            <span>{format(new Date(apt.appointmentDate), "MMM d, yyyy")}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Clock className="w-3 h-3" />
-                            <span>{formatTime(apt.startTime)}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-sm">{apt.visitorEmail}</div>
-                          {apt.visitorPhone && <div className="text-xs text-muted-foreground">{apt.visitorPhone}</div>}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className={statusColors[apt.status]}>
-                            {apt.status}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </motion.div> */}
+      {/* All Appointments Section (commented out in original) */}
     </div>
   );
 }
