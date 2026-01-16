@@ -125,7 +125,7 @@ export function ProjectsSection() {
                                     {project.cofo && (
                                         <div className="flex items-center gap-2 px-4 py-2 bg-card rounded-xl border border-border">
                                             <Shield className="w-4 h-4 text-vijad-gold" />
-                                            <span className="text-sm font-medium">{project.cofo}</span>
+                                            <span className="text-sm font-medium">file no:{project.cofo}</span>
                                         </div>
                                     )}
                                 </div>

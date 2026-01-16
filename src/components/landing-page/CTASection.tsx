@@ -34,7 +34,7 @@ export function CTASection() {
                     >
                         <div className="inline-flex items-center gap-2 px-4 py-2 bg-vijad-gold/10 text-vijad-gold rounded-full text-sm font-medium mb-6">
                             <Zap className="w-4 h-4" />
-                            Vijad Partner Network
+                            Vijad Associate network
                         </div>
 
                         <h2 className="section-heading mb-4">
@@ -43,7 +43,7 @@ export function CTASection() {
                         </h2>
 
                         <p className="section-subheading mx-auto">
-                            The Vijad Partner Network is our structured affiliate program designed for professionals and entrepreneurs who want to earn commissions by referring qualified buyers to verified Vijad Projects developments. Partners are supported with training, materials, and transparent tracking.
+                            The Vijad Associate network is our structured affiliate program designed for professionals and entrepreneurs who want to earn commissions by referring qualified buyers to verified Vijad Projects developments. Partners are supported with training, materials, and transparent tracking.
                         </p>
                     </motion.div>
 
@@ -79,7 +79,7 @@ export function CTASection() {
                             className="bg-primary hover:bg-primary/90 text-lg px-10 py-6 group"
                             onClick={() => router.push("/auth?mode=register")}
                         >
-                            Join the Partner Network
+                            Join the Associate network
                             <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                         </Button>
                         <Button

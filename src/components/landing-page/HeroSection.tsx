@@ -79,7 +79,7 @@ export function HeroSection() {
                             <Button asChild variant="outline" className="border-2 border-white/30 text-white hover:bg-white/10 px-8 py-6 text-lg font-semibold rounded-xl transition-all duration-300 backdrop-blur-sm group">
                                 <Link href="/auth?mode=register">
                                     <Users className="w-5 h-5 mr-2" />
-                                    Join Affiliate Program
+                                    Join Associate Program
                                 </Link>
                             </Button>
                         </motion.div>
