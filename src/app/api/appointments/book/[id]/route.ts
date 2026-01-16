@@ -7,9 +7,10 @@ import { prisma } from "@/lib/db";
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const { status } = body;
 
@@ -26,7 +27,7 @@ export async function PATCH(
     }
 
     const appointment = await prisma.appointmentBooking.update({
-      where: { id: params.id },
+      where: { id },
       data: { status: status as any },
     });
 
@@ -50,11 +51,12 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const appointment = await prisma.appointmentBooking.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
 
     if (!appointment) {
@@ -65,7 +67,7 @@ export async function DELETE(
     }
 
     await prisma.appointmentBooking.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({
