@@ -216,6 +216,20 @@ export function DaySlotManager() {
                 toast.error(error);
                 return;
             }
+            // Additional validation: duration must be positive and not exceed slot range
+            const [startHour, startMin] = slot.startTime.split(":").map(Number);
+            const [endHour, endMin] = slot.endTime.split(":").map(Number);
+            const startMinutes = startHour * 60 + startMin;
+            const endMinutes = endHour * 60 + endMin;
+            const slotDuration = endMinutes - startMinutes;
+            if (slot.duration <= 0) {
+                toast.error("Duration must be greater than 0");
+                return;
+            }
+            if (slot.duration > slotDuration) {
+                toast.error("Duration cannot be greater than the slot time range");
+                return;
+            }
         }
 
         // Check for overlapping slots
