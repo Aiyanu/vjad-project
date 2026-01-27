@@ -1,0 +1,188 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String  @id @default(uuid())
+  email        String  @unique
+  passwordHash String
+  fullName     String?
+
+  role Role @default(affiliate)
+
+  phone         String?
+
+  // ─── Affiliate profile (optional) ───
+  affiliate   Affiliate?
+
+  // ─── Auth / Security ───
+  emailVerified Boolean   @default(false)
+  verificationToken String?
+  verificationTokenExp DateTime?
+  isDisabled Boolean @default(false)
+
+  // ─── Metadata ───
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([verificationToken])
+}
+
+model Affiliate {
+  id            String   @id @default(uuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id])
+  bankName      String?
+  bankCode      String?
+  accountNumber String?
+  accountName   String?
+  referralCode  String?  @unique
+  referrerId    String?
+  referrer      Affiliate? @relation("AffiliateReferrals", fields: [referrerId], references: [id])
+  referrals     Affiliate[] @relation("AffiliateReferrals")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([referrerId])
+}
+
+enum Role {
+  affiliate
+  admin
+  super_admin
+}
+
+// ─── Appointment Booking System ───
+model AppointmentSlot {
+  id          String   @id @default(uuid())
+  dayOfWeek   Int      // 0-6 (Sunday-Saturday)
+  startTime   String   // HH:mm format
+  endTime     String   // HH:mm format
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([dayOfWeek, startTime, endTime])
+}
+
+model AppointmentBooking {
+  id            String   @id @default(uuid())
+  visitorName   String
+  visitorEmail  String
+  visitorPhone  String
+  appointmentDate DateTime
+  startTime     String   // HH:mm format
+  endTime       String   // HH:mm format
+  message       String?
+  status        AppointmentStatus @default(pending)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([appointmentDate])
+  @@index([status])
+}
+
+enum AppointmentStatus {
+  pending
+  confirmed
+  completed
+  cancelled
+}
+
+// ─── New Appointment Availability System ───
+model AppointmentSettings {
+  id                      Int      @id @default(autoincrement())
+  durationMinutes         Int      @default(60) // Default 1 hour
+  maxAdvanceBookingDays   Int      @default(90) // Max days in advance
+  minAdvanceBookingHours  Int      @default(24) // Min hours in advance
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+}
+
+// Weekly schedule template
+model WeeklySchedule {
+  id              String        @id @default(cuid())
+  dayOfWeek       Int           // 0-6 (Sunday-Saturday)
+  enabled         Boolean       @default(true)
+  timeBlocks      ScheduleBlock[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@unique([dayOfWeek])
+  @@index([dayOfWeek])
+}
+
+model ScheduleBlock {
+  id                String          @id @default(cuid())
+  weeklyScheduleId  String
+  weeklySchedule    WeeklySchedule  @relation(fields: [weeklyScheduleId], references: [id], onDelete: Cascade)
+  startTime         String          // HH:mm:ss format
+  endTime           String          // HH:mm:ss format
+  slotDuration      Int             @default(60) // minutes per slot
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@index([weeklyScheduleId])
+}
+
+// Daily availability (overrides weekly schedule)
+model DailyAvailability {
+  id         String      @id @default(cuid())
+  date       DateTime    @unique
+  enabled    Boolean     @default(true)
+  isHoliday  Boolean     @default(false)
+  timeBlocks TimeBlock[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@index([date])
+}
+
+model TimeBlock {
+  id                  String            @id @default(cuid())
+  dailyAvailabilityId String
+  dailyAvailability   DailyAvailability @relation(fields: [dailyAvailabilityId], references: [id], onDelete: Cascade)
+  startTime           String            // Format: "HH:mm:ss"
+  endTime             String            // Format: "HH:mm:ss"
+  slotDuration        Int               @default(60) // Duration for slots in this block
+  maxCapacity         Int               @default(1)  // How many bookings per slot
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  @@index([dailyAvailabilityId])
+}
+
+// Updated Appointment model
+model Appointment {
+  id              String            @id @default(uuid())
+  visitorName     String
+  visitorEmail    String
+  visitorPhone    String
+  appointmentDate DateTime
+  startTime       String            // HH:mm:ss format
+  endTime         String            // HH:mm:ss format
+  startSeconds    Int               // Seconds from start of day
+  endSeconds      Int               // Seconds from start of day
+  message         String?
+  status          AppointmentStatus @default(pending)
+  resourceId      Int               @default(1) // Resource/staff ID
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  confirmedAt     DateTime?
+  cancelledAt     DateTime?
+  cancellationReason String?
+
+  @@index([appointmentDate])
+  @@index([status])
+  @@index([appointmentDate, startTime])
+  @@index([appointmentDate, startSeconds, endSeconds])
+}
