@@ -51,14 +51,17 @@ export const login = async (req: Request, res: Response) => {
     }
 
     if (user.isDisabled) {
-      return apiError(res, "Your account has been disabled. Please contact support.", 403);
+      return apiError(
+        res,
+        "Your account has been disabled. Please contact support.",
+        403,
+      );
     }
 
     if (!user.emailVerified) {
-      return res.status(403).json({
-        success: false,
-        message: "Email not verified",
-        data: { email: user.email, isVerified: false }
+      return apiError(res, "Email not verified", 403, {
+        email: user.email,
+        isVerified: false,
       });
     }
 
@@ -72,14 +75,14 @@ export const login = async (req: Request, res: Response) => {
 
 export const register = async (req: Request, res: Response) => {
   try {
-    const { 
-      email: rawEmail, 
-      password, 
-      fullName: rawFullName, 
+    const {
+      email: rawEmail,
+      password,
+      fullName: rawFullName,
       referralCode: inviterCode,
       bankCode: rawBankCode,
       accountNumber: rawAccountNumber,
-      accountName
+      accountName,
     } = req.body;
 
     const email = (rawEmail || "").trim().toLowerCase();
@@ -88,11 +91,19 @@ export const register = async (req: Request, res: Response) => {
     const accountNumber = (rawAccountNumber || "").trim();
 
     if (!email || !password || password.length < 8) {
-      return apiError(res, "Email and password (min 8 chars) are required", 400);
+      return apiError(
+        res,
+        "Email and password (min 8 chars) are required",
+        400,
+      );
     }
 
     if (!bankCode || accountNumber.length !== 10) {
-      return apiError(res, "Bank code and 10-digit account number are required", 400);
+      return apiError(
+        res,
+        "Bank code and 10-digit account number are required",
+        400,
+      );
     }
 
     const existing = await prisma.user.findUnique({ where: { email } });
@@ -111,7 +122,9 @@ export const register = async (req: Request, res: Response) => {
       });
     }
 
-    const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
+    const verificationToken = Math.floor(
+      100000 + Math.random() * 900000,
+    ).toString();
     const expiresAt = new Date(Date.now() + 1000 * 60 * 10); // 10 minutes
 
     const user = await prisma.$transaction(async (tx: any) => {
@@ -147,7 +160,7 @@ export const register = async (req: Request, res: Response) => {
       const emailContent = emailTemplates.verification(
         fullName || "there",
         verificationToken,
-        verificationUrl
+        verificationUrl,
       );
 
       await sendMail({
@@ -160,7 +173,12 @@ export const register = async (req: Request, res: Response) => {
       console.error("Failed to send verification email:", emailError);
     }
 
-    return apiSuccess(res, { id: user.id, email: user.email, referralCode }, "Registered successfully. Please check your email to verify your account.", 201);
+    return apiSuccess(
+      res,
+      { id: user.id, email: user.email, referralCode },
+      "Registered successfully. Please check your email to verify your account.",
+      201,
+    );
   } catch (err) {
     return apiError(res, "Server error", 500, err);
   }
@@ -174,7 +192,9 @@ export const verify = async (req: Request, res: Response) => {
       return apiError(res, "Invalid verification link", 400);
     }
 
-    const user = await prisma.user.findUnique({ where: { email: String(email) } });
+    const user = await prisma.user.findUnique({
+      where: { email: String(email) },
+    });
     if (!user) {
       return apiError(res, "Invalid verification link", 400);
     }
@@ -211,20 +231,26 @@ export const resendVerification = async (req: Request, res: Response) => {
       return apiError(res, "Email is required", 400);
     }
 
-    const user = await prisma.user.findUnique({ 
+    const user = await prisma.user.findUnique({
       where: { email },
-      include: { affiliate: true }
+      include: { affiliate: true },
     });
 
     if (!user) {
-      return apiSuccess(res, null, "If an account exists, a new verification code has been sent.");
+      return apiSuccess(
+        res,
+        null,
+        "If an account exists, a new verification code has been sent.",
+      );
     }
 
     if (user.emailVerified) {
       return apiError(res, "Email is already verified", 400);
     }
 
-    const verificationToken = Math.floor(100000 + Math.random() * 900000).toString();
+    const verificationToken = Math.floor(
+      100000 + Math.random() * 900000,
+    ).toString();
     const expiresAt = new Date(Date.now() + 1000 * 60 * 10); // 10 minutes
 
     await prisma.user.update({
@@ -232,7 +258,7 @@ export const resendVerification = async (req: Request, res: Response) => {
       data: {
         verificationToken,
         verificationTokenExp: expiresAt,
-      }
+      },
     });
 
     const verificationUrl = `${process.env.APP_URL ?? "http://localhost:3000"}/auth/verify-email?token=${encodeURIComponent(verificationToken)}&email=${encodeURIComponent(email)}`;
@@ -241,7 +267,7 @@ export const resendVerification = async (req: Request, res: Response) => {
       const emailContent = emailTemplates.verification(
         user.fullName || "there",
         verificationToken,
-        verificationUrl
+        verificationUrl,
       );
 
       await sendMail({
@@ -254,85 +280,108 @@ export const resendVerification = async (req: Request, res: Response) => {
       console.error("Failed to send verification email:", emailError);
     }
 
-    return apiSuccess(res, null, "Verification code resent. Please check your email.");
+    return apiSuccess(
+      res,
+      null,
+      "Verification code resent. Please check your email.",
+    );
   } catch (err) {
     return apiError(res, "Server error", 500, err);
   }
 };
 export const forgotPassword = async (req: Request, res: Response) => {
-    try {
-        const { email: rawEmail } = req.body;
-        const email = (rawEmail || "").trim().toLowerCase();
+  try {
+    const { email: rawEmail } = req.body;
+    const email = (rawEmail || "").trim().toLowerCase();
 
-        if (!email) {
-            return apiSuccess(res, null, "If an account exists, a reset link will be sent.");
-        }
-
-        const user = await prisma.user.findUnique({ where: { email } });
-        if (!user) {
-            return apiSuccess(res, null, "If an account exists, a reset link will be sent.");
-        }
-
-        const token = crypto.randomBytes(16).toString("hex");
-        const exp = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
-
-        await prisma.user.update({
-            where: { id: user.id },
-            data: { verificationToken: token, verificationTokenExp: exp },
-        });
-
-        const resetUrl = `${process.env.APP_URL ?? "http://localhost:3000"}/auth/reset-password?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
-
-        try {
-            const emailContent = emailTemplates.passwordReset(user.fullName || "there", resetUrl);
-            await sendMail({
-                to: email,
-                subject: emailContent.subject,
-                html: emailContent.html,
-                text: emailContent.text,
-            });
-        } catch (emailError) {
-            console.error("Failed to send password reset email:", emailError);
-        }
-
-        return apiSuccess(res, null, "If an account exists, a reset link will be sent.");
-    } catch (err) {
-        return apiError(res, "Server error", 500, err);
+    if (!email) {
+      return apiSuccess(
+        res,
+        null,
+        "If an account exists, a reset link will be sent.",
+      );
     }
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      return apiSuccess(
+        res,
+        null,
+        "If an account exists, a reset link will be sent.",
+      );
+    }
+
+    const token = crypto.randomBytes(16).toString("hex");
+    const exp = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { verificationToken: token, verificationTokenExp: exp },
+    });
+
+    const resetUrl = `${process.env.APP_URL ?? "http://localhost:3000"}/auth/reset-password?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
+
+    try {
+      const emailContent = emailTemplates.passwordReset(
+        user.fullName || "there",
+        resetUrl,
+      );
+      await sendMail({
+        to: email,
+        subject: emailContent.subject,
+        html: emailContent.html,
+        text: emailContent.text,
+      });
+    } catch (emailError) {
+      console.error("Failed to send password reset email:", emailError);
+    }
+
+    return apiSuccess(
+      res,
+      null,
+      "If an account exists, a reset link will be sent.",
+    );
+  } catch (err) {
+    return apiError(res, "Server error", 500, err);
+  }
 };
 
 export const resetPassword = async (req: Request, res: Response) => {
-    try {
-        const { email, token, password } = req.body;
+  try {
+    const { email, token, password } = req.body;
 
-        if (!email || !token || !password) {
-            return apiError(res, "Email, token and new password are required", 400);
-        }
-
-        const user = await prisma.user.findUnique({ where: { email } });
-        if (!user || user.verificationToken !== token) {
-            return apiError(res, "Invalid or expired token", 400);
-        }
-
-        if (!user.verificationTokenExp || user.verificationTokenExp < new Date()) {
-            return apiError(res, "Token expired", 400);
-        }
-
-        const hashedPassword = await bcrypt.hash(password, 12);
-
-        await prisma.user.update({
-            where: { id: user.id },
-            data: {
-                passwordHash: hashedPassword,
-                verificationToken: null,
-                verificationTokenExp: null,
-            },
-        });
-
-        return apiSuccess(res, null, "Password reset successfully. You can now login.");
-    } catch (err) {
-        return apiError(res, "Server error", 500, err);
+    if (!email || !token || !password) {
+      return apiError(res, "Email, token and new password are required", 400);
     }
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user || user.verificationToken !== token) {
+      return apiError(res, "Invalid or expired token", 400);
+    }
+
+    if (!user.verificationTokenExp || user.verificationTokenExp < new Date()) {
+      return apiError(res, "Token expired", 400);
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        passwordHash: hashedPassword,
+        verificationToken: null,
+        verificationTokenExp: null,
+      },
+    });
+
+    return apiSuccess(
+      res,
+      null,
+      "Password reset successfully. You can now login.",
+    );
+  } catch (err) {
+    return apiError(res, "Server error", 500, err);
+  }
 };
 
 import crypto from "crypto";

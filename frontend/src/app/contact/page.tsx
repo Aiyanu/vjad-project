@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { sendContactMessage } from "@/services/contactService";
 import { motion } from "motion/react";
 import { toast } from "sonner";
 import { Navbar } from "@/components/landing-page/Navbar";
@@ -82,26 +83,17 @@ export default function Contact() {
     setIsSubmitting(true);
 
     try {
-      // Simulate form submission to API
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+      await sendContactMessage(formData);
+      toast.success("Message Sent Successfully!", {
+        description: "Thank you for contacting us. We'll get back to you within 24 hours.",
       });
-
-      if (response.ok) {
-        toast.success("Message Sent Successfully!", {
-          description: "Thank you for contacting us. We'll get back to you within 24 hours.",
-        });
-        setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
-      } else {
-        toast.error("Error", {
-          description: "Failed to send message. Please try again.",
-        });
-      }
-    } catch (error) {
+      setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
+    } catch (error: any) {
       toast.error("Error", {
-        description: "An unexpected error occurred. Please try again.",
+        description:
+          error?.response?.data?.message ||
+          error?.message ||
+          "Failed to send message. Please try again.",
       });
     } finally {
       setIsSubmitting(false);

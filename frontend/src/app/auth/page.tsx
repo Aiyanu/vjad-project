@@ -14,7 +14,8 @@ import { z } from "zod";
 import { useAppDispatch } from "@/store/hooks";
 import { setToken } from "@/store/globalSlice";
 import { setUser } from "@/store/userSlice";
-import { useApi } from "@/hooks/useApi";
+import { authService } from "@/services/authService";
+import { adminService } from "@/services/adminService";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -42,7 +43,7 @@ const Auth = () => {
     const searchParams = useSearchParams();
     const router = useRouter();
     const dispatch = useAppDispatch();
-    const api = useApi();
+    // const api = useApi();
     const initialMode = searchParams?.get("mode") === "register" ? "register" : "login";
 
     const [mode, setMode] = useState<AuthMode>(initialMode);
@@ -92,18 +93,18 @@ const Auth = () => {
         if (mode !== "register") return;
         const loadBanks = async () => {
             try {
-                const json = await api.get("/api/banks");
+                const json = await authService.getBanks();
                 setBanks(json?.banks || []);
             } catch (e) {
                 console.warn("Could not load banks", e);
             }
         };
         loadBanks();
-    }, [mode, api]);
+    }, [mode]);
 
     const fetchReferrerInfo = async (referralCode: string) => {
         try {
-            const data = await api.get(`/api/user?referralCode=${encodeURIComponent(referralCode)}`);
+            const data = await adminService.getUserByReferralCode(referralCode);
             if (data?.success && data?.data?.fullName) {
                 setReferrerName(data.data.fullName);
             }
@@ -124,19 +125,14 @@ const Auth = () => {
     //     setAccountVerified(false);
     //     setAccountName("");
     //     try {
-    //         const res = await fetch("/api/verify-account", {
-    //             method: "POST",
-    //             headers: { "Content-Type": "application/json" },
-    //             body: JSON.stringify({ accountNumber: acctNumber, bankCode: code }),
-    //         });
-    //         const json = await res.json();
-    //         if (!res.ok || json.error) {
-    //             toast.error(json.error || "Could not verify account");
+    //         const res = await bankService.verifyAccount(acctNumber, code);
+    //         if (res.error) {
+    //             toast.error(res.error || "Could not verify account");
     //             return;
     //         }
-    //         setAccountName(json.accountName);
+    //         setAccountName(res.accountName);
     //         setAccountVerified(true);
-    //         toast.success(`Verified: ${json.accountName}`);
+    //         toast.success(`Verified: ${res.accountName}`);
     //     } catch (err) {
     //         console.error(err);
     //         toast.error("Verification failed. Please try again.");
@@ -177,7 +173,7 @@ const Auth = () => {
 
         try {
             if (mode === "login") {
-                const json = await api.post("/api/auth/login", { email: formData.email, password: formData.password });
+                const json = await authService.login(formData.email, formData.password);
 
                 // Save authToken in session store (only token); then fetch user
                 try {
@@ -191,7 +187,7 @@ const Auth = () => {
                 // Fetch user using session cookie to avoid storing user in response
                 let fetchedUser: any = null;
                 try {
-                    const userJson = await api.get("/api/user");
+                    const userJson = await authService.getCurrentUser();
                     if (userJson?.success && userJson?.data) {
                         fetchedUser = userJson.data;
                         dispatch(setUser(fetchedUser));
@@ -217,14 +213,14 @@ const Auth = () => {
                 const referralCode = formData.referralCode ||
                     (typeof window !== "undefined" ? sessionStorage.getItem("vijad_ref") || undefined : undefined);
 
-                const json = await api.post("/api/auth/register", {
+                const json = await authService.register({
                     fullName: formData.fullName,
                     email: formData.email,
                     password: formData.password,
                     referralCode,
-                    bankName,
-                    bankCode,
-                    accountNumber,
+                    // bankName,
+                    // bankCode,
+                    // accountNumber,
                     // accountName,
                 });
 

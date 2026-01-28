@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { toast } from "sonner";
-import { useApi } from "./useApi";
+import { authService } from "@/services/authService";
 
 interface LoginData {
   email: string;
@@ -33,95 +33,78 @@ interface ResendVerificationData {
 
 export function useAuth() {
   const [loading, setLoading] = useState(false);
-  const api = useApi();
+  // Removed useApi, now using authService
 
-  const login = useCallback(
-    async (data: LoginData) => {
-      setLoading(true);
-      try {
-        const result = await api.post("/api/auth/login", data);
-        return result;
-      } catch (error: any) {
-        console.error("Login error:", error);
-        throw error;
-      } finally {
-        setLoading(false);
-      }
-    },
-    [api]
-  );
+  const login = useCallback(async (data: LoginData) => {
+    setLoading(true);
+    try {
+      const result = await authService.login(data.email, data.password);
+      return result;
+    } catch (error: any) {
+      console.error("Login error:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const register = useCallback(
-    async (data: RegisterData) => {
-      setLoading(true);
-      try {
-        const result = await api.post("/api/auth/register", data);
-        return result;
-      } catch (error: any) {
-        console.error("Registration error:", error);
-        throw error;
-      } finally {
-        setLoading(false);
-      }
-    },
-    [api]
-  );
+  const register = useCallback(async (data: RegisterData) => {
+    setLoading(true);
+    try {
+      const result = await authService.register(data);
+      return result;
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const forgotPassword = useCallback(
-    async (data: ForgotPasswordData) => {
-      setLoading(true);
-      try {
-        const result = await api.post("/api/auth/forgot-password", data);
-        return result;
-      } catch (error: any) {
-        console.error("Forgot password error:", error);
-        throw error;
-      } finally {
-        setLoading(false);
-      }
-    },
-    [api]
-  );
+  const forgotPassword = useCallback(async (data: ForgotPasswordData) => {
+    setLoading(true);
+    try {
+      const result = await authService.forgotPassword(data.email);
+      return result;
+    } catch (error: any) {
+      console.error("Forgot password error:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const resetPassword = useCallback(
-    async (data: ResetPasswordData) => {
-      setLoading(true);
-      try {
-        const result = await api.post("/api/auth/reset-password", data);
-        return result;
-      } catch (error: any) {
-        console.error("Reset password error:", error);
-        throw error;
-      } finally {
-        setLoading(false);
-      }
-    },
-    [api]
-  );
+  const resetPassword = useCallback(async (data: ResetPasswordData) => {
+    setLoading(true);
+    try {
+      const result = await authService.resetPassword(data.token, data.password);
+      return result;
+    } catch (error: any) {
+      console.error("Reset password error:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const verifyEmail = useCallback(
-    async (token: string, email: string) => {
-      setLoading(true);
-      try {
-        const result = await api.get(
-          `/api/auth/verify?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`
-        );
-        return result;
-      } catch (error: any) {
-        console.error("Verify email error:", error);
-        throw error;
-      } finally {
-        setLoading(false);
-      }
-    },
-    [api]
-  );
+  const verifyEmail = useCallback(async (token: string, email: string) => {
+    setLoading(true);
+    try {
+      const result = await authService.verifyEmail(token, email);
+      return result;
+    } catch (error: any) {
+      console.error("Verify email error:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   const resendVerification = useCallback(
     async (data: ResendVerificationData) => {
       setLoading(true);
       try {
-        const result = await api.post("/api/auth/resend-verification", data);
+        const result = await authService.resendVerification(data.email);
         return result;
       } catch (error: any) {
         console.error("Resend verification error:", error);
@@ -130,28 +113,26 @@ export function useAuth() {
         setLoading(false);
       }
     },
-    [api]
+    [],
   );
 
-  const fetchUser = useCallback(
-    async (referralCode?: string) => {
-      setLoading(true);
-      try {
-        const url = referralCode
-          ? `/api/user?referralCode=${encodeURIComponent(referralCode)}`
-          : "/api/user";
-
-        const result = await api.get(url);
-        return result;
-      } catch (error: any) {
-        console.error("Fetch user error:", error);
-        throw error;
-      } finally {
-        setLoading(false);
+  const fetchUser = useCallback(async (referralCode?: string) => {
+    setLoading(true);
+    try {
+      let result;
+      if (referralCode) {
+        result = await authService.getUserByReferralCode(referralCode);
+      } else {
+        result = await authService.getCurrentUser();
       }
-    },
-    [api]
-  );
+      return result;
+    } catch (error: any) {
+      console.error("Fetch user error:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   return {
     loading,

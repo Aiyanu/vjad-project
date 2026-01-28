@@ -71,16 +71,19 @@ export const getProfile = async (req: AuthenticatedRequest, res: Response) => {
   }
 };
 
-export const updateProfile = async (req: AuthenticatedRequest, res: Response) => {
+export const updateProfile = async (
+  req: AuthenticatedRequest,
+  res: Response,
+) => {
   try {
     if (!req.user) return apiError(res, "Unauthorized", 401);
-    
+
     const { fullName, phone } = req.body;
-    
+
     const user = await prisma.user.update({
       where: { id: req.user.userId },
       data: { fullName, phone },
-      include: { affiliate: true }
+      include: { affiliate: true },
     });
 
     return apiSuccess(res, flattenUser(user), "Profile updated successfully");

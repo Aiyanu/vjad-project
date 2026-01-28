@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { appointmentService } from "@/services/appointmentService";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,7 +34,7 @@ const DAYS_OF_WEEK = [
   "Saturday",
 ];
 
-export function AppointmentSlotManager() {
+export default function AppointmentSlotManager() {
   const [slots, setSlots] = useState<AppointmentSlot[]>([]);
   const [slotsByDay, setSlotsByDay] = useState<SlotsByDay>({});
   const [loading, setLoading] = useState(true);
@@ -54,16 +55,16 @@ export function AppointmentSlotManager() {
   const fetchSlots = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/appointments/slots");
-      const data = await response.json();
-
+      const data = await appointmentService.fetchSlots();
       if (data.success) {
-        setSlots(data.slots);
-        setSlotsByDay(data.slotsByDay);
+        setSlots(data.data?.slots || []);
+        setSlotsByDay(data.data?.slotsByDay || {});
+      } else {
+        toast.error(data.message || "Failed to load appointment slots");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching slots:", error);
-      toast.error("Failed to load appointment slots");
+      toast.error(error?.message || "Failed to load appointment slots");
     } finally {
       setLoading(false);
     }
@@ -79,16 +80,9 @@ export function AppointmentSlotManager() {
 
     setSaving(true);
     try {
-      const response = await fetch("/api/appointments/slots", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newSlot),
-      });
-
-      const data = await response.json();
-
+      const data = await appointmentService.createSlot(newSlot);
       if (data.success) {
-        toast.success("Appointment slot added");
+        toast.success(data.message || "Appointment slot added");
         setNewSlot({
           dayOfWeek: 0,
           startTime: "09:00",
@@ -97,11 +91,11 @@ export function AppointmentSlotManager() {
         });
         fetchSlots();
       } else {
-        toast.error(data.error || "Failed to add slot");
+        toast.error(data.message || "Failed to add slot");
       }
     } catch (error: any) {
       console.error("Error adding slot:", error);
-      toast.error("Error adding appointment slot");
+      toast.error(error?.message || "Error adding appointment slot");
     } finally {
       setSaving(false);
     }
@@ -111,46 +105,34 @@ export function AppointmentSlotManager() {
     if (!confirm("Are you sure you want to delete this slot?")) return;
 
     try {
-      const response = await fetch(`/api/appointments/slots?slotId=${slotId}`, {
-        method: "DELETE",
-      });
-
-      const data = await response.json();
-
+      const data = await appointmentService.deleteSlot(slotId);
       if (data.success) {
-        toast.success("Appointment slot deleted");
+        toast.success(data.message || "Appointment slot deleted");
         fetchSlots();
       } else {
-        toast.error("Failed to delete slot");
+        toast.error(data.message || "Failed to delete slot");
       }
     } catch (error: any) {
       console.error("Error deleting slot:", error);
-      toast.error("Error deleting appointment slot");
+      toast.error(error?.message || "Error deleting appointment slot");
     }
   };
 
   const handleToggleAvailability = async (slot: AppointmentSlot) => {
     try {
-      const response = await fetch("/api/appointments/slots", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...slot,
-          isAvailable: !slot.isAvailable,
-        }),
+      const data = await appointmentService.createSlot({
+        ...slot,
+        isAvailable: !slot.isAvailable,
       });
-
-      const data = await response.json();
-
       if (data.success) {
-        toast.success(
-          `Slot marked as ${!slot.isAvailable ? "available" : "unavailable"}`
-        );
+        toast.success(data.message || `Slot marked as ${!slot.isAvailable ? "available" : "unavailable"}`);
         fetchSlots();
+      } else {
+        toast.error(data.message || "Error updating slot");
       }
     } catch (error: any) {
       console.error("Error updating slot:", error);
-      toast.error("Error updating slot");
+      toast.error(error?.message || "Error updating slot");
     }
   };
 

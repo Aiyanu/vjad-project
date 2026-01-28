@@ -24,7 +24,7 @@ function getTransporter() {
       pass: smtpPass,
     },
     tls: {
-      ciphers: 'SSLv3',
+      ciphers: "SSLv3",
       rejectUnauthorized: false, // Accept self-signed certs (optional, for dev)
     },
     connectionTimeout: 10000, // 10s timeout
@@ -45,7 +45,9 @@ export async function sendMail({
   text?: string;
 }) {
   const t = getTransporter();
-  const mailFrom = process.env.MAIL_FROM || `no-reply@${process.env.APP_DOMAIN || "example.com"}`;
+  const mailFrom =
+    process.env.MAIL_FROM ||
+    `no-reply@${process.env.APP_DOMAIN || "example.com"}`;
 
   if (!t) {
     console.log("Mailer not configured. Mail content below:", {

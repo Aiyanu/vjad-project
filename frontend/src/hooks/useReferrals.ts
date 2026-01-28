@@ -28,7 +28,6 @@ type SortField = "fullName" | "email" | "createdAt" | "emailVerified";
 type SortOrder = "asc" | "desc";
 
 export function useReferrals() {
-  const api = useApi();
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [loading, setLoading] = useState(false);
   const [pageLoading, setPageLoading] = useState(false);
@@ -62,7 +61,7 @@ export function useReferrals() {
         }
         setError(null);
 
-        const response = await affiliateService.fetchReferrals(api, {
+        const response = await affiliateService.fetchReferrals({
           page,
           limit: pagination.limit,
           search: debouncedSearch,
@@ -88,7 +87,7 @@ export function useReferrals() {
         setLoading(false);
       }
     },
-    [api, debouncedSearch, sortField, sortOrder, pagination.limit]
+    [debouncedSearch, sortField, sortOrder, pagination.limit],
   );
 
   // Reset to page 1 when search/sort changes

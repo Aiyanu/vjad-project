@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { appointmentService } from "@/services/appointmentService";
+import useApi from "@/hooks/useApi";
 import { motion } from "framer-motion";
 import { Calendar as CalendarIcon, Clock, CheckCircle, User, Mail, Phone } from "lucide-react";
 import { Navbar } from "@/components/landing-page/Navbar";
@@ -28,6 +30,7 @@ interface TimeSlot {
 }
 
 export default function AppointmentsPage() {
+  const api = useApi();
   const [step, setStep] = useState<1 | 2>(1);
   const [date, setDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState("");
@@ -83,14 +86,10 @@ export default function AppointmentsPage() {
     try {
       const dateStr = format(checkDate, "yyyy-MM-dd");
       const dayOfWeek = checkDate.getDay();
-
       const daySlots = availability.filter((slot) => slot.dayOfWeek === dayOfWeek && slot.isAvailable);
       if (daySlots.length === 0) return;
-
-      const response = await fetch(`/api/appointments/book?date=${dateStr}`);
-      const data = await response.json();
+      const data = await appointmentService.fetchBookingByDate(dateStr);
       const bookedSlots = data.bookings?.map((b: any) => b.startTime) || [];
-
       let totalSlots = 0;
       daySlots.forEach((slot) => {
         const [startHour, startMin] = slot.startTime.split(":").map(Number);
@@ -99,9 +98,7 @@ export default function AppointmentsPage() {
         const endMinutes = endHour * 60 + endMin;
         totalSlots += Math.floor((endMinutes - startMinutes) / 30);
       });
-
       const availableCount = totalSlots - bookedSlots.length;
-
       setDayAvailability(prev => ({
         ...prev,
         [dateStr]: { total: totalSlots, available: availableCount }
@@ -114,8 +111,7 @@ export default function AppointmentsPage() {
   const fetchAvailability = async () => {
     try {
       setIsLoadingAvailability(true);
-      const response = await fetch("/api/appointments/slots");
-      const data = await response.json();
+      const data = await appointmentService.fetchSlots();
       if (data.success) {
         setAvailability(data.slots || []);
       }
@@ -129,43 +125,32 @@ export default function AppointmentsPage() {
 
   const generateTimeSlots = async () => {
     if (!date) return;
-
     setIsLoadingTimeSlots(true);
     try {
       const dayOfWeek = date.getDay();
       const dateStr = format(date, "yyyy-MM-dd");
-
       // Get slots for this day of week
       const daySlots = availability.filter((slot) => slot.dayOfWeek === dayOfWeek && slot.isAvailable);
-
       if (daySlots.length === 0) {
         setTimeSlots([]);
         return;
       }
-
       // Fetch existing bookings for this date
-      const response = await fetch(`/api/appointments/book?date=${dateStr}`);
-      const data = await response.json();
+      const data = await appointmentService.fetchBookingByDate(dateStr);
       const bookedSlots = data.bookings?.map((b: any) => b.startTime) || [];
-
       const slots: TimeSlot[] = [];
-
       daySlots.forEach((slot) => {
         const [startHour, startMin] = slot.startTime.split(":").map(Number);
         const [endHour, endMin] = slot.endTime.split(":").map(Number);
-
         let currentHour = startHour;
         let currentMinute = startMin;
-
         while (currentHour < endHour || (currentHour === endHour && currentMinute < endMin)) {
           const timeString = `${currentHour.toString().padStart(2, "0")}:${currentMinute.toString().padStart(2, "0")}`;
           const isBooked = bookedSlots.includes(timeString);
-
           slots.push({
             time: timeString,
             available: !isBooked,
           });
-
           currentMinute += 30;
           if (currentMinute >= 60) {
             currentMinute = 0;
@@ -173,9 +158,7 @@ export default function AppointmentsPage() {
           }
         }
       });
-
       setTimeSlots(slots);
-
       // Track day availability
       const availableCount = slots.filter(s => s.available).length;
       setDayAvailability(prev => ({
@@ -217,40 +200,28 @@ export default function AppointmentsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!date || !selectedTime) {
       toast.error("Please select a date and time");
       return;
     }
-
     if (!formData.visitorName || !formData.visitorEmail || !formData.visitorPhone) {
       toast.error("Please fill in all required fields");
       return;
     }
-
     setIsSubmitting(true);
-
     try {
       const [hours, minutes] = selectedTime.split(":");
       const endHour = parseInt(hours) + (parseInt(minutes) === 30 ? 1 : 0);
       const endMinute = (parseInt(minutes) + 30) % 60;
-
-      const response = await fetch("/api/appointments/book", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          visitorName: formData.visitorName,
-          visitorEmail: formData.visitorEmail,
-          visitorPhone: formData.visitorPhone,
-          appointmentDate: date,
-          startTime: selectedTime,
-          endTime: `${endHour.toString().padStart(2, "0")}:${endMinute.toString().padStart(2, "0")}:00`,
-          message: formData.message,
-        }),
+      const data = await appointmentService.createBooking({
+        visitorName: formData.visitorName,
+        visitorEmail: formData.visitorEmail,
+        visitorPhone: formData.visitorPhone,
+        appointmentDate: date,
+        startTime: selectedTime,
+        endTime: `${endHour.toString().padStart(2, "0")}:${endMinute.toString().padStart(2, "0")}:00`,
+        message: formData.message,
       });
-
-      const data = await response.json();
-
       if (data.success) {
         setIsSuccess(true);
         toast.success("Appointment booked successfully!");

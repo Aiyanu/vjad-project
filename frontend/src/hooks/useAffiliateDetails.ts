@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import { useApi } from "./useApi";
+import { adminService } from "@/services/adminService";
 
 interface AffiliateDetails {
   id: string;
@@ -29,17 +29,14 @@ export function useAffiliateDetails(affiliateId: string) {
   const [affiliate, setAffiliate] = useState<AffiliateDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const api = useApi();
+  // Removed useApi, now using adminService
 
   const fetchAffiliateDetails = useCallback(async () => {
     if (!affiliateId) return;
-
     try {
       setLoading(true);
       setError(null);
-      const response = await api.get(
-        `/api/admin/affiliates/${affiliateId}/details`
-      );
+      const response = await adminService.getAffiliateDetails(affiliateId);
       if (response?.success && response?.data?.affiliate) {
         setAffiliate({
           ...response.data.affiliate,
@@ -56,23 +53,19 @@ export function useAffiliateDetails(affiliateId: string) {
     } finally {
       setLoading(false);
     }
-  }, [affiliateId, api]);
+  }, [affiliateId]);
 
   const updateAffiliateStatus = useCallback(
     async (isDisabled: boolean) => {
       if (!affiliateId) return;
-
       try {
-        const data = await api.put(
-          `/api/admin/affiliates/${affiliateId}/status`,
-          {
-            isDisabled,
-          }
+        const data = await adminService.updateAffiliateStatus(
+          affiliateId,
+          isDisabled,
         );
-
         setAffiliate((prev) => (prev ? { ...prev, isDisabled } : null));
         toast.success(
-          `Affiliate ${isDisabled ? "disabled" : "enabled"} successfully`
+          `Affiliate ${isDisabled ? "disabled" : "enabled"} successfully`,
         );
         return data;
       } catch (error: any) {
@@ -81,7 +74,7 @@ export function useAffiliateDetails(affiliateId: string) {
         throw error;
       }
     },
-    [affiliateId, api]
+    [affiliateId],
   );
 
   useEffect(() => {

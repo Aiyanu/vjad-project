@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { appointmentService } from "@/services/appointmentService";
 import {
   ChevronLeft,
   ChevronRight,
@@ -41,9 +42,8 @@ export function AppointmentCalendar({
     try {
       setLoading(true);
       const monthStr = format(currentMonth, "yyyy-MM");
-      const response = await fetch(`/api/appointments/calendar?month=${monthStr}`);
-      const data = await response.json();
-
+      // You may need to implement this method in appointmentService if it doesn't exist
+      const data = await appointmentService.fetchCalendar(monthStr);
       if (data.success) {
         setAvailability(data.availability);
       }
@@ -140,21 +140,20 @@ export function AppointmentCalendar({
                     }
                   }}
                   disabled={dayStatus?.status === "unavailable"}
-                  title={`${format(day, "MMM d, yyyy")} - ${
-                    dayStatus?.status === "available"
+                  title={`${format(day, "MMM d, yyyy")} - ${dayStatus?.status === "available"
                       ? "Available"
                       : dayStatus?.status === "booked"
                         ? "Fully Booked"
                         : "Unavailable"
-                  }`}
+                    }`}
                   className={clsx(
                     "w-full h-full rounded-lg border-2 font-semibold text-sm transition-all",
                     "flex items-center justify-center",
                     dayStatus && getStatusColor(dayStatus.status),
                     !dayStatus && "border-gray-300 bg-white",
                     isSelected &&
-                      dayStatus?.status !== "unavailable" &&
-                      "ring-2 ring-offset-2 ring-primary",
+                    dayStatus?.status !== "unavailable" &&
+                    "ring-2 ring-offset-2 ring-primary",
                     dayStatus?.status === "unavailable" && "cursor-not-allowed"
                   )}
                 >

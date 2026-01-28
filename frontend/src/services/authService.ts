@@ -2,9 +2,9 @@
  * Auth service: centralized authentication API calls
  * Handles login, registration, password reset, email verification, etc.
  */
-import { ApiService } from "./api";
 
-// URL constants for auth endpoints (point to backend)
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 const AUTH_URLS = {
   LOGIN: "/auth/login",
   REGISTER: "/auth/register",
@@ -14,60 +14,75 @@ const AUTH_URLS = {
   RESET_PASSWORD: "/auth/reset-password",
 };
 
+async function fetchWithAuth(path: string, options: RequestInit = {}) {
+  const token =
+    typeof window !== "undefined" ? sessionStorage.getItem("authToken") : null;
+  const headers: Record<string, string> = { ...(options.headers as any) };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  if (options.body && !(options.body instanceof FormData))
+    headers["Content-Type"] = "application/json";
+  const res = await fetch(`${BACKEND_URL}${path}`, { ...options, headers });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok)
+    throw new Error(data?.message || data?.error || "Request failed");
+  return data;
+}
+
 export const authService = {
-  /**
-   * Login user with email and password
-   */
-  login: async (api: ApiService, email: string, password: string) => {
-    return api.post(AUTH_URLS.LOGIN, { email, password });
+  login: async (email: string, password: string) => {
+    return fetchWithAuth(AUTH_URLS.LOGIN, {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
   },
-
-  /**
-   * Register new user (affiliate)
-   */
-  register: async (
-    api: ApiService,
-    data: {
-      fullName: string;
-      email: string;
-      password: string;
-      referralCode?: string;
-    },
-  ) => {
-    return api.post(AUTH_URLS.REGISTER, data);
+  register: async (data: {
+    fullName: string;
+    email: string;
+    password: string;
+    referralCode?: string;
+  }) => {
+    return fetchWithAuth(AUTH_URLS.REGISTER, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
   },
-
-  /**
-   * Verify email with token and email
-   */
-  verifyEmail: async (api: ApiService, token: string, email: string) => {
-    return api.get(
+  verifyEmail: async (token: string, email: string) => {
+    return fetchWithAuth(
       `${AUTH_URLS.VERIFY}?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`,
     );
   },
-
-  /**
-   * Resend verification email
-   */
-  resendVerification: async (api: ApiService, email: string) => {
-    return api.post(AUTH_URLS.RESEND_VERIFICATION, { email });
+  resendVerification: async (email: string) => {
+    return fetchWithAuth(AUTH_URLS.RESEND_VERIFICATION, {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
   },
-
-  /**
-   * Request password reset
-   */
-  forgotPassword: async (api: ApiService, email: string) => {
-    return api.post(AUTH_URLS.FORGOT_PASSWORD, { email });
+  forgotPassword: async (email: string) => {
+    return fetchWithAuth(AUTH_URLS.FORGOT_PASSWORD, {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
   },
 
   /**
    * Reset password with token
    */
-  resetPassword: async (
-    api: ApiService,
-    token: string,
-    newPassword: string,
-  ) => {
-    return api.post(AUTH_URLS.RESET_PASSWORD, { token, newPassword });
+  resetPassword: async (token: string, newPassword: string) => {
+    return fetchWithAuth(AUTH_URLS.RESET_PASSWORD, {
+      method: "POST",
+      body: JSON.stringify({ token, newPassword }),
+    });
+  },
+
+  getCurrentUser: async () => {
+    return fetchWithAuth("/user");
+  },
+  getUserByReferralCode: async (referralCode: string) => {
+    return fetchWithAuth(
+      `/user?referralCode=${encodeURIComponent(referralCode)}`,
+    );
+  },
+  getBanks: async () => {
+    return fetchWithAuth("/banks");
   },
 };

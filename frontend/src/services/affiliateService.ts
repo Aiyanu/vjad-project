@@ -1,28 +1,36 @@
 /**
  * Affiliate service: centralized affiliate-related API calls
  */
-import { ApiService } from "./api";
 
-// URL constants for affiliate endpoints (point to backend)
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 const AFFILIATE_URLS = {
   REFERRALS_LIST: "/affiliate/referrals",
   REFERRALS_COUNT: "/affiliate/referrals/count",
 };
 
+async function fetchWithAuth(path: string, options: RequestInit = {}) {
+  const token =
+    typeof window !== "undefined" ? sessionStorage.getItem("authToken") : null;
+  const headers: Record<string, string> = { ...(options.headers as any) };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  if (options.body && !(options.body instanceof FormData))
+    headers["Content-Type"] = "application/json";
+  const res = await fetch(`${BACKEND_URL}${path}`, { ...options, headers });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok)
+    throw new Error(data?.message || data?.error || "Request failed");
+  return data;
+}
+
 export const affiliateService = {
-  /**
-   * Fetch referrals with pagination, search, and sorting
-   */
-  fetchReferrals: async (
-    api: ApiService,
-    params: {
-      page: number;
-      limit: number;
-      search?: string;
-      sortField?: string;
-      sortOrder?: string;
-    },
-  ) => {
+  fetchReferrals: async (params: {
+    page: number;
+    limit: number;
+    search?: string;
+    sortField?: string;
+    sortOrder?: string;
+  }) => {
     const queryParams = new URLSearchParams({
       page: String(params.page),
       limit: String(params.limit),
@@ -30,13 +38,21 @@ export const affiliateService = {
       ...(params.sortField && { sortField: params.sortField }),
       ...(params.sortOrder && { sortOrder: params.sortOrder }),
     });
-    return api.get(`${AFFILIATE_URLS.REFERRALS_LIST}?${queryParams}`);
+    return fetchWithAuth(`${AFFILIATE_URLS.REFERRALS_LIST}?${queryParams}`);
   },
-
-  /**
-   * Fetch referral count
-   */
-  fetchReferralCount: async (api: ApiService) => {
-    return api.get(AFFILIATE_URLS.REFERRALS_COUNT);
+  fetchReferralCount: async () => {
+    return fetchWithAuth(AFFILIATE_URLS.REFERRALS_COUNT);
+  },
+  verifyAccount: async (accountNumber: string, bankCode: string) => {
+    return fetchWithAuth("/verify-account", {
+      method: "POST",
+      body: JSON.stringify({ accountNumber, bankCode }),
+    });
+  },
+  fetchAffiliates: async () => {
+    return fetchWithAuth("/admin/affiliates");
+  },
+  getCurrentUser: async () => {
+    return fetchWithAuth("/user");
   },
 };

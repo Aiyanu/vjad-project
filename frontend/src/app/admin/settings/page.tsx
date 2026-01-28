@@ -5,6 +5,9 @@ import dynamic from "next/dynamic";
 import { motion } from "motion/react";
 import { useAppSelector } from "@/store/hooks";
 import { useApi } from "@/hooks/useApi";
+import { appointmentService } from "@/services/appointmentService";
+import { adminService } from "@/services/adminService";
+import { authService } from "@/services/authService";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -151,8 +154,7 @@ export default function AdminSettings() {
 
   const fetchSlots = async () => {
     try {
-      const response = await fetch("/api/appointments/slots");
-      const data = await response.json();
+      const data = await appointmentService.fetchSlots();
       if (data.success) {
         setSlots(data.slots);
       }
@@ -164,10 +166,9 @@ export default function AdminSettings() {
 
   const fetchAppointments = async () => {
     try {
-      const response = await fetch("/api/appointments/book");
-      const data = await response.json();
+      const data = await appointmentService.fetchBookings();
       if (data.success) {
-        setAppointments(data.appointments || []);
+        setAppointments(data.appointments || data.bookings || []);
       }
     } catch (error) {
       console.error("Error fetching appointments:", error);
@@ -179,28 +180,19 @@ export default function AdminSettings() {
 
   const handleAddSlot = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
       // Add all time slots
       for (const slot of timeSlots) {
-        const response = await fetch("/api/appointments/slots", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            dayOfWeek: parseInt(slot.dayOfWeek),
-            startTime: slot.startTime,
-            endTime: slot.endTime,
-          }),
+        const data = await appointmentService.createSlot({
+          dayOfWeek: parseInt(slot.dayOfWeek),
+          startTime: slot.startTime,
+          endTime: slot.endTime,
         });
-
-        const data = await response.json();
-
         if (!data.success) {
           toast.error(data.error || "Failed to add slot");
           return;
         }
       }
-
       toast.success("All appointment slots added successfully!");
       setShowAppointmentForm(false);
       setTimeSlots([{ dayOfWeek: "1", startTime: "09:00", endTime: "10:00" }]);
@@ -233,12 +225,7 @@ export default function AdminSettings() {
 
   const handleDeleteSlot = async (id: string) => {
     try {
-      const response = await fetch(`/api/appointments/slots?slotId=${id}`, {
-        method: "DELETE",
-      });
-
-      const data = await response.json();
-
+      const data = await appointmentService.deleteSlot(id);
       if (data.success) {
         toast.success("Slot deleted");
         fetchSlots();
@@ -258,68 +245,33 @@ export default function AdminSettings() {
     return `${displayHour}:${minutes} ${ampm}`;
   };
 
+  // Implement profile update via userService
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) {
-      toast.error("User not authenticated");
-      return;
-    }
-
     setSaving(true);
     try {
-      // If you want to use your api helper to update the profile:
-      const response = await api.put(`/api/user/${user.id}`, {
+      const updatePayload: any = {
         fullName: profile.full_name,
         phone: profile.phone,
-      });
-
-      if (response?.success) {
-        toast.success("Profile updated successfully");
-      } else {
-        toast.error(response?.message || "Failed to update profile");
+      };
+      const result = await (await import("@/services/userService")).userService.updateProfile(updatePayload);
+      if (result?.error) {
+        toast.error(result.error, { id: "profile-update" });
+        return;
       }
-
-      // If you use Supabase, restore your supabase update logic here
-    } catch (error: any) {
+      toast.success("Profile updated successfully", { id: "profile-update" });
+    } catch (error) {
       console.error("Error updating profile:", error);
-      toast.error(error?.message || "Failed to update profile");
+      toast.error("Failed to update profile", { id: "profile-update" });
     } finally {
       setSaving(false);
     }
-  };
+  } 
 
+  // TODO: Implement password change via authService if/when available
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      // Optionally show toast
-      return;
-    }
-
-    if (passwordData.newPassword.length < 6) {
-      // Optionally show toast
-      return;
-    }
-
-    setChangingPassword(true);
-    try {
-      // Replace with your auth endpoint or supabase call
-      const response = await api.post("/api/auth/change-password", {
-        newPassword: passwordData.newPassword,
-      });
-
-      if (response?.success) {
-        toast.success("Password updated successfully");
-        setPasswordData({ newPassword: "", confirmPassword: "" });
-      } else {
-        toast.error(response?.message || "Failed to update password");
-      }
-    } catch (error: any) {
-      console.error("Error updating password:", error);
-      toast.error(error?.message || "Failed to update password");
-    } finally {
-      setChangingPassword(false);
-    }
+    toast.error("Password change not implemented");
   };
 
   if (loading) {

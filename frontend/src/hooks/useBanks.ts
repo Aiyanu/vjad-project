@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import useApi from "./useApi";
+import { userService } from "@/services/userService";
 
 interface Bank {
   name: string;
@@ -11,16 +11,15 @@ export function useBanks() {
   const [banks, setBanks] = useState<Bank[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const api = useApi();
 
   const fetchBanks = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.get("/api/banks");
-      if (response?.banks) {
-        setBanks(response.banks);
-        return response.banks;
+      const response = await userService.getBanks();
+      if (response?.success && response?.data) {
+        setBanks(response.data);
+        return response.data;
       } else {
         setBanks([]);
         return [];
@@ -33,7 +32,7 @@ export function useBanks() {
     } finally {
       setLoading(false);
     }
-  }, [api]);
+  }, []);
 
   return {
     banks,

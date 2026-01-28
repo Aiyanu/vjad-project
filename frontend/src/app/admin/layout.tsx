@@ -10,7 +10,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { useAppSelector, useAppDispatch } from "@/store/hooks";
 import { clearUser, setUser } from "@/store/userSlice";
 import { clearToken } from "@/store/globalSlice";
-import { useApi } from "@/hooks/useApi";
+import { adminService } from "@/services/adminService";
 import {
   LayoutDashboard,
   Users,
@@ -49,7 +49,6 @@ export default function AdminDashboardLayout({ children }: DashboardLayoutProps)
   const user = useAppSelector((state) => state.user.user);
   const token = useAppSelector((state) => state.global.token);
   const dispatch = useAppDispatch();
-  const api = useApi();
 
   // Wait for Redux persist to rehydrate from sessionStorage
   useEffect(() => {
@@ -70,7 +69,7 @@ export default function AdminDashboardLayout({ children }: DashboardLayoutProps)
         return;
       }
       try {
-        const json = await api.get("/api/user");
+        const json = await adminService.getCurrentUser();
         if (!json?.success || !json?.data) {
           dispatch(clearUser());
           dispatch(clearToken());

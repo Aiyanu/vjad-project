@@ -8,7 +8,7 @@ import * as z from "zod";
 import { useAppDispatch } from "@/store/hooks";
 import { setUser } from "@/store/userSlice";
 import { useToken } from "@/hooks/useToken";
-import { useApi } from "@/hooks/useApi";
+import { authService } from "@/services/authService";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -55,38 +55,29 @@ type Mode = "login" | "register";
 
 export interface AuthFormProps {
     mode?: Mode;
-    loginEndpoint?: string;
-    registerEndpoint?: string;
     redirectTo?: string;
 }
 
-type FormValues = {
-    fullName?: string;
-    email: string;
-    password: string;
-    confirmPassword?: string;
-};
-
-export interface AuthFormProps {
-    mode?: Mode;
-    // url to call for authentication; default endpoints used if not provided
-    loginEndpoint?: string;
-    registerEndpoint?: string;
-    // redirect after success
-    redirectTo?: string;
-}
+type FormValues =
+    | {
+            email: string;
+            password: string;
+        }
+    | {
+            fullName: string;
+            email: string;
+            password: string;
+            confirmPassword: string;
+        };
 
 /* ----- Reusable component ----- */
 export function AuthForm({
     mode = "login",
-    loginEndpoint = "/api/auth/login",
-    registerEndpoint = "/api/auth/register",
     redirectTo = "/affiliate/dashboard",
 }: AuthFormProps) {
     const router = useRouter();
     const dispatch = useAppDispatch();
     const { saveToken } = useToken();
-    const api = useApi();
     const [serverError, setServerError] = React.useState<string | null>(null);
     const [loading, setLoading] = React.useState(false);
 
@@ -106,47 +97,34 @@ export function AuthForm({
 
         try {
             const isLoginMode = mode === "login";
-            const payload = isLoginMode
-                ? { email: (values as LoginValues).email, password: (values as LoginValues).password }
-                : {
+            let data;
+            if (isLoginMode) {
+                data = await authService.login(
+                    (values as LoginValues).email,
+                    (values as LoginValues).password
+                );
+            } else {
+                data = await authService.register({
                     email: (values as RegisterValues).email,
                     password: (values as RegisterValues).password,
                     fullName: (values as RegisterValues).fullName,
-                };
-
-            const data = isLoginMode 
-                ? await api.post(loginEndpoint, payload)
-                : await api.post(registerEndpoint, payload);
+                });
+            }
 
             // For login, save token and user data to Redux store
             if (isLoginMode && data.token && data.user) {
-                console.log("🎯 [AuthForm] Login successful, saving token and user");
-                console.log("📦 [AuthForm] Token received:", data.token.substring(0, 20) + "...");
-                console.log("👤 [AuthForm] User data:", { id: data.user.id, email: data.user.email, role: data.user.role });
-
-                // Save token using useToken hook (which will also save to sessionStorage via middleware)
                 saveToken(data.token);
-
-                // Save user data to Redux
                 dispatch(setUser(data.user));
-                console.log("✅ [AuthForm] Token and user data dispatched");
-
-                // Wait for state to be saved before navigating
                 await new Promise(resolve => setTimeout(resolve, 100));
-                console.log("🚀 [AuthForm] Navigating to:", redirectTo);
                 router.push(redirectTo);
             } else if (!isLoginMode) {
-                // For registration, redirect to email verification page
-                console.log("✅ [AuthForm] Registration successful, redirecting to email verification");
                 const email = (values as RegisterValues).email;
                 router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`);
             }
         } catch (err: any) {
-            // Check if error is due to unverified email
             if (err.status === 403 && err.message === "Email not verified") {
-                console.log("📧 [AuthForm] Email not verified, redirecting to verification page");
-                const email = mode === "login" 
-                    ? (values as LoginValues).email 
+                const email = mode === "login"
+                    ? (values as LoginValues).email
                     : (values as RegisterValues).email;
                 router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`);
                 return;

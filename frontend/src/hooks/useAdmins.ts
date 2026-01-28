@@ -55,7 +55,7 @@ export function useAdmins() {
         else setLoading(true);
         setError(null);
 
-        const response = await adminService.fetchAdmins(api, {
+        const response = await adminService.fetchAdmins({
           page,
           limit: pagination.limit,
           search: debouncedSearch,
@@ -80,7 +80,7 @@ export function useAdmins() {
         setLoading(false);
       }
     },
-    [api, debouncedSearch, sortField, sortOrder, pagination.limit]
+    [debouncedSearch, sortField, sortOrder, pagination.limit],
   );
 
   // Reset to page 1 when search/sort changes
@@ -124,9 +124,9 @@ export function useAdmins() {
       role?: "admin" | "super_admin";
     }) => {
       try {
-        const result = await adminService.createAdmin(api, data);
+        const result = await adminService.createAdmin(data);
         toast.success(
-          "Admin added successfully! Credentials sent to their email."
+          "Admin added successfully! Credentials sent to their email.",
         );
         await fetchAdmins(pagination.page, true);
         return result;
@@ -136,13 +136,13 @@ export function useAdmins() {
         throw error;
       }
     },
-    [api, fetchAdmins, pagination.page]
+    [fetchAdmins, pagination.page],
   );
 
   const deleteAdmin = useCallback(
     async (id: string) => {
       try {
-        await adminService.deleteAdmin(api, id);
+        await adminService.deleteUser(id);
         toast.success("Admin removed successfully");
         await fetchAdmins(pagination.page, true);
       } catch (error: any) {
@@ -151,13 +151,13 @@ export function useAdmins() {
         throw error;
       }
     },
-    [api, fetchAdmins, pagination.page]
+    [fetchAdmins, pagination.page],
   );
 
   const updateAdminRole = useCallback(
     async (id: string, role: "admin" | "super_admin") => {
       try {
-        await adminService.updateAdminRole(api, id, role);
+        await adminService.updateAdminRole(id, role);
         toast.success("Admin role updated");
         await fetchAdmins(pagination.page, true);
       } catch (error: any) {
@@ -166,7 +166,7 @@ export function useAdmins() {
         throw error;
       }
     },
-    [api, fetchAdmins, pagination.page]
+    [fetchAdmins, pagination.page],
   );
 
   return {

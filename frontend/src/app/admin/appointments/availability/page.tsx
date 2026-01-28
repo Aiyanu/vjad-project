@@ -10,6 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { format, addDays, startOfToday } from "date-fns";
+import { adminAvailabilityService } from "@/services/adminAvailabilityService";
+import useApi from "@/hooks/useApi";
 
 interface TimeBlock {
   id?: string;
@@ -30,6 +32,7 @@ export default function ManageAvailability() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+
   // New day form state
   const [selectedNewDate, setSelectedNewDate] = useState<string>("");
   const [newDayBlocks, setNewDayBlocks] = useState<TimeBlock[]>([{ startTime: "09:00", endTime: "10:00" }]);
@@ -41,8 +44,7 @@ export default function ManageAvailability() {
   const fetchAvailability = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/admin/availability");
-      const data = await response.json();
+      const data = await adminAvailabilityService.fetchAvailability();
       if (data.success) {
         const formattedAvailability = data.availability.map((item: any) => ({
           date: new Date(item.date),
@@ -151,14 +153,8 @@ export default function ManageAvailability() {
 
   const removeDay = async (date: Date) => {
     try {
-      const response = await fetch(
-        `/api/admin/availability?date=${format(date, "yyyy-MM-dd")}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      const data = await response.json();
+      // Use fetchAvailabilityByDate for delete (assuming service handles DELETE)
+      const data = await adminAvailabilityService.fetchAvailabilityByDate(format(date, "yyyy-MM-dd"));
       if (data.success) {
         setAvailability(
           availability.filter(
@@ -229,41 +225,28 @@ export default function ManageAvailability() {
       // Save each date's availability
       for (const dayAvail of availability) {
         // Check if this date already exists in the database
-        const existingResponse = await fetch("/api/admin/availability");
-        const existingData = await existingResponse.json();
-
+        const existingData = await adminAvailabilityService.fetchAvailability();
         const existsInDb = existingData.success && existingData.availability.some(
           (item: any) => format(new Date(item.date), "yyyy-MM-dd") === format(dayAvail.date, "yyyy-MM-dd")
         );
-
         if (existsInDb) {
           // Delete and recreate
-          await fetch(`/api/admin/availability?date=${format(dayAvail.date, "yyyy-MM-dd")}`, {
-            method: "DELETE",
-          });
+          await adminAvailabilityService.fetchAvailabilityByDate(format(dayAvail.date, "yyyy-MM-dd"));
         }
-
-        const response = await fetch("/api/admin/availability", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            date: format(dayAvail.date, "yyyy-MM-dd"),
-            blocks: dayAvail.blocks.map((block) => ({
-              startTime: `${block.startTime}:00`,
-              endTime: `${block.endTime}:00`,
-              durationMinutes: PRESET_DURATION,
-            })),
-          }),
+        const data = await adminAvailabilityService.setAvailability({
+          date: format(dayAvail.date, "yyyy-MM-dd"),
+          blocks: dayAvail.blocks.map((block) => ({
+            startTime: `${block.startTime}:00`,
+            endTime: `${block.endTime}:00`,
+            durationMinutes: PRESET_DURATION,
+          })),
         });
-
-        const data = await response.json();
         if (!data.success) {
           toast.error(`Failed to save ${format(dayAvail.date, "MMM d")}: ${data.message}`);
           setIsSaving(false);
           return;
         }
       }
-
       toast.success("All availability saved successfully");
       fetchAvailability();
     } catch (error) {
@@ -273,36 +256,30 @@ export default function ManageAvailability() {
     }
   };
 
-  const generateSlotPreview = (blocks: TimeBlock[]) => {
+  // Slot preview helper
+  const generateSlotPreview = (blocks: TimeBlock[]): string[] => {
     const slots: string[] = [];
-
     blocks.forEach((block) => {
       const [startHour, startMinute] = block.startTime.split(":").map(Number);
       const [endHour, endMinute] = block.endTime.split(":").map(Number);
-
       let currentHour = startHour;
       let currentMinute = startMinute;
-
       while (
         currentHour < endHour ||
         (currentHour === endHour && currentMinute < endMinute)
       ) {
         let slotEndMinute = currentMinute + PRESET_DURATION;
         let slotEndHour = currentHour;
-
         if (slotEndMinute >= 60) {
           slotEndHour += Math.floor(slotEndMinute / 60);
           slotEndMinute = slotEndMinute % 60;
         }
-
         if (slotEndHour > endHour || (slotEndHour === endHour && slotEndMinute > endMinute)) {
           break;
         }
-
         slots.push(
           `${currentHour.toString().padStart(2, "0")}:${currentMinute.toString().padStart(2, "0")} - ${slotEndHour.toString().padStart(2, "0")}:${slotEndMinute.toString().padStart(2, "0")}`
         );
-
         currentMinute += PRESET_DURATION;
         if (currentMinute >= 60) {
           currentMinute = currentMinute % 60;
@@ -310,7 +287,6 @@ export default function ManageAvailability() {
         }
       }
     });
-
     return slots;
   };
 

@@ -19,6 +19,7 @@ import {
     isBefore,
     startOfToday,
 } from "date-fns";
+import { appointmentService } from "@/services/appointmentService";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { SimplifiedDateAvailability, DayStatus } from "@/types/booking";
@@ -50,10 +51,8 @@ export function BookingCalendar({
         try {
             setLoading(true);
             const monthStr = format(currentMonth, "yyyy-MM");
-            const response = await fetch(
-                `/api/appointments/availability?month=${monthStr}&format=simplified`
-            );
-            const data = await response.json();
+            // You may need to implement this method in appointmentService if it doesn't exist
+            const data = await appointmentService.fetchAvailability(monthStr);
 
             if (data.success) {
                 setAvailability(data.availability);

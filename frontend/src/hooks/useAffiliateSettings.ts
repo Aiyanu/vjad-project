@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setUser } from "@/store/userSlice";
-import { useApi } from "./useApi";
+import { userService } from "@/services/userService";
 import { toast } from "sonner";
 
 interface Bank {
@@ -28,7 +28,6 @@ interface BankState {
 export const useAffiliateSettings = () => {
   const user = useAppSelector((state) => state.user.user);
   const dispatch = useAppDispatch();
-  const { post, get } = useApi();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -60,7 +59,7 @@ export const useAffiliateSettings = () => {
   useEffect(() => {
     const getBanks = async () => {
       try {
-        const response = await get("/api/banks");
+        const response = await userService.getBanks();
         if (response?.success && response?.data) {
           setBanks(response.data);
         } else {
@@ -71,7 +70,7 @@ export const useAffiliateSettings = () => {
       }
     };
     getBanks();
-  }, [get]);
+  }, []);
 
   // Fetch user profile on mount or when user changes
   useEffect(() => {
@@ -115,7 +114,7 @@ export const useAffiliateSettings = () => {
 
   const updateBankField = (
     field: keyof Omit<BankState, "accountVerifying" | "accountVerified">,
-    value: string
+    value: string,
   ) => {
     setBankState((prev) => ({ ...prev, [field]: value }));
   };
@@ -137,7 +136,7 @@ export const useAffiliateSettings = () => {
       if (bankState.accountName)
         updatePayload.accountName = bankState.accountName;
 
-      const result = await post("/api/user/update-profile", updatePayload);
+      const result = await userService.updateProfile(updatePayload);
 
       if (result?.error) {
         toast.error(result.error, { id: "profile-update" });
@@ -171,9 +170,7 @@ export const useAffiliateSettings = () => {
 
     setChangingPassword(true);
     try {
-      const result = await post("/api/user/change-password", {
-        newPassword: passwordData.newPassword,
-      });
+      const result = await userService.changePassword(passwordData.newPassword);
 
       if (result?.error) {
         toast.error(result.error, { id: "password-change" });

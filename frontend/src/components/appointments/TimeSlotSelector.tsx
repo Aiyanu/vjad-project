@@ -6,6 +6,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { appointmentService } from "@/services/appointmentService";
 import { Clock, CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -39,9 +40,7 @@ export function TimeSlotSelector({
         try {
             setLoading(true);
             setError(null);
-            const response = await fetch(`/api/appointments/slots/${date}`);
-            const data = await response.json();
-
+            const data = await appointmentService.fetchSlotsByDate(date);
             if (data.success) {
                 setSlots(data.slots || []);
                 if (data.slots.length === 0) {

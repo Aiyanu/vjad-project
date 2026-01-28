@@ -17,6 +17,7 @@ import {
     QrCode,
 } from "lucide-react";
 import { toast } from "sonner";
+import { affiliateService } from "@/services/affiliateService";
 
 export default function AffiliateShare() {
     const [referralCode, setReferralCode] = useState("");
@@ -32,8 +33,7 @@ export default function AffiliateShare() {
     const fetchAffiliateData = async () => {
         try {
             // Use centralized API helper to load current user and referral code
-            const api = (await import("@/hooks/useApi")).default();
-            const res = await api.get("/api/user");
+            const res = await affiliateService.getCurrentUser();
             if (res?.success && res?.data) {
                 setReferralCode(res.data.referralCode || "");
                 // commission rate not yet stored on user; default 15

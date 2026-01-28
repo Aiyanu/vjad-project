@@ -3,7 +3,8 @@ import { useCallback } from "react";
 
 type Options = RequestInit & { json?: any };
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
 
 function useApi() {
   const token = useAppSelector((state) => state.global.token);
@@ -39,7 +40,7 @@ function useApi() {
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         const error: any = new Error(
-          data?.message || data?.error || "Request failed"
+          data?.message || data?.error || "Request failed",
         );
         error.status = data?.status || res.status;
         error.message = data?.message || data?.error || "Request failed";
@@ -48,14 +49,15 @@ function useApi() {
       }
       return data;
     },
-    [token]
+    [token],
   );
 
   return {
     get: (path: string) => request(path, { method: "GET" }),
     post: (path: string, json?: any) => request(path, { method: "POST", json }),
     put: (path: string, json?: any) => request(path, { method: "PUT", json }),
-    patch: (path: string, json?: any) => request(path, { method: "PATCH", json }),
+    patch: (path: string, json?: any) =>
+      request(path, { method: "PATCH", json }),
     del: (path: string) => request(path, { method: "DELETE" }),
   };
 }

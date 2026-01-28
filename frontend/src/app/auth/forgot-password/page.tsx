@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Mail, ArrowLeft, Loader2, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
-import { useApi } from "@/hooks/useApi";
+import { authService } from "@/services/authService";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -16,7 +16,7 @@ const ForgotPassword = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [error, setError] = useState("");
-    const api = useApi();
+    // const api = useApi();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -24,7 +24,7 @@ const ForgotPassword = () => {
         setIsLoading(true);
 
         try {
-            const json = await api.post("/api/auth/forgot-password", { email });
+            const json = await authService.forgotPassword(email);
 
             setIsSubmitted(true);
             toast.success("If an account exists, a reset email was sent");

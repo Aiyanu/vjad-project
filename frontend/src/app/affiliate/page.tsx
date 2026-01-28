@@ -23,6 +23,7 @@ import {
     CheckCircle,
     Loader2,
 } from "lucide-react";
+import { affiliateService } from "@/services/affiliateService";
 
 const AffiliateDashboard = () => {
     const [copied, setCopied] = useState(false);
@@ -144,7 +145,7 @@ function VerifiedAffiliatesCard() {
     useEffect(() => {
         const fetchTopAffiliates = async () => {
             try {
-                const response = await api.get("/api/admin/affiliates");
+                const response = await affiliateService.fetchAffiliates();
                 // Expecting the affiliates in response.data.affiliates
                 const affiliatesList = response?.success && response?.data?.affiliates ? response.data.affiliates : [];
                 const verified = affiliatesList.filter((a: any) => a.emailVerified).slice(0, 3);

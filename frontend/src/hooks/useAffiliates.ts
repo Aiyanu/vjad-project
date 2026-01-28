@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import useApi from "./useApi";
+import { adminService } from "@/services/adminService";
 
 export interface Affiliate {
   id: string;
@@ -49,7 +49,7 @@ export const useAffiliates = () => {
   const [sortField, setSortField] = useState<SortField>("createdAt");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [pageSize, setPageSize] = useState(10);
-  const api = useApi();
+  // Removed useApi, now using adminService
 
   // Debounce search query
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -71,16 +71,13 @@ export const useAffiliates = () => {
         setPageLoading(true);
       }
       try {
-        const params = new URLSearchParams({
-          page: String(currentPage),
-          limit: String(pageSize),
-          ...(debouncedSearch && { search: debouncedSearch }),
+        const response = await adminService.fetchAdmins({
+          page: currentPage,
+          limit: pageSize,
+          search: debouncedSearch,
           sortField,
           sortOrder,
         });
-
-        const response = await api.get(`/api/admin/affiliates?${params}`);
-
         if (response?.success && response?.data) {
           setAffiliates(response.data.affiliates || []);
           setPagination(response.data.pagination || {});
@@ -90,7 +87,6 @@ export const useAffiliates = () => {
         }
       } catch (error) {
         console.error("Error fetching affiliates:", error);
-        // Only show error if it's not just an empty result
         setAffiliates([]);
         toast.error("Failed to load affiliates");
       } finally {
@@ -98,9 +94,8 @@ export const useAffiliates = () => {
         setPageLoading(false);
       }
     };
-
     fetchAffiliatesData();
-  }, [currentPage, debouncedSearch, sortField, sortOrder, pageSize, api]);
+  }, [currentPage, debouncedSearch, sortField, sortOrder, pageSize]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -118,37 +113,33 @@ export const useAffiliates = () => {
 
   const updateAffiliateStatus = (affiliateId: string, isDisabled: boolean) => {
     setAffiliates((prev) =>
-      prev.map((a) => (a.id === affiliateId ? { ...a, isDisabled } : a))
+      prev.map((a) => (a.id === affiliateId ? { ...a, isDisabled } : a)),
     );
   };
 
-  const deleteAffiliate = useCallback(
-    async (affiliateId: string) => {
-      try {
-        const data = await api.del(`/api/admin/affiliates/${affiliateId}`);
-
-        removeAffiliate(affiliateId);
-        toast.success("Affiliate deleted successfully");
-        return data;
-      } catch (error: any) {
-        console.error("Error deleting affiliate:", error);
-        toast.error(error.message || "Failed to delete affiliate");
-        throw error;
-      }
-    },
-    [api]
-  );
+  const deleteAffiliate = useCallback(async (affiliateId: string) => {
+    try {
+      const data = await adminService.deleteUser(affiliateId);
+      removeAffiliate(affiliateId);
+      toast.success("Affiliate deleted successfully");
+      return data;
+    } catch (error: any) {
+      console.error("Error deleting affiliate:", error);
+      toast.error(error.message || "Failed to delete affiliate");
+      throw error;
+    }
+  }, []);
 
   const toggleAffiliateStatus = useCallback(
     async (affiliateId: string, isDisabled: boolean) => {
       try {
-        const data = await api.put(`/api/admin/affiliates/${affiliateId}`, {
+        const data = await adminService.updateAffiliateStatus(
+          affiliateId,
           isDisabled,
-        });
-
+        );
         updateAffiliateStatus(affiliateId, isDisabled);
         toast.success(
-          `Affiliate ${isDisabled ? "disabled" : "enabled"} successfully`
+          `Affiliate ${isDisabled ? "disabled" : "enabled"} successfully`,
         );
         return data;
       } catch (error: any) {
@@ -157,7 +148,7 @@ export const useAffiliates = () => {
         throw error;
       }
     },
-    [api]
+    [],
   );
 
   const handlePageChange = useCallback((page: number) => {

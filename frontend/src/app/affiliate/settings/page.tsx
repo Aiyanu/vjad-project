@@ -14,6 +14,9 @@ import { User as UserIcon, Mail, Phone, Lock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
+import { affiliateService } from "@/services/affiliateService";
+import { bankService } from "@/services/bankService";
+
 const PhoneInput = dynamic(() => import("react-phone-input-2"), { ssr: false });
 
 export default function AffiliateSettings() {
@@ -173,7 +176,7 @@ export default function AffiliateSettings() {
                                 // auto-verify when it reaches 10 digits and bank is selected
                                 if (v.length === 10 && bankState.bankCode && !bankState.accountVerifying) {
                                     try {
-                                        const json = await api.post("/api/verify-account", { accountNumber: v, bankCode: bankState.bankCode });
+                                        const json = await bankService.verifyAccount(v, bankState.bankCode);
                                         updateBankField("accountName", json.accountName);
                                         toast.success(`Verified: ${json.accountName}`, { id: "account-verify" });
                                     } catch (err) {

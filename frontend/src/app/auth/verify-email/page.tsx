@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/input-otp";
 import { Mail, Loader2, CheckCircle, AlertCircle, ArrowLeft, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
-import { useApi } from "@/hooks/useApi";
+import { authService } from "@/services/authService";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -23,7 +23,7 @@ import {
 const VerifyEmail = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const api = useApi();
+    // const api = useApi();
     const token = searchParams?.get("token") ?? "";
     const email = searchParams?.get("email") ?? "";
 
@@ -52,8 +52,7 @@ const VerifyEmail = () => {
             try {
                 setIsLoading(true);
 
-                const queryParams = new URLSearchParams({ token, email });
-                const json = await api.get(`/api/auth/verify?${queryParams.toString()}`);
+                const json = await authService.verifyEmail(token, email);
 
                 setIsVerified(true);
                 toast.success("Email verified successfully!");
@@ -91,7 +90,7 @@ const VerifyEmail = () => {
 
         try {
             setIsResending(true);
-            const json = await api.post("/api/auth/resend-verification", { email });
+            const json = await authService.resendVerification(email);
             toast.success("Verification email sent! Check your inbox.");
         } catch (err) {
             console.error("Resend error:", err);
@@ -110,8 +109,7 @@ const VerifyEmail = () => {
         try {
             setIsLoading(true);
 
-            const queryParams = new URLSearchParams({ token: otp, email });
-            const json = await api.get(`/api/auth/verify?${queryParams.toString()}`);
+            const json = await authService.verifyEmail(otp, email);
 
             setIsVerified(true);
             toast.success("Email verified successfully!");

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { appointmentService } from "@/services/appointmentService";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -57,8 +58,7 @@ export function DaySlotManager() {
     const fetchSlots = async () => {
         try {
             setLoading(true);
-            const response = await fetch("/api/appointments/slots");
-            const data = await response.json();
+            const data = await appointmentService.fetchSlots();
             if (data.success) {
                 setSlots(data.slots || []);
             }
@@ -249,9 +249,7 @@ export function DaySlotManager() {
             // Delete existing slots for this day
             const existingDaySlots = getDaySlots(selectedDay);
             for (const slot of existingDaySlots) {
-                await fetch(`/api/appointments/slots?slotId=${slot.id}`, {
-                    method: "DELETE",
-                });
+                await appointmentService.deleteSlot(slot.id);
             }
 
             // Add new slots - split based on duration
@@ -276,18 +274,12 @@ export function DaySlotManager() {
                     const startTimeStr = `${slotStartHour.toString().padStart(2, "0")}:${slotStartMin.toString().padStart(2, "0")}`;
                     const endTimeStr = `${slotEndHour.toString().padStart(2, "0")}:${slotEndMin.toString().padStart(2, "0")}`;
 
-                    const response = await fetch("/api/appointments/slots", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            dayOfWeek: selectedDay,
-                            startTime: startTimeStr,
-                            endTime: endTimeStr,
-                            isAvailable: true,
-                        }),
+                    const data = await appointmentService.createSlot({
+                        dayOfWeek: selectedDay,
+                        startTime: startTimeStr,
+                        endTime: endTimeStr,
+                        isAvailable: true,
                     });
-
-                    const data = await response.json();
                     if (!data.success) {
                         throw new Error(data.message || "Failed to save slot");
                     }
@@ -309,11 +301,7 @@ export function DaySlotManager() {
 
     const deleteSlot = async (slotId: string) => {
         try {
-            const response = await fetch(`/api/appointments/slots?slotId=${slotId}`, {
-                method: "DELETE",
-            });
-
-            const data = await response.json();
+            const data = await appointmentService.deleteSlot(slotId);
             if (data.success) {
                 toast.success("Slot deleted");
                 await fetchSlots();
@@ -330,9 +318,7 @@ export function DaySlotManager() {
 
         try {
             for (const slotId of selectedSlots) {
-                await fetch(`/api/appointments/slots?slotId=${slotId}`, {
-                    method: "DELETE",
-                });
+                await appointmentService.deleteSlot(slotId);
             }
             toast.success(`${selectedSlots.size} slot(s) deleted`);
             setSelectedSlots(new Set());
@@ -437,56 +423,62 @@ export function DaySlotManager() {
                                         </span>
                                     )}
                                     {currentDaySlots.length > 0 && (
-                                        <div className="flex items-center gap-2">
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={toggleSelectAll}
-                                                className="text-xs"
-                                            >
-                                                {selectedSlots.size === currentDaySlots.length ? (
-                                                    <>
-                                                        <CheckSquare className="w-3 h-3 mr-1" />
-                                                        Deselect All
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Square className="w-3 h-3 mr-1" />
-                                                        Select All
-                                                    </>
-                                                )}
-                                            </Button>
-                                            {selectedSlots.size > 0 && (
+                                        <>
+                                            <div className="flex items-center gap-2">
                                                 <Button
                                                     size="sm"
-                                                    variant="destructive"
-                                                    onClick={deleteSelectedSlots}
+                                                    variant="outline"
+                                                    onClick={toggleSelectAll}
                                                     className="text-xs"
-                                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full">
-                                                    {/* Unified error display */}
-                                                    {slotValidationError && (
-                                                        <Badge variant="destructive" className="text-xs flex items-center">
-                                                            <AlertCircle className="w-3 h-3 mr-1" />
-                                                            {slotValidationError}
-                                                        </Badge>
+                                                >
+                                                    {selectedSlots.size === currentDaySlots.length ? (
+                                                        <>
+                                                            <CheckSquare className="w-3 h-3 mr-1" />
+                                                            Deselect All
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Square className="w-3 h-3 mr-1" />
+                                                            Select All
+                                                        </>
                                                     )}
-                                                    {hasOverlap && (
-                                                        <Badge variant="destructive" className="text-xs flex items-center">
-                                                            <AlertCircle className="w-3 h-3 mr-1" />
-                                                            Overlapping times
-                                                        </Badge>
-                                                    )}
-                                                    {tempTotal.totalMinutes > 24 * 60 && (
-                                                        <Badge variant="destructive" className="text-xs flex items-center">
-                                                            <AlertCircle className="w-3 h-3 mr-1" />
-                                                            Exceeds 24h
-                                                        </Badge>
-                                                    )}
-                                                    <Badge variant="outline" className="text-xs">
-                                                        {tempTotal.hours}h {tempTotal.minutes}m
+                                                </Button>
+                                                {selectedSlots.size > 0 && (
+                                                    <Button
+                                                        size="sm"
+                                                        variant="destructive"
+                                                        onClick={deleteSelectedSlots}
+                                                        className="text-xs"
+                                                    >
+                                                        Delete Selected
+                                                    </Button>
+                                                )}
+                                            </div>
+                                            {/* Unified error display and slot info */}
+                                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full mt-2">
+                                                {slotValidationError && (
+                                                    <Badge variant="destructive" className="text-xs flex items-center">
+                                                        <AlertCircle className="w-3 h-3 mr-1" />
+                                                        {slotValidationError}
                                                     </Badge>
-                                                </div>
-                                        </div>
+                                                )}
+                                                {hasOverlap && (
+                                                    <Badge variant="destructive" className="text-xs flex items-center">
+                                                        <AlertCircle className="w-3 h-3 mr-1" />
+                                                        Overlapping times
+                                                    </Badge>
+                                                )}
+                                                {tempTotal.totalMinutes > 24 * 60 && (
+                                                    <Badge variant="destructive" className="text-xs flex items-center">
+                                                        <AlertCircle className="w-3 h-3 mr-1" />
+                                                        Exceeds 24h
+                                                    </Badge>
+                                                )}
+                                                <Badge variant="outline" className="text-xs">
+                                                    {tempTotal.hours}h {tempTotal.minutes}m
+                                                </Badge>
+                                            </div>
+                                        </>
                                     )}
                                 </div>
 
@@ -539,11 +531,11 @@ export function DaySlotManager() {
                             <div className="border-t pt-6">
                                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
                                     <h3 className="text-base sm:text-lg font-semibold">Add New Slots</h3>
-                                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full">
-                                            <Badge variant="outline" className="text-xs">
-                                                {tempTotal.hours}h {tempTotal.minutes}m
-                                            </Badge>
-                                        </div>
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full">
+                                        <Badge variant="outline" className="text-xs">
+                                            {tempTotal.hours}h {tempTotal.minutes}m
+                                        </Badge>
+                                    </div>
                                 </div>
 
                                 <div className="space-y-3 mb-4">

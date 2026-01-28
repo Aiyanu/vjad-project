@@ -14,6 +14,7 @@ import {
   CheckCircle,
   Calendar
 } from "lucide-react";
+import { appointmentService } from "@/services/appointmentService";
 
 interface Stats {
   totalAffiliates: number;
@@ -102,8 +103,7 @@ export default function AdminDashboard() {
 
   const fetchAppointmentStats = async () => {
     try {
-      const response = await fetch("/api/appointments/book");
-      const data = await response.json();
+      const data = await appointmentService.fetchBookings();
 
       if (data.success && data.appointments) {
         const appointments = data.appointments;
