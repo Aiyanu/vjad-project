@@ -1,39 +1,16 @@
+import "dotenv/config";
+import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
-import { Pool } from "pg";
-import dotenv from "dotenv";
 
-dotenv.config();
-
-const databaseUrl = process.env.DATABASE_URL!;
-
-const pool = new Pool({
-  connectionString: databaseUrl,
-  max: 10,
-  idleTimeoutMillis: 60000,
-  connectionTimeoutMillis: 30000,
+const adapter = new PrismaMariaDb({
+  host: process.env.DB_HOST || "localhost",
+  port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 3306,
+  user: process.env.DB_USER || "root",
+  password: process.env.DB_PASSWORD || "",
+  database: process.env.DB_NAME || "vijad",
+  connectionLimit: 5,
 });
 
-const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
 
-const prismaClientSingleton = () => {
-  return new PrismaClient({
-    adapter,
-    log:
-      process.env.NODE_ENV === "development"
-        ? ["query", "warn", "error"]
-        : ["error"],
-  });
-};
-
-declare global {
-  var prisma: PrismaClient | undefined;
-}
-
-export const prisma = globalThis.prisma ?? prismaClientSingleton();
-
-if (process.env.NODE_ENV !== "production") {
-  globalThis.prisma = prisma;
-}
-
-export default prisma;
+export { prisma };

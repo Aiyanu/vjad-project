@@ -93,7 +93,7 @@ const Auth = () => {
         const loadBanks = async () => {
             try {
                 const json = await api.get("/api/banks");
-                setBanks(json?.data || []);
+                setBanks(json?.banks || []);
             } catch (e) {
                 console.warn("Could not load banks", e);
             }

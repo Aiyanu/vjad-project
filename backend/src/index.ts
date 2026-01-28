@@ -8,6 +8,8 @@ import authRoutes from "./routes/auth.routes";
 import userRoutes from "./routes/user.routes";
 import adminRoutes from "./routes/admin.routes";
 import affiliateRoutes from "./routes/affiliate.routes";
+import bankRoutes from "./routes/bank.routes";
+import appointmentRoutes from "./routes/appointment.routes";
 
 // Routes
 
@@ -21,18 +23,23 @@ const allowedOrigins = [
   "http://localhost:5173",
 ].filter(Boolean) as string[];
 
-app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === "development") {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      if (
+        allowedOrigins.indexOf(origin) !== -1 ||
+        process.env.NODE_ENV === "development"
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  }),
+);
 
 app.use(express.json());
 
@@ -51,6 +58,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/affiliate", affiliateRoutes);
+app.use("/api/banks", bankRoutes);
+app.use("/api/appointments", appointmentRoutes);
 // app.use("/api/appointments", appointmentRoutes);
 
 // Database connection test
@@ -58,7 +67,7 @@ async function main() {
   try {
     await prisma.$connect();
     console.log("✅ Database connected successfully");
-    
+
     app.listen(PORT, () => {
       console.log(`🚀 Server running on http://localhost:${PORT}`);
     });

@@ -3,10 +3,10 @@
  */
 import { ApiService } from "./api";
 
-// URL constants for affiliate endpoints
+// URL constants for affiliate endpoints (point to backend)
 const AFFILIATE_URLS = {
-  REFERRALS_LIST: "/api/affiliate/referrals",
-  REFERRALS_COUNT: "/api/affiliate/referrals/count",
+  REFERRALS_LIST: "/affiliate/referrals",
+  REFERRALS_COUNT: "/affiliate/referrals/count",
 };
 
 export const affiliateService = {
@@ -21,7 +21,7 @@ export const affiliateService = {
       search?: string;
       sortField?: string;
       sortOrder?: string;
-    }
+    },
   ) => {
     const queryParams = new URLSearchParams({
       page: String(params.page),

@@ -18,10 +18,9 @@ export function useBanks() {
     setError(null);
     try {
       const response = await api.get("/api/banks");
-
-      if (response?.success && response?.data) {
-        setBanks(response.data);
-        return response.data;
+      if (response?.banks) {
+        setBanks(response.banks);
+        return response.banks;
       } else {
         setBanks([]);
         return [];

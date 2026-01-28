@@ -18,14 +18,16 @@ function getTransporter() {
   transporter = nodemailer.createTransport({
     host: smtpHost,
     port: smtpPort,
-    secure: smtpPort === 465,
+    secure: false, // Namecheap: use false for port 587 (STARTTLS)
     auth: {
       user: smtpUser,
       pass: smtpPass,
     },
     tls: {
-      rejectUnauthorized: false,
+      ciphers: 'SSLv3',
+      rejectUnauthorized: false, // Accept self-signed certs (optional, for dev)
     },
+    connectionTimeout: 10000, // 10s timeout
   });
 
   return transporter;

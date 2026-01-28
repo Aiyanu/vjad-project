@@ -4,15 +4,15 @@
  */
 import { ApiService } from "./api";
 
-// URL constants for admin endpoints
+// URL constants for admin endpoints (point to backend)
 const ADMIN_URLS = {
-  ADMINS_LIST: "/api/admin/admins",
-  ADMINS_CREATE: "/api/admin/admins",
-  ADMIN_ITEM: (id: string) => `/api/admin/admins/${id}`,
-  AFFILIATES_LIST: "/api/admin/affiliates",
-  AFFILIATES_DETAILS: (id: string) => `/api/admin/affiliates/${id}/details`,
-  USER_STATUS: (id: string) => `/api/admin/users/${id}/status`,
-  USER_DELETE: (id: string) => `/api/admin/users/${id}`,
+  ADMINS_LIST: "/admin/admins",
+  ADMINS_CREATE: "/admin/admins",
+  ADMIN_ITEM: (id: string) => `/admin/admins/${id}`,
+  AFFILIATES_LIST: "/admin/affiliates",
+  AFFILIATES_DETAILS: (id: string) => `/admin/affiliates/${id}/details`,
+  USER_STATUS: (id: string) => `/admin/users/${id}/status`,
+  USER_DELETE: (id: string) => `/admin/users/${id}`,
 };
 
 export const adminService = {
@@ -27,7 +27,7 @@ export const adminService = {
       search?: string;
       sortField?: string;
       sortOrder?: string;
-    }
+    },
   ) => {
     const queryParams = new URLSearchParams({
       page: String(params.page),
@@ -44,7 +44,7 @@ export const adminService = {
    */
   createAdmin: async (
     api: ApiService,
-    data: { fullName: string; email: string; role?: "admin" | "super_admin" }
+    data: { fullName: string; email: string; role?: "admin" | "super_admin" },
   ) => {
     return api.post(ADMIN_URLS.ADMINS_CREATE, data);
   },
@@ -55,7 +55,7 @@ export const adminService = {
   updateAdminRole: async (
     api: ApiService,
     id: string,
-    role: "admin" | "super_admin"
+    role: "admin" | "super_admin",
   ) => {
     return api.put(ADMIN_URLS.ADMIN_ITEM(id), { role });
   },
@@ -78,7 +78,7 @@ export const adminService = {
       search?: string;
       sortField?: string;
       sortOrder?: string;
-    }
+    },
   ) => {
     const queryParams = new URLSearchParams({
       page: String(params.page),
@@ -100,7 +100,11 @@ export const adminService = {
   /**
    * Toggle user disabled status
    */
-  toggleUserStatus: async (api: ApiService, id: string, isDisabled: boolean) => {
+  toggleUserStatus: async (
+    api: ApiService,
+    id: string,
+    isDisabled: boolean,
+  ) => {
     return api.patch(ADMIN_URLS.USER_STATUS(id), { isDisabled });
   },
 

@@ -4,14 +4,14 @@
  */
 import { ApiService } from "./api";
 
-// URL constants for auth endpoints
+// URL constants for auth endpoints (point to backend)
 const AUTH_URLS = {
-  LOGIN: "/api/auth/login",
-  REGISTER: "/api/auth/register",
-  VERIFY: "/api/auth/verify",
-  RESEND_VERIFICATION: "/api/auth/resend-verification",
-  FORGOT_PASSWORD: "/api/auth/forgot-password",
-  RESET_PASSWORD: "/api/auth/reset-password",
+  LOGIN: "/auth/login",
+  REGISTER: "/auth/register",
+  VERIFY: "/auth/verify",
+  RESEND_VERIFICATION: "/auth/resend-verification",
+  FORGOT_PASSWORD: "/auth/forgot-password",
+  RESET_PASSWORD: "/auth/reset-password",
 };
 
 export const authService = {
@@ -32,7 +32,7 @@ export const authService = {
       email: string;
       password: string;
       referralCode?: string;
-    }
+    },
   ) => {
     return api.post(AUTH_URLS.REGISTER, data);
   },
@@ -41,7 +41,9 @@ export const authService = {
    * Verify email with token and email
    */
   verifyEmail: async (api: ApiService, token: string, email: string) => {
-    return api.get(`${AUTH_URLS.VERIFY}?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`);
+    return api.get(
+      `${AUTH_URLS.VERIFY}?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`,
+    );
   },
 
   /**
@@ -64,7 +66,7 @@ export const authService = {
   resetPassword: async (
     api: ApiService,
     token: string,
-    newPassword: string
+    newPassword: string,
   ) => {
     return api.post(AUTH_URLS.RESET_PASSWORD, { token, newPassword });
   },
