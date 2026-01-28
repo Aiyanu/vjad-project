@@ -266,7 +266,7 @@ export default function AdminSettings() {
     } finally {
       setSaving(false);
     }
-  } 
+  }
 
   // TODO: Implement password change via authService if/when available
   const handlePasswordChange = async (e: React.FormEvent) => {

@@ -140,7 +140,9 @@ export const createAppointmentSlot = async (req: Request, res: Response) => {
         return apiError(res, "Invalid slot data", 400);
       }
       const slot = await prisma.appointmentSlot.upsert({
-        where: { dayOfWeek_startTime_endTime: { dayOfWeek, startTime, endTime } },
+        where: {
+          dayOfWeek_startTime_endTime: { dayOfWeek, startTime, endTime },
+        },
         update: { isAvailable },
         create: { dayOfWeek, startTime, endTime, isAvailable },
       });
